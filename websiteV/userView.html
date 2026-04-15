@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top Right — Design & Support Services</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;900&family=Raleway:wght@100;200;300&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Cairo',system-ui,sans-serif}
+body{background:#000}
+
+/* NAV */
+.nav{background:#000000;border-bottom:2px solid #1f1f1f;padding:0 40px;height:78px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 4px 32px rgba(0,0,0,0.8)}
+.nav-logo{display:flex;align-items:center}
+.nav-bmark{height:48px;width:auto;display:block;flex-shrink:0}
+.nav-wmark{height:54px;width:auto;display:block;flex-shrink:0;object-fit:contain}
+.nav-links{display:flex;gap:36px}
+.nav-links a{color:#ffffff;font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase;text-decoration:none;transition:color 0.2s;text-shadow:0 0 20px rgba(255,255,255,0.1)}
+.nav-links a:hover{color:#E7432B}
+.nav-links a.nav-events{color:#E7432B;border:1px solid rgba(231,67,43,0.5);padding:7px 16px;font-size:12px;letter-spacing:2px}
+.nav-links a.nav-events:hover{background:rgba(231,67,43,0.15);color:#ff6b55}
+.nav-r{display:flex;gap:12px;align-items:center}
+.btn-lang{background:none;border:1px solid #444;color:#bbb;font-size:10px;padding:7px 14px;cursor:pointer;letter-spacing:1px;font-weight:700}
+.btn-start{background:#E7432B;color:#fff;font-size:11px;font-weight:900;letter-spacing:2px;text-transform:uppercase;padding:13px 26px;border:none;cursor:pointer}
+
+/* HERO */
+.hero{background:#000;display:grid;grid-template-columns:1fr 1fr;min-height:92vh}
+.hero-l{padding:70px 48px 60px 32px;display:flex;flex-direction:column;justify-content:center}
+.hero-tag{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#E7432B;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.hero-tag::before{content:'';width:28px;height:1px;background:#E7432B}
+.hero-h1{font-size:76px;font-weight:200;line-height:.95;letter-spacing:3px;color:#fff;margin-bottom:24px;font-family:'Raleway','Cairo',sans-serif;text-transform:uppercase}
+.hero-h1>span{color:#fff;display:block}.hero-h1 span span{color:#E7432B;display:block}
+.hero-p{font-size:13px;color:#555;line-height:1.75;margin-bottom:36px;max-width:400px}
+.hero-btns{display:flex;gap:12px;margin-bottom:52px}
+.btn-w{background:#fff;color:#000;font-size:9px;font-weight:900;letter-spacing:2px;text-transform:uppercase;padding:13px 26px;border:none;cursor:pointer}
+.btn-g{background:transparent;color:#fff;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:12px 26px;border:1px solid #222;cursor:pointer}
+.hero-stats{display:flex;gap:36px}
+.hstat strong{display:block;font-size:38px;font-weight:200;color:#E7432B;letter-spacing:2px;line-height:1;font-family:'Raleway','Cairo',sans-serif}
+.hstat span{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#333;margin-top:3px;display:block}
+.hero-r{position:relative;overflow:hidden;background:#040404}
+.hgrid{position:absolute;inset:0;background-image:linear-gradient(#0d0d0d 1px,transparent 1px),linear-gradient(90deg,#0d0d0d 1px,transparent 1px);background-size:36px 36px}
+
+/* MARQUEE */
+.marquee{background:#E7432B;padding:14px 0;overflow:hidden;white-space:nowrap}
+.mtrack{display:inline-flex;animation:scroll 26s linear infinite}
+.mitem{display:inline-flex;align-items:center;gap:20px;padding:0 20px;font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#fff}
+.mdot{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.35);flex-shrink:0}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+/* CLIENTS */
+.clients{background:#d0d1cf;border-bottom:1px solid #ddd;padding:22px 32px;display:flex;align-items:center;gap:0;flex-wrap:wrap}
+.cl-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#aaa;padding-right:24px;flex-shrink:0}
+.cl-n{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#333;padding:4px 20px;white-space:nowrap}
+.cl-d{width:1px;height:14px;background:#ccc;flex-shrink:0}
+
+/* PORTFOLIO */
+.port{background:#1E1E1E;padding:72px 0}
+.port-hd{padding:0 32px 36px;display:flex;justify-content:space-between;align-items:flex-end}
+.sec-lbl{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#E7432B;margin-bottom:10px;display:block}
+.sec-ttl{font-size:46px;font-weight:200;letter-spacing:2px;color:#fff;line-height:1;font-family:'Raleway','Cairo',sans-serif;text-transform:uppercase}
+.sec-link{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#555;border-bottom:1px solid #333;padding-bottom:2px;text-decoration:none}
+.port-tabs{display:flex;gap:0;padding:0 32px;margin-bottom:28px;border-bottom:1px solid #2a2a2a}
+.ptab{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#555;background:none;border:none;border-bottom:2px solid transparent;padding:8px 18px 12px;cursor:pointer;margin-bottom:-1px;transition:all .2s;font-family:system-ui,sans-serif}
+.ptab:hover{color:#fff}
+.ptab.on{color:#fff;border-bottom-color:#E7432B}
+
+/* PORTFOLIO GRID */
+.port-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px;padding:0 32px}
+.pcard{display:flex;cursor:pointer;background:#262626;transition:background .2s}
+.pcard.hidden{display:none}
+.pcard:hover{background:#2e2e2e}
+.pcard-thumb{width:220px;height:180px;flex-shrink:0;overflow:hidden}
+.pcard-thumb svg{width:100%;height:100%;display:block}
+.pcard-info{flex:1;padding:28px 32px;display:flex;flex-direction:column;justify-content:center;border-left:1px solid #333}
+.pcard-cat{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:#E7432B;margin-bottom:10px}
+.pcard-ttl{font-size:17px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:8px}
+.pcard-sub{font-size:11px;color:#888;line-height:1.65}
+.pcard-arrow{font-size:10px;color:#444;margin-top:14px;transition:color .2s;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+.pcard:hover .pcard-arrow{color:#E7432B}
+/* empty state when filter yields nothing */
+.port-empty{display:none;padding:60px 32px;color:#333;font-size:13px;letter-spacing:2px;text-transform:uppercase}
+.port-empty.show{display:block}
+
+/* SERVICES */
+.svcs{background:#d0d1cf url('references/top right background.png') center/cover no-repeat;padding:72px 32px}
+.svcs .sec-ttl{color:#000}
+.svcs .sec-lbl{color:#E7432B}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:44px}
+.sv{padding:30px 26px;position:relative;overflow:hidden}
+/* Card 1: Orange — bold brand statement */
+.sv-a{background:#E7432B}
+/* Card 2: Black — strong contrast */
+.sv-b{background:#000}
+/* Card 3: Teal */
+.sv-c{background:#01A6A6}
+/* Card 4: Blue */
+.sv-d{background:#0058A1}
+/* Card 5: Purple */
+.sv-e{background:#773E84}
+/* Card 6: Charcoal */
+.sv-f{background:#1a1a1a}
+.sv-n{font-size:60px;font-weight:900;line-height:1;margin-bottom:14px;letter-spacing:-2px}
+.sv-a .sv-n,.sv-b .sv-n,.sv-c .sv-n,.sv-d .sv-n,.sv-e .sv-n,.sv-f .sv-n{color:rgba(255,255,255,.1)}
+.sv-tag{font-size:7px;letter-spacing:2px;text-transform:uppercase;padding:3px 10px;display:inline-block;margin-bottom:10px}
+.sv-a .sv-tag,.sv-b .sv-tag,.sv-c .sv-tag,.sv-d .sv-tag,.sv-e .sv-tag,.sv-f .sv-tag{background:rgba(0,0,0,.25);color:rgba(255,255,255,.85)}
+.sv-ttl{font-size:15px;font-weight:700;margin-bottom:10px;line-height:1.2}
+.sv-a .sv-ttl,.sv-b .sv-ttl,.sv-c .sv-ttl,.sv-d .sv-ttl,.sv-e .sv-ttl,.sv-f .sv-ttl{color:#fff}
+.sv-a .sv-desc,.sv-b .sv-desc,.sv-c .sv-desc,.sv-d .sv-desc,.sv-e .sv-desc,.sv-f .sv-desc{color:rgba(255,255,255,.7)}
+.sv-desc{font-size:10px;line-height:1.7;margin-bottom:16px}
+.sv-lnk{font-size:8px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;border-bottom:1px solid;padding-bottom:1px}
+.sv-a .sv-lnk,.sv-b .sv-lnk,.sv-c .sv-lnk,.sv-d .sv-lnk,.sv-e .sv-lnk,.sv-f .sv-lnk{color:rgba(255,255,255,.8);border-color:rgba(255,255,255,.35)}
+/* corner icon */
+.sv-ico{position:absolute;top:28px;right:28px;width:36px;height:36px;display:flex;align-items:center;justify-content:center}
+
+/* WHY */
+.why{display:grid;grid-template-columns:1fr 1fr;min-height:560px}
+.why-l{background:white;padding:72px 56px;display:flex;flex-direction:column;justify-content:center}
+.why-l h2{font-size:50px;font-weight:200;letter-spacing:3px;color:#000;line-height:1;margin-bottom:44px;font-family:'Raleway','Cairo',sans-serif;text-transform:uppercase}
+.wi{display:flex;gap:14px;padding:18px 0;border-bottom:1px solid rgba(0,0,0,.12)}
+.wi:last-child{border-bottom:none}
+.wi-n{font-size:10px;font-weight:900;color:rgba(0,0,0,.35);min-width:24px;padding-top:1px}
+.wi strong{display:block;font-size:12px;font-weight:700;color:#000;margin-bottom:3px}
+.wi p{font-size:10px;color:rgba(0,0,0,.55);line-height:1.6}
+.why-r{background:#1E1E1E;padding:72px 56px;display:flex;flex-direction:column;justify-content:center;position:relative;overflow:hidden}
+.why-deco{position:absolute;border-radius:50%;border:1px solid #2a2a2a}
+.why-big{font-size:140px;font-weight:200;letter-spacing:4px;color:#E7432B;line-height:1;margin-bottom:6px;font-family:'Raleway','Cairo',sans-serif}
+.why-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#666;margin-bottom:44px}
+.why-box{background:#E7432B;padding:28px 24px}
+.why-box p{font-size:11px;color:#fff;line-height:1.65;margin-bottom:16px}
+.why-box button{background:#000;color:#fff;font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:11px 20px;border:none;cursor:pointer}
+
+/* COACHING */
+.coaching{display:grid;grid-template-columns:3fr 2fr;min-height:440px}
+.coa-l{background:#0058A1;padding:72px 56px;display:flex;flex-direction:column;justify-content:center}
+.coa-lbl{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:14px;display:block}
+.coa-l h2{font-size:48px;font-weight:200;letter-spacing:3px;color:#fff;line-height:1;margin-bottom:16px;font-family:'Raleway','Cairo',sans-serif;text-transform:uppercase}
+.coa-l p{font-size:12px;color:#B5D4F4;line-height:1.75;margin-bottom:26px;max-width:420px}
+.ctags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:30px}
+.ctag{font-size:8px;letter-spacing:1px;text-transform:uppercase;border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.5);padding:5px 13px}
+.btn-wht{background:#fff;color:#0058A1;font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:12px 24px;border:none;cursor:pointer}
+.coa-r{background:#003a78;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 32px;position:relative;overflow:hidden}
+.coa-ring{position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.06)}
+.coa-big{font-size:96px;font-weight:200;color:#fff;letter-spacing:4px;line-height:1;position:relative;z-index:1;font-family:'Raleway','Cairo',sans-serif}
+.coa-lbl2{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:8px;line-height:1.5;position:relative;z-index:1}
+
+/* TESTIMONIALS */
+.testi{background:#d0d1cf;padding:72px 32px}
+.testi .sec-ttl{color:#000}
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:44px}
+.tc{background:#b6b4b4;padding:36px 32px;position:relative;border:1px solid #e0e0e0}
+.tc-q{font-size:80px;font-weight:900;color:#E7432B;opacity:.18;position:absolute;top:-12px;left:24px;line-height:1;font-family:Georgia,serif}
+.tc-txt{font-size:13px;color:#444;line-height:1.8;font-style:italic;margin-bottom:22px;position:relative;z-index:1}
+.tc-row{display:flex;align-items:center;gap:12px}
+.tc-dot{width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff}
+.tc-name{font-size:11px;font-weight:700;color:#000}
+.tc-co{font-size:9px;color:#888;margin-top:2px}
+
+/* CONTACT */
+.contact{display:grid;grid-template-columns:1fr 1fr;min-height:580px}
+.con-l{background:#d0d1cf;padding:72px 56px;display:flex;flex-direction:column;justify-content:center}
+.con-l .sec-lbl{color:#E7432B}
+.con-l h2{font-size:48px;font-weight:200;letter-spacing:3px;color:#000;line-height:1;margin-bottom:12px;font-family:'Raleway','Cairo',sans-serif;text-transform:uppercase}
+.con-l p{font-size:12px;color:#5F5E5A;line-height:1.7;margin-bottom:36px}
+.ci{margin-bottom:16px}
+.ci-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#939598;margin-bottom:3px}
+.ci-val{font-size:12px;color:#000;font-weight:500}
+.con-r{background:#d0d1cf;padding:72px 56px;display:flex;flex-direction:column;justify-content:center}
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#666;margin-bottom:5px}
+.fg input,.fg textarea{width:100%;border:none;border-bottom:1px solid #333;padding:11px 13px;font-size:12px;color:#fff;font-family:system-ui,sans-serif;outline:none;transition:border-color .2s}
+.fg input:focus,.fg textarea:focus{border-bottom-color:#E7432B}
+.fg textarea{height:90px;resize:none}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.form-btns{display:flex;gap:9px;margin-top:8px}
+.btn-sub{background:#E7432B;color:#fff;font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:13px 20px;border:none;cursor:pointer;flex:1}
+.btn-wa{background:#25D366;color:#fff;font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:13px 16px;border:none;cursor:pointer;display:flex;align-items:center;gap:7px}
+.form-ok{display:none;margin-top:10px;background:#E7432B;color:#fff;padding:12px 16px;font-size:11px}
+.form-ok.show{display:block}
+
+/* FOOTER */
+.footer{background:#000000;border-top:1px solid #2a2a2a;padding:56px 32px 24px}
+.fg2{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px;margin-bottom:44px}
+.fb h3{font-size:13px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#fff}
+.fb p{font-size:9px;color:#555;margin-top:4px}
+.fb-desc{font-size:10px;color:#555;line-height:1.6;margin-top:12px}
+.fcol h4{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#444;margin-bottom:14px}
+.fcol a{display:block;font-size:10px;color:#666;text-decoration:none;margin-bottom:7px;transition:color .2s}
+.fcol a:hover{color:#fff}
+.fbot{border-top:1px solid #2a2a2a;padding-top:22px;display:flex;justify-content:space-between;align-items:center}
+.fcp{font-size:9px;color:#444;letter-spacing:.5px}
+.fsoc{display:flex;gap:7px}
+.fsb{width:30px;height:30px;border:1px solid #333;display:flex;align-items:center;justify-content:center;font-size:9px;color:#555;text-decoration:none;transition:all .2s}
+.fsb:hover{border-color:#E7432B;color:#E7432B}
+.fsb.wa{background:#25D366;border-color:#25D366;color:#fff}
+.tbar{height:3px;background:linear-gradient(90deg,#E7432B,#773E84,#0058A1,#01A6A6)}
+/* Slash accent — logo diagonal element used as section label decoration */
+.sec-lbl::before{content:'/ ';font-weight:900;color:rgba(231,67,43,.5)}
+/* Logo watermark overlay */
+.logo-wm{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:0;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="tbar"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <!-- Logo — top left -->
+  <div class="nav-logo">
+    <img src="references/logo.png" alt="Top Right" class="nav-wmark">
+  </div>
+  <div class="nav-links">
+    <a href="#" data-en="Work" data-ar="أعمالنا">Work</a><a href="#" data-en="Services" data-ar="خدماتنا">Services</a><a href="#" data-en="About" data-ar="من نحن">About</a><a href="#" data-en="Coaching" data-ar="التدريب">Coaching</a><a href="#" data-en="Contact" data-ar="تواصل">Contact</a><a href="#" data-en="Events&CSR" data-ar="الفعاليات والمسؤولية">Events&CSR</a>
+  </div>
+  <div class="nav-r">
+    <button class="btn-lang" id="langBtn">AR | EN</button>
+    <button class="btn-start" data-en="Start a project" data-ar="ابدأ مشروعك">Start a project</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-l">
+    <span class="hero-tag" id="heroTag" data-en="Bahrain · Est. 2001 · Bilingual Studio" data-ar="البحرين · منذ ٢٠٠١ · استوديو ثنائي اللغة">Bahrain · Est. 2001 · Bilingual Studio</span>
+    <h1 class="hero-h1">
+      <span id="hero-h1-en">We tell<br>your story<br><span style="color:#01A6A6;display:block">through design</span></span>
+      <span id="hero-h1-ar" style="display:none">نروي قصتك<br>من خلال<br><span style="color:#01A6A6;display:block">التصميم</span></span>
+    </h1>
+
+    <div class="hero-btns">
+      <button class="btn-w" data-en="View our work" data-ar="اكتشف أعمالنا">View our work</button>
+      <button class="btn-g" data-en="Start a project →" data-ar="ابدأ مشروعك ←">Start a project →</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><strong data-en="20+" data-ar="٢٠+">20+</strong><span data-en="Years in Bahrain" data-ar="سنة في البحرين">Years in Bahrain</span></div>
+      <div class="hstat"><strong data-en="100+" data-ar="١٠٠+">100+</strong><span data-en="Publications" data-ar="مطبوعة">Publications</span></div>
+      <div class="hstat"><strong data-en="AR+EN" data-ar="ع+إ">AR+EN</strong><span data-en="Bilingual" data-ar="ثنائي اللغة">Bilingual</span></div>
+    </div>
+  </div>
+  <div class="hero-r">
+    <div class="hgrid"></div>
+    <!-- floating illustrated book cards -->
+    <svg width="100%" height="100%" viewBox="0 0 520 700" xmlns="http://www.w3.org/2000/svg">
+      <!-- LOGO WATERMARK -->
+      <image href="references/logo.png" x="-40" y="160" width="580" height="360" opacity="0.07" preserveAspectRatio="xMidYMid meet"/>
+      <!-- decorative circles -->
+      <circle cx="420" cy="80" r="140" fill="#01A6A6" opacity=".06"/>
+      <circle cx="80" cy="580" r="120" fill="#773E84" opacity=".07"/>
+      <circle cx="340" cy="400" r="80" fill="#E7432B" opacity=".05"/>
+
+      <!-- BOOK 1 — Safety with Namool (teal, tilted left) -->
+      <g transform="translate(60,80) rotate(-5)">
+        <rect width="190" height="250" rx="6" fill="#01A6A6"/>
+        <rect x="12" y="12" width="166" height="226" rx="4" fill="rgba(0,0,0,.2)"/>
+        <rect x="18" y="18" width="154" height="214" rx="3" fill="rgba(255,255,255,.08)"/>
+        <!-- book cover illustration: circles -->
+        <circle cx="95" cy="100" r="52" fill="rgba(255,255,255,.12)"/>
+        <circle cx="95" cy="100" r="36" fill="#E7432B" opacity=".85"/>
+        <!-- ant body hint -->
+        <ellipse cx="95" cy="97" rx="13" ry="9" fill="rgba(255,255,255,.9)"/>
+        <circle cx="95" cy="84" r="7" fill="rgba(0,0,0,.75)"/>
+        <line x1="84" y1="101" x2="72" y2="113" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+        <line x1="91" y1="104" x2="80" y2="118" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+        <line x1="106" y1="101" x2="118" y2="113" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+        <line x1="100" y1="104" x2="111" y2="118" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+        <!-- title area -->
+        <rect x="20" y="160" width="150" height="60" rx="3" fill="rgba(0,0,0,.25)"/>
+        <text x="95" y="182" font-size="15" font-weight="900" fill="#fff" text-anchor="middle" font-family="system-ui">Safety with</text>
+        <text x="95" y="200" font-size="15" font-weight="900" fill="#FBEED6" text-anchor="middle" font-family="system-ui">Namool</text>
+        <text x="95" y="235" font-size="8" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="system-ui" letter-spacing="1">BAPCO ENERGIES · HSE</text>
+      </g>
+
+      <!-- BOOK 2 — Khaleejieh (deep blue, tilted right) -->
+      <g transform="translate(280,50) rotate(4)">
+        <rect width="170" height="220" rx="5" fill="#0058A1"/>
+        <rect x="10" y="10" width="150" height="200" rx="3" fill="rgba(0,0,0,.2)"/>
+        <!-- GPIC logo hint: hexagon -->
+        <polygon points="85,40 110,55 110,85 85,100 60,85 60,55" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2"/>
+        <polygon points="85,50 102,60 102,80 85,90 68,80 68,60" fill="rgba(255,255,255,.1)"/>
+        <!-- Arabic title -->
+        <text x="85" y="130" font-size="26" font-weight="900" fill="#fff" text-anchor="middle" font-family="system-ui">خليجية</text>
+        <rect x="20" y="140" width="130" height="1" fill="rgba(255,255,255,.15)"/>
+        <text x="85" y="157" font-size="7" fill="rgba(255,255,255,.4)" text-anchor="middle" font-family="system-ui" letter-spacing="2">KHALEEJIEH</text>
+        <!-- page lines -->
+        <rect x="20" y="166" width="90" height="3" rx="1" fill="rgba(255,255,255,.1)"/>
+        <rect x="20" y="173" width="110" height="2" rx="1" fill="rgba(255,255,255,.07)"/>
+        <rect x="20" y="179" width="75" height="2" rx="1" fill="rgba(255,255,255,.07)"/>
+        <text x="85" y="205" font-size="7" fill="rgba(255,255,255,.3)" text-anchor="middle" font-family="system-ui">GPIC · SINCE 2001</text>
+      </g>
+
+      <!-- BOOK 3 — Children's book purple/night -->
+      <g transform="translate(40,370) rotate(-3)">
+        <rect width="160" height="210" rx="5" fill="#773E84"/>
+        <rect x="10" y="10" width="140" height="190" rx="3" fill="rgba(0,0,0,.25)"/>
+        <!-- moon -->
+        <circle cx="80" cy="85" r="40" fill="#F9DFB7" opacity=".85"/>
+        <circle cx="96" cy="74" r="32" fill="#773E84" opacity=".9"/>
+        <!-- stars -->
+        <circle cx="30" cy="50" r="2" fill="#F9DFB7" opacity=".6"/>
+        <circle cx="130" cy="40" r="1.5" fill="#F9DFB7" opacity=".5"/>
+        <circle cx="140" cy="70" r="2" fill="#F9DFB7" opacity=".4"/>
+        <circle cx="20" cy="90" r="1.5" fill="#F9DFB7" opacity=".5"/>
+        <text x="80" y="145" font-size="13" font-weight="900" fill="#F9DFB7" text-anchor="middle" font-family="system-ui">تطير بلا ريش</text>
+        <text x="80" y="163" font-size="8" fill="rgba(249,223,183,.5)" text-anchor="middle" font-family="system-ui">Flies Without Wings</text>
+        <text x="80" y="193" font-size="7" fill="rgba(249,223,183,.3)" text-anchor="middle" font-family="system-ui">Sharjah Heritage Institute</text>
+      </g>
+
+      <!-- BOOK 4 — SDG green -->
+      <g transform="translate(300,330) rotate(6)">
+        <rect width="155" height="200" rx="5" fill="#00AEA2"/>
+        <rect x="10" y="10" width="135" height="180" rx="3" fill="rgba(0,0,0,.2)"/>
+        <!-- SDG wheel -->
+        <circle cx="77" cy="80" r="44" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="2"/>
+        <circle cx="77" cy="80" r="28" fill="rgba(255,255,255,.15)"/>
+        <circle cx="77" cy="80" r="14" fill="rgba(255,255,255,.2)"/>
+        <text x="77" y="76" font-size="9" font-weight="900" fill="#fff" text-anchor="middle" font-family="system-ui">SDG</text>
+        <text x="77" y="88" font-size="8" fill="rgba(255,255,255,.7)" text-anchor="middle" font-family="system-ui">3</text>
+        <text x="77" y="140" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" font-family="system-ui">SDG Booklets</text>
+        <text x="77" y="157" font-size="7" fill="rgba(255,255,255,.5)" text-anchor="middle" font-family="system-ui">Bapco Energies</text>
+        <text x="77" y="185" font-size="7" fill="rgba(255,255,255,.3)" text-anchor="middle" font-family="system-ui">Bilingual Series</text>
+      </g>
+
+      <!-- AL BASTA character row -->
+      <g transform="translate(50,600)">
+        <rect width="420" height="80" rx="4" fill="rgba(231,67,43,.12)"/>
+        <text x="210" y="28" font-size="18" font-weight="900" fill="#E7432B" text-anchor="middle" font-family="system-ui">البسطة</text>
+        <text x="210" y="47" font-size="8" fill="rgba(231,67,43,.5)" text-anchor="middle" font-family="system-ui" letter-spacing="3">AL BASTA · BAHRAIN TV</text>
+        <!-- character colour dots -->
+        <rect x="60" y="55" width="18" height="14" rx="2" fill="#E7432B" opacity=".7"/>
+        <rect x="88" y="55" width="18" height="14" rx="2" fill="#01A6A6" opacity=".7"/>
+        <rect x="116" y="55" width="18" height="14" rx="2" fill="#773E84" opacity=".7"/>
+        <rect x="144" y="55" width="18" height="14" rx="2" fill="#F9DFB7" opacity=".7"/>
+        <rect x="172" y="55" width="18" height="14" rx="2" fill="#0058A1" opacity=".7"/>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="mtrack">
+    <span class="mitem">Publication Design<span class="mdot"></span></span>
+    <span class="mitem">Children's Books<span class="mdot"></span></span>
+    <span class="mitem">HSE Publications<span class="mdot"></span></span>
+    <span class="mitem">Annual Reports<span class="mdot"></span></span>
+    <span class="mitem">Animation<span class="mdot"></span></span>
+    <span class="mitem">Bilingual AR+EN<span class="mdot"></span></span>
+    <span class="mitem">Coaching &amp; Workshops<span class="mdot"></span></span>
+    <span class="mitem">Corporate Newsletters<span class="mdot"></span></span>
+    <span class="mitem">Publication Design<span class="mdot"></span></span>
+    <span class="mitem">Children's Books<span class="mdot"></span></span>
+    <span class="mitem">HSE Publications<span class="mdot"></span></span>
+    <span class="mitem">Annual Reports<span class="mdot"></span></span>
+    <span class="mitem">Animation<span class="mdot"></span></span>
+    <span class="mitem">Bilingual AR+EN<span class="mdot"></span></span>
+    <span class="mitem">Coaching &amp; Workshops<span class="mdot"></span></span>
+    <span class="mitem">Corporate Newsletters<span class="mdot"></span></span>
+  </div>
+</div>
+
+<!-- CLIENTS -->
+<div class="clients">
+  <span class="cl-lbl">Trusted by</span>
+  <div class="cl-d"></div><span class="cl-n">GPIC</span>
+  <div class="cl-d"></div><span class="cl-n">Bapco Energies</span>
+  <div class="cl-d"></div><span class="cl-n">Ministry of Interior</span>
+  <div class="cl-d"></div><span class="cl-n">Sharjah Heritage Institute</span>
+  <div class="cl-d"></div><span class="cl-n">GCC Secretariat</span>
+  <div class="cl-d"></div><span class="cl-n">INJAZ Bahrain</span>
+  <div class="cl-d"></div><span class="cl-n">Bahrain Television</span>
+</div>
+
+<!-- PORTFOLIO -->
+<section class="port">
+  <div class="port-hd">
+    <div><span class="sec-lbl" data-en="Selected work" data-ar="أعمال مختارة">Selected work</span><h2 id="port-ttl" class="sec-ttl">20+ years of<br>stories told</h2></div>
+    <a href="#" class="sec-link">View all projects</a>
+  </div>
+  <div class="port-tabs">
+    <button class="ptab on" data-f="all">All</button>
+    <button class="ptab" data-f="newsletter">Newsletter</button>
+    <button class="ptab" data-f="hse">HSE</button>
+    <button class="ptab" data-f="storybooks">Storybooks</button>
+    <button class="ptab" data-f="illustration">Illustration</button>
+  </div>
+
+  <div class="port-grid">
+
+    <!-- CARD — Khaleejieh Newsletter -->
+    <div class="pcard" data-cat="newsletter">
+      <div class="pcard-thumb">
+        <img src="photos/khaleej.jpeg" alt="Khaleejieh Newsletter" style="width:100%;height:100%;object-fit:cover;display:block">
+      </div>
+      <div class="pcard-info">
+        <div class="pcard-cat">Newsletter · GPIC</div>
+        <div class="pcard-ttl">Khaleejieh · خليجية</div>
+        <div class="pcard-sub">Monthly bilingual newsletter · Print &amp; Digital · 118+ issues since 2001</div>
+        <span class="pcard-arrow">View project →</span>
+      </div>
+    </div>
+
+    <!-- CARD — INJAZ Annual Report -->
+    <div class="pcard" data-cat="newsletter">
+      <div class="pcard-thumb">
+        <img src="photos/injaz.jpeg" alt="INJAZ Annual Report" style="width:100%;height:100%;object-fit:cover;display:block">
+      </div>
+      <div class="pcard-info">
+        <div class="pcard-cat">Annual Report · INJAZ Bahrain</div>
+        <div class="pcard-ttl">INJAZ Annual Report</div>
+        <div class="pcard-sub">Bilingual annual report · Arabic &amp; English · Full design, layout &amp; print</div>
+        <span class="pcard-arrow">View project →</span>
+      </div>
+    </div>
+
+    <!-- CARD — Safety with Namool -->
+    <div class="pcard" data-cat="hse">
+      <div class="pcard-thumb">
+        <img src="photos/alnamlah.jpeg" alt="Safety with Namool" style="width:100%;height:100%;object-fit:cover;display:block">
+      </div>
+      <div class="pcard-info">
+        <div class="pcard-cat">HSE · Bapco Energies</div>
+        <div class="pcard-ttl">Safety with Namool · السلامة مع نمول</div>
+        <div class="pcard-sub">Bilingual illustrated HSE storybook · Full illustration, layout &amp; print · 2024</div>
+        <span class="pcard-arrow">View project →</span>
+      </div>
+    </div>
+
+    <!-- CARD — SDG Booklets -->
+    <div class="pcard" data-cat="hse">
+      <div class="pcard-thumb">
+        <img src="photos/babco.jpeg" alt="Al Basta Market" style="width:100%;height:100%;object-fit:cover;display:block">
+      </div>
+      <div class="pcard-info">
+        <div class="pcard-cat">HSE Education · Bapco Energies</div>
+        <div class="pcard-ttl">UN SDG Booklet Series</div>
+        <div class="pcard-sub">Bilingual illustrated education series · 3 booklets · Arabic &amp; English</div>
+        <span class="pcard-arrow">View project →</span>
+      </div>
+    </div>
+
+    <!-- CARD — Qadamai Mutahajjeratan -->
+    <div class="pcard" data-cat="storybooks">
+      <div class="pcard-thumb">
+        <img src="photos/WhatsApp Image 2026-04-11 at 19.34.51.jpeg" alt="قدماي متحجرتان" style="width:100%;height:100%;object-fit:cover;display:block">
+      </div>
+      <div class="pcard-info">
+        <div class="pcard-cat">Children's Book</div>
+        <div class="pcard-ttl">قدماي متحجرتان</div>
+        <div class="pcard-sub">Full illustration &amp; layout · Author: Hanan Saleh</div>
+        <span class="pcard-arrow">View project →</span>
+      </div>
+    </div>
+
+    <!-- CARD — Al Basta Market -->
+    <div class="pcard" data-cat="illustration">
+      <div class="pcard-thumb">
+        <img src="photos/albasta.jpeg" alt="Al Basta Market" style="width:100%;height:100%;object-fit:cover;display:block">
+      </div>
+      <div class="pcard-info">
+        <div class="pcard-cat">Illustration · Bahrain TV</div>
+        <div class="pcard-ttl">Al Basta Market · سوق البسطة</div>
+        <div class="pcard-sub">Character &amp; scene illustration series · Bahrain Television</div>
+        <span class="pcard-arrow">View project →</span>
+      </div>
+    </div>
+
+  </div>
+  <div class="port-empty" id="portEmpty">No projects in this category yet.</div>
+</section>
+
+<!-- SERVICES -->
+<section class="svcs">
+  <span class="sec-lbl" data-en="What we offer" data-ar="ما نقدمه">What we offer</span>
+  <h2 id="svcs-ttl" class="sec-ttl">Full-service creative,<br>concept to print</h2>
+  <div class="sg">
+    <div class="sv sv-a">
+      <div class="sv-ico"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="2" stroke="#01A6A6" stroke-width="1.5"/><path d="M6 8h10M6 11h7M6 14h9" stroke="#01A6A6" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <div class="sv-n">01</div>
+      <span class="sv-tag">Publications</span>
+      <div class="sv-ttl">Publication Design</div>
+      <p class="sv-desc">Books, newsletters, annual reports and HSE manuals — printed and digital, fully bilingual in Arabic and English from concept through to print.</p>
+      <a href="#" class="sv-lnk">Start a project →</a>
+    </div>
+    <div class="sv sv-c">
+      <div class="sv-ico"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="5" stroke="rgba(255,255,255,.7)" stroke-width="1.5"/><path d="M4 20c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="rgba(255,255,255,.7)" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <div class="sv-n">02</div>
+      <span class="sv-tag">Illustration</span>
+      <div class="sv-ttl">Editorial Art &amp; Illustration</div>
+      <p class="sv-desc">Storybooks and activity books for children and young adults — full character development, graphic art and complete layout from start to finish.</p>
+      <a href="#" class="sv-lnk">Start a project →</a>
+    </div>
+    <div class="sv sv-f">
+      <div class="sv-ico"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v4M11 15v4M3 11h4M15 11h4" stroke="rgba(255,255,255,.7)" stroke-width="1.5" stroke-linecap="round"/><circle cx="11" cy="11" r="4" stroke="rgba(255,255,255,.7)" stroke-width="1.5"/></svg></div>
+      <div class="sv-n">03</div>
+      <span class="sv-tag">Animation</span>
+      <div class="sv-ttl">Animation &amp; Motion</div>
+      <p class="sv-desc">Character development to full animation. Digital publications with embedded animations — HTML5 eBooks, digital editions and interactive content.</p>
+      <a href="#" class="sv-lnk">Start a project →</a>
+    </div>
+    <div class="sv sv-d">
+      <div class="sv-ico"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="14" rx="2" stroke="rgba(255,255,255,.7)" stroke-width="1.5"/><path d="M7 9h8M7 13h5" stroke="rgba(255,255,255,.7)" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <div class="sv-n">04</div>
+      <span class="sv-tag">Corporate</span>
+      <div class="sv-ttl">Corporate &amp; Guideline Books</div>
+      <p class="sv-desc">Corporate communication books, brand guidelines and process manuals — structured, clear and brand-consistent throughout every spread.</p>
+      <a href="#" class="sv-lnk">Start a project →</a>
+    </div>
+    <div class="sv sv-b">
+      <div class="sv-ico"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="2" stroke="#01A6A6" stroke-width="1.5"/><path d="M7 7l4 4-4 4M13 15h3" stroke="#01A6A6" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <div class="sv-n">05</div>
+      <span class="sv-tag">Digital</span>
+      <div class="sv-ttl">Digital Publications</div>
+      <p class="sv-desc">Interactive eBooks, HTML5 mini-websites and digital editions with embedded animations — modern, accessible and shareable on every device.</p>
+      <a href="#" class="sv-lnk">Start a project →</a>
+    </div>
+    <div class="sv sv-e">
+      <div class="sv-ico"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 17L11 5l6 12" stroke="rgba(255,255,255,.7)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 13h8" stroke="rgba(255,255,255,.7)" stroke-width="1.2" stroke-linecap="round"/></svg></div>
+      <div class="sv-n">06</div>
+      <span class="sv-tag">Coaching</span>
+      <div class="sv-ttl">Coaching &amp; Workshops</div>
+      <p class="sv-desc">Creative writing, storytelling and brand development workshops for individuals, teams and organisations — in Bahrain and online.</p>
+      <a href="#" class="sv-lnk">Explore sessions →</a>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="why">
+  <div class="why-l">
+    <h2 id="why-h2">Why<br>Top Right?</h2>
+    <div class="wi"><span class="wi-n">01</span><div><strong>20+ years of creative experience in Bahrain</strong><p>A depth of client trust, creative judgment and established relationships that newer competitors simply cannot replicate.</p></div></div>
+    <div class="wi"><span class="wi-n">02</span><div><strong>Fully bilingual — Arabic and English</strong><p>One team that writes, designs and produces in both languages. No brief lost in translation. No separate vendors.</p></div></div>
+    <div class="wi"><span class="wi-n">03</span><div><strong>Direct, personal communication</strong><p>Every client speaks directly with the creative leads. No account managers, no dilution of vision — just clear, focused collaboration.</p></div></div>
+    <div class="wi"><span class="wi-n">04</span><div><strong>Full-service from concept to print</strong><p>Writing, illustration, design and production — all under one roof. One partner for the entire process.</p></div></div>
+    <div class="wi"><span class="wi-n">05</span><div><strong>Proudly Bahraini — GCC culturally rooted</strong><p>20+ years of understanding Gulf visual language, business culture and audience expectations.</p></div></div>
+  </div>
+  <div class="why-r">
+    <!-- Logo watermark -->
+    <div class="logo-wm" aria-hidden="true">
+      <img src="references/logo.png" alt="" style="width:100%;height:100%;object-fit:cover;opacity:0.06;mix-blend-mode:luminosity">
+    </div>
+    <div class="why-deco" style="width:280px;height:280px;bottom:-80px;right:-80px"></div>
+    <div class="why-deco" style="width:180px;height:180px;bottom:-40px;right:-40px"></div>
+    <div class="why-big">20+</div>
+    <div class="why-lbl">Years in Bahrain</div>
+    <div class="why-box">
+      <p>Ready to start your next publication, book or campaign? We would love to hear about your project.</p>
+      <button>Get in touch →</button>
+    </div>
+  </div>
+</section>
+
+<!-- COACHING -->
+<section class="coaching">
+  <div class="coa-l">
+    <span class="coa-lbl">Creative education</span>
+    <h2>Coaching &amp;<br>Workshops</h2>
+    <p>Empowering writers, educators and professionals through creative coaching, storytelling workshops and brand development sessions — in Bahrain and online.</p>
+
+    <button class="btn-wht">Enquire about sessions</button>
+  </div>
+  <div class="coa-r">
+    <div class="coa-ring" style="width:280px;height:280px"></div>
+    <div class="coa-ring" style="width:180px;height:180px"></div>
+    <div class="coa-big">20+</div>
+    <div class="coa-lbl2">Years of coaching<br>&amp; creative workshops</div>
+  </div>
+</section>
+
+<!-- EVENTS & CSR -->
+<section id="events" style="background:#E7432B;padding:72px 32px;position:relative;overflow:hidden">
+  <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,white,#773E84,#0058A1)"></div>
+  <div style="max-width:1100px;margin:0 auto">
+    <span class="sec-lbl" data-en="Community &amp; Responsibility" data-ar="المجتمع والمسؤولية">Community &amp; Responsibility</span>
+    <h2 class="sec-ttl" style="color:black;margin-bottom:12px" data-en="Events &amp; CSR" data-ar="الفعاليات والمسؤولية المجتمعية">Events &amp; CSR</h2>
+    <p style="font-size:13px;color:white;line-height:1.8;max-width:600px;margin-bottom:52px" data-en="Beyond design and publishing, Top Right invests in community-driven initiatives that bring creativity to life. Our first event under the Local Miniatures initiative was held in Bahrain — a celebration of local art, craft and culture." data-ar="بعيداً عن التصميم والنشر، تستثمر توب رايت في مبادرات مجتمعية تُحيي الإبداع. أقمنا أول فعالية لنا ضمن مبادرة 'المجسمات المحلية' في البحرين — احتفاءً بالفن والحرف والثقافة المحلية.">Beyond design and publishing, Top Right invests in community-driven initiatives that bring creativity to life. Our first event under the Local Miniatures initiative was held in Bahrain — a celebration of local art, craft and culture.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px">
+      <div style="background:#1E1E1E;padding:44px 40px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:white"></div>
+        <span style="font-size:8px;letter-spacing:3px;text-transform:uppercase;color:white;margin-bottom:14px;display:block">/ Initiative</span>
+        <h3 style="font-size:26px;font-weight:200;letter-spacing:2px;color:#fff;line-height:1.2;margin-bottom:14px;font-family:'Raleway','Cairo',sans-serif;text-transform:uppercase">Local<br>Miniatures</h3>
+        <p style="font-size:12px;color:#888;line-height:1.75;margin-bottom:28px" data-en="A Top Right initiative celebrating miniature art and local creative culture in Bahrain. Our inaugural event brought together artists, collectors and community members for an immersive experience." data-ar="مبادرة من توب رايت تحتفي بفن المجسمات والثقافة الإبداعية المحلية في البحرين. جمعت فعاليتنا الأولى فنانين وهواة ومجتمعاً في تجربة غامرة.">A Top Right initiative celebrating miniature art and local creative culture in Bahrain. Our inaugural event brought together artists, collectors and community members for an immersive experience.</p>
+        <a href="https://www.instagram.com/local_miniatures" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;background:#E7432B;color:#fff;font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;padding:13px 24px;text-decoration:none">Follow on Instagram →</a>
+      </div>
+      <div style="background:#1E1E1E;padding:44px 40px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;position:relative;overflow:hidden">
+        <div style="width:120px;height:120px;border-radius:50%;border:1px solid #E7432B;display:flex;align-items:center;justify-content:center;margin-bottom:20px;position:relative">
+          <div style="width:90px;height:90px;border-radius:50%;border:1px solid rgba(231,67,43,0.3);position:absolute"></div>
+          <span style="font-size:32px;font-weight:200;color:white;font-family:'Raleway','Cairo',sans-serif;letter-spacing:2px">1</span>
+        </div>
+        <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#aea9a9;margin-bottom:8px">Event held</div>
+        <div style="font-size:11px;color:#aea9a9;line-height:1.7" data-en="Bahrain · 2025<br>More events coming soon" data-ar="البحرين · ٢٠٢٥<br>فعاليات قادمة قريباً">Bahrain · 2025<br>More events coming soon</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi">
+  <span class="sec-lbl" data-en="Client voices" data-ar="آراء عملائنا">Client voices</span>
+  <h2 class="sec-ttl" data-en="What our clients say" data-ar="ماذا يقول عملاؤنا">What our clients say</h2>
+  <div class="tg">
+    <div class="tc">
+      <span class="tc-q">"</span>
+      <p class="tc-txt">"TopRight understood our brand and delivered the publication exactly as we envisioned — fully bilingual, on time, without needing constant guidance. A studio we trust completely for our annual publications."</p>
+      <div class="tc-row">
+        <div class="tc-dot" style="background:#01A6A6">G</div>
+        <div><div class="tc-name">Senior Communications Manager</div><div class="tc-co">GPIC — Gulf Petrochemical Industries Company</div></div>
+      </div>
+    </div>
+    <div class="tc">
+      <span class="tc-q">"</span>
+      <p class="tc-txt">"The illustrated HSE booklets were a major success on our Safety Day. TopRight managed everything from writing and illustration through to print — one team, one contact, zero complications."</p>
+      <div class="tc-row">
+        <div class="tc-dot" style="background:#E7432B">B</div>
+        <div><div class="tc-name">HSE Manager</div><div class="tc-co">Bapco Energies</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact">
+  <div class="con-l">
+    <span class="sec-lbl" data-en="Get in touch" data-ar="تواصل معنا">Get in touch</span>
+    <h2 id="con-h2">Let's work<br>together</h2>
+    <p data-en="Tell us about your project and we will get back to you within 24 hours. We work with organisations across Bahrain and the GCC." data-ar="أخبرنا عن مشروعك وسنعود إليك خلال ٢٤ ساعة. نعمل مع المؤسسات في البحرين ودول الخليج.">Tell us about your project and we will get back to you within 24 hours. We work with organisations across Bahrain and the GCC.</p>
+    <div class="ci"><div class="ci-lbl">Email</div><div class="ci-val">info@topright.bh</div></div>
+    <div class="ci"><div class="ci-lbl">Phone</div><div class="ci-val">(+973) 36622100 / 17566726</div></div>
+    <div class="ci"><div class="ci-lbl">WhatsApp</div><div class="ci-val">(+973) 36622100</div></div>
+    <div class="ci"><div class="ci-lbl">Location</div><div class="ci-val">Bahrain · CR: 46817-1</div></div>
+  </div>
+  <div class="con-r">
+    <form id="cf" novalidate>
+      <div class="fg-row">
+        <div class="fg"><label>Name *</label><input type="text" required placeholder="Your name"/></div>
+        <div class="fg"><label>Organisation</label><input type="text" placeholder="Company name"/></div>
+      </div>
+      <div class="fg"><label>Email *</label><input type="email" required placeholder="your@email.com"/></div>
+      <div class="fg"><label>Type of project</label><input type="text" placeholder="Annual report, children's book, HSE manual..."/></div>
+      <div class="fg"><label>Message *</label><textarea required placeholder="Tell us about your project and timeline..."></textarea></div>
+      <div class="form-btns">
+        <button type="submit" class="btn-sub">Send message →</button>
+        <a href="https://wa.me/97336622100" target="_blank" class="btn-wa">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </a>
+      </div>
+      <div class="form-ok" id="fok">Thank you — we will get back to you within 24 hours.</div>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="fg2">
+    <div class="fb">
+      <img src="references/logo.png" alt="Top Right" style="height:60px;width:auto;display:block;margin-bottom:12px">
+      <p>Design &amp; Support Services · Bahrain · CR: 46817-1</p>
+      <p class="fb-desc">A Bahraini creative studio specialising in bilingual illustration, publication design and brand development. Partnering organisations across the GCC since 2001.</p>
+    </div>
+    <div class="fcol"><h4>Services</h4><a href="#">Publication Design</a><a href="#">Illustration &amp; Art</a><a href="#">Animation</a><a href="#">Corporate Books</a><a href="#">Digital Publications</a><a href="#">Coaching</a></div>
+    <div class="fcol"><h4>Portfolio</h4><a href="#">Children's Books</a><a href="#">HSE Publications</a><a href="#">Corporate</a><a href="#">Illustration</a><a href="#">Animation</a></div>
+    <div class="fcol"><h4>Contact</h4><a href="#">info@topright.bh</a><a href="#">(+973) 36622100</a><a href="#">WhatsApp</a><a href="#">About us</a></div>
+  </div>
+  <div class="fbot">
+    <div class="fcp">© 2025 TopRight Design &amp; Support Services · Bahrain · CR: 46817-1</div>
+    <div class="fsoc">
+      <a href="#" class="fsb">in</a>
+      <a href="#" class="fsb">ig</a>
+      <a href="https://wa.me/97336622100" class="fsb wa" target="_blank">wa</a>
+    </div>
+  </div>
+</footer>
+<div class="tbar"></div>
+
+<script>
+// Portfolio filter
+document.querySelectorAll('.ptab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ptab').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    const f = btn.dataset.f;
+    const cards = document.querySelectorAll('.pcard');
+    let visible = 0;
+    cards.forEach(c => {
+      const match = f === 'all' || c.dataset.cat === f;
+      c.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+    const empty = document.getElementById('portEmpty');
+    empty.classList.toggle('show', visible === 0);
+  });
+});
+
+let currentLang = 'en';
+document.getElementById('langBtn').addEventListener('click', function() {
+  currentLang = currentLang === 'en' ? 'ar' : 'en';
+  const isAr = currentLang === 'ar';
+
+  // Direction + lang attribute
+  document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+  document.documentElement.setAttribute('lang', isAr ? 'ar' : 'en');
+  this.textContent = isAr ? 'EN | عربي' : 'AR | EN';
+
+  // Translate every element that has data-en / data-ar
+  document.querySelectorAll('[data-en][data-ar]').forEach(el => {
+    el.textContent = el.getAttribute('data-' + currentLang);
+  });
+
+  // Hero h1 — has HTML inside so handled separately
+  document.getElementById('hero-h1-en').style.display = isAr ? 'none' : 'block';
+  document.getElementById('hero-h1-ar').style.display = isAr ? 'block' : 'none';
+
+  // Section titles that contain <br> — restore line breaks
+  const brTitles = {
+    'port-ttl': { en: '20+ years of<br>stories told', ar: '٢٠+ عامًا من<br>القصص' },
+    'svcs-ttl': { en: 'Full-service creative,<br>concept to print', ar: 'خدمات إبداعية متكاملة<br>من الفكرة إلى الطباعة' },
+    'why-h2':   { en: 'Why<br>Top Right?', ar: 'لماذا<br>توب رايت؟' },
+    'con-h2':   { en: 'Let\'s work<br>together', ar: 'لنعمل<br>معًا' },
+  };
+  Object.entries(brTitles).forEach(([id, t]) => {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = t[currentLang];
+  });
+});
+document.getElementById('cf').addEventListener('submit',function(e){
+  e.preventDefault();
+  let ok=true;
+  this.querySelectorAll('[required]').forEach(i=>{
+    if(!i.value.trim()){i.style.borderBottomColor='#E7432B';ok=false;}
+    else i.style.borderBottomColor='';
+  });
+  const em=this.querySelector('[type=email]');
+  if(em&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value)){em.style.borderBottomColor='#E7432B';ok=false;}
+  if(ok){
+    const m=document.getElementById('fok');
+    m.classList.add('show');
+    this.reset();
+    setTimeout(()=>m.classList.remove('show'),5000);
+  }
+});
+</script>
+</body>
+</html>

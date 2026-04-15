@@ -1,0 +1,512 @@
+import { useEffect, useState, useRef } from 'react'
+import { supabase } from '../../lib/supabase'
+import styles from './Dashboard.module.css'
+
+const CATEGORIES = ['newsletter', 'hse', 'storybooks', 'illustration', 'animation', 'corporate']
+
+const EMPTY_ITEM = {
+  slug: '', category: 'newsletter', label_en: '', label_ar: '',
+  title: '', subtitle_en: '', subtitle_ar: '', year: '',
+  image_url: '', display_order: 0, is_published: true,
+}
+
+function getPublicUrl(filename) {
+  if (!filename) return null
+  const { data } = supabase.storage.from('portfolio-images').getPublicUrl(filename)
+  return data.publicUrl
+}
+
+function catClass(cat) {
+  const map = {
+    hse: styles.catHse,
+    storybooks: styles.catStorybooks,
+    corporate: styles.catCorporate,
+    illustration: styles.catIllustration,
+    animation: styles.catAnimation,
+    newsletter: styles.catNewsletter,
+  }
+  return map[cat] ?? ''
+}
+
+/* ── Portfolio Manager ── */
+function PortfolioManager({ onNav }) {
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [editItem, setEditItem] = useState(null)
+  const [isNew, setIsNew] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [search, setSearch] = useState('')
+  const dragIdx = useRef(null)
+  const fileRef = useRef(null)
+
+  async function load() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('portfolio_items')
+      .select('*')
+      .order('display_order')
+    setItems(data ?? [])
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [])
+
+  async function togglePublish(item) {
+    const updated = !item.is_published
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_published: updated } : i))
+    await supabase.from('portfolio_items').update({ is_published: updated }).eq('id', item.id)
+  }
+
+  function onDragStart(idx) { dragIdx.current = idx }
+  function onDragOver(e, idx) {
+    e.preventDefault()
+    if (dragIdx.current === idx) return
+    setItems(prev => {
+      const next = [...prev]
+      const [moved] = next.splice(dragIdx.current, 1)
+      next.splice(idx, 0, moved)
+      dragIdx.current = idx
+      return next
+    })
+  }
+  async function onDrop() {
+    dragIdx.current = null
+    await Promise.all(
+      items.map((item, i) =>
+        supabase.from('portfolio_items').update({ display_order: i }).eq('id', item.id)
+      )
+    )
+  }
+
+  function openEdit(item) { setEditItem({ ...item }); setIsNew(false) }
+  function openNew() { setEditItem({ ...EMPTY_ITEM, display_order: items.length }); setIsNew(true) }
+  function closeEdit() { setEditItem(null) }
+
+  async function handleImageUpload(file) {
+    if (!file) return
+    setUploading(true)
+    const ext = file.name.split('.').pop()
+    const filename = `${Date.now()}.${ext}`
+    const { error } = await supabase.storage.from('portfolio-images').upload(filename, file)
+    setUploading(false)
+    if (!error) setEditItem(prev => ({ ...prev, image_url: filename }))
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    if (isNew) {
+      const safeSlug = editItem.slug || `item-${Date.now()}`
+      await supabase.from('portfolio_items').insert({ ...editItem, slug: safeSlug, updated_at: new Date().toISOString() })
+    } else {
+      await supabase.from('portfolio_items').update({ ...editItem, updated_at: new Date().toISOString() }).eq('id', editItem.id)
+    }
+    setSaving(false)
+    closeEdit()
+    load()
+  }
+
+  async function handleDelete(item) {
+    if (!window.confirm(`Delete "${item.title}"? This cannot be undone.`)) return
+    await supabase.from('portfolio_items').delete().eq('id', item.id)
+    load()
+  }
+
+  const visible = items.filter(i =>
+    !search || i.title.toLowerCase().includes(search.toLowerCase())
+  )
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Website Content</div>
+          <h1 className={styles.pageTitle}>Portfolio</h1>
+        </div>
+        <button className={styles.btnAdd} onClick={openNew}>+ Add Project</button>
+      </div>
+
+      <div className={styles.tableWrap}>
+        <div className={styles.tableToolbar}>
+          <div className={styles.tableSearch}>
+            <span className={styles.tableSearchIcon}>⊘</span>
+            <input
+              type="text"
+              placeholder="Search projects…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+          <span className={styles.tableCount}>{visible.length} items</span>
+        </div>
+
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th>Project Title</th>
+              <th>Category</th>
+              <th>Year</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((item, idx) => (
+              <tr
+                key={item.id}
+                draggable
+                onDragStart={() => onDragStart(idx)}
+                onDragOver={e => onDragOver(e, idx)}
+                onDrop={onDrop}
+                className={styles.draggableRow}
+              >
+                <td className={styles.dragHandle}>⠿</td>
+                <td>
+                  {item.image_url
+                    ? <img src={getPublicUrl(item.image_url)} alt="" className={styles.thumb} />
+                    : <div className={styles.thumbEmpty} />}
+                </td>
+                <td className={styles.tdTitle}>{item.title}</td>
+                <td><span className={`${styles.catBadge} ${catClass(item.category)}`}>{item.category}</span></td>
+                <td>{item.year || '—'}</td>
+                <td>
+                  <button
+                    className={`${styles.toggle} ${item.is_published ? styles.toggleOn : styles.toggleOff}`}
+                    onClick={() => togglePublish(item)}
+                  >
+                    {item.is_published ? '● Live' : '○ Draft'}
+                  </button>
+                </td>
+                <td className={styles.tdActions}>
+                  <button className={`${styles.btnSm} ${styles.btnEdit}`} onClick={() => openEdit(item)}>Edit</button>
+                  <button className={`${styles.btnSm} ${styles.btnDel}`} onClick={() => handleDelete(item)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {visible.length === 0 && (
+          <div className={styles.empty}>No projects found.</div>
+        )}
+      </div>
+
+      {editItem && (
+        <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && closeEdit()}>
+          <div className={styles.modal}>
+            <div className={styles.modalHd}>
+              <span className={styles.modalTtl}>{isNew ? 'New Project' : 'Edit Project'}</span>
+              <button className={styles.modalClose} onClick={closeEdit}>✕</button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Slug</label>
+                  <input className={styles.fieldInput} value={editItem.slug} onChange={e => setEditItem(p => ({ ...p, slug: e.target.value }))} />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Category</label>
+                  <select className={styles.fieldInput} value={editItem.category} onChange={e => setEditItem(p => ({ ...p, category: e.target.value }))}>
+                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Title</label>
+                <input className={styles.fieldInput} value={editItem.title} onChange={e => setEditItem(p => ({ ...p, title: e.target.value }))} />
+              </div>
+
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Label EN</label>
+                  <input className={styles.fieldInput} value={editItem.label_en ?? ''} onChange={e => setEditItem(p => ({ ...p, label_en: e.target.value }))} />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Label AR</label>
+                  <input className={styles.fieldInput} dir="rtl" value={editItem.label_ar ?? ''} onChange={e => setEditItem(p => ({ ...p, label_ar: e.target.value }))} />
+                </div>
+              </div>
+
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Subtitle EN</label>
+                  <textarea className={styles.fieldInput} rows={3} value={editItem.subtitle_en ?? ''} onChange={e => setEditItem(p => ({ ...p, subtitle_en: e.target.value }))} />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Subtitle AR</label>
+                  <textarea className={styles.fieldInput} rows={3} dir="rtl" value={editItem.subtitle_ar ?? ''} onChange={e => setEditItem(p => ({ ...p, subtitle_ar: e.target.value }))} />
+                </div>
+              </div>
+
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Year</label>
+                  <input className={styles.fieldInput} value={editItem.year ?? ''} onChange={e => setEditItem(p => ({ ...p, year: e.target.value }))} />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Display Order</label>
+                  <input className={styles.fieldInput} type="number" value={editItem.display_order} onChange={e => setEditItem(p => ({ ...p, display_order: Number(e.target.value) }))} />
+                </div>
+              </div>
+
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Image</label>
+                <div
+                  className={styles.uploadArea}
+                  onClick={() => fileRef.current?.click()}
+                >
+                  {editItem.image_url
+                    ? <img src={getPublicUrl(editItem.image_url)} alt="" className={styles.previewImg} />
+                    : <span style={{ fontSize: 24, opacity: 0.3 }}>↑</span>}
+                  <span className={styles.uploadAreaText}>
+                    {uploading ? 'Uploading…' : 'Click to upload image'}
+                  </span>
+                  {editItem.image_url && (
+                    <span className={styles.uploadNote}>{editItem.image_url}</span>
+                  )}
+                  <span className={styles.uploadAreaHint}>JPG, PNG, WEBP</span>
+                </div>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/*"
+                  className={styles.fileInput}
+                  onChange={e => handleImageUpload(e.target.files?.[0])}
+                />
+              </div>
+
+              <label className={styles.checkRow}>
+                <input type="checkbox" checked={editItem.is_published} onChange={e => setEditItem(p => ({ ...p, is_published: e.target.checked }))} />
+                Published (Live on site)
+              </label>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button className={styles.btnSecondary} onClick={closeEdit}>Cancel</button>
+              <button className={styles.btnAdd} onClick={handleSave} disabled={saving || uploading}>
+                {saving ? 'Saving…' : 'Save Project'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ── Site Text Editor ── */
+function SiteTextEditor() {
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [savedKeys, setSavedKeys] = useState({})
+
+  useEffect(() => {
+    supabase.from('site_text').select('*').order('key').then(({ data }) => {
+      setRows(data ?? [])
+      setLoading(false)
+    })
+  }, [])
+
+  function updateField(id, field, value) {
+    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r))
+  }
+
+  async function handleBlur(row) {
+    await supabase.from('site_text').update({
+      value_en: row.value_en,
+      value_ar: row.value_ar,
+      updated_at: new Date().toISOString(),
+    }).eq('id', row.id)
+    setSavedKeys(prev => ({ ...prev, [row.id]: true }))
+    setTimeout(() => setSavedKeys(prev => ({ ...prev, [row.id]: false })), 2000)
+  }
+
+  const grouped = rows.reduce((acc, row) => {
+    const prefix = row.key.split(/[._]/)[0]
+    if (!acc[prefix]) acc[prefix] = []
+    acc[prefix].push(row)
+    return acc
+  }, {})
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Website Content</div>
+          <h1 className={styles.pageTitle}>Site Text</h1>
+        </div>
+      </div>
+
+      {Object.entries(grouped).map(([prefix, groupRows]) => (
+        <div key={prefix} className={styles.textGroup}>
+          <h3 className={styles.textGroupTitle}>{prefix}</h3>
+          {groupRows.map(row => (
+            <div key={row.id} className={styles.textRow}>
+              <div className={styles.textKey}>{row.key}</div>
+              <div className={styles.textFields}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>EN</label>
+                  <textarea
+                    className={styles.fieldInput}
+                    rows={2}
+                    value={row.value_en ?? ''}
+                    onChange={e => updateField(row.id, 'value_en', e.target.value)}
+                    onBlur={() => handleBlur(row)}
+                  />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>AR</label>
+                  <textarea
+                    className={styles.fieldInput}
+                    rows={2}
+                    dir="rtl"
+                    value={row.value_ar ?? ''}
+                    onChange={e => updateField(row.id, 'value_ar', e.target.value)}
+                    onBlur={() => handleBlur(row)}
+                  />
+                </div>
+              </div>
+              {savedKeys[row.id] && <span className={styles.savedBadge}>Saved</span>}
+            </div>
+          ))}
+        </div>
+      ))}
+
+      {rows.length === 0 && (
+        <div className={styles.empty}>No site text rows yet. Add rows to the site_text table in Supabase.</div>
+      )}
+    </div>
+  )
+}
+
+/* ── Dashboard overview ── */
+function DashboardOverview({ onNav, counts }) {
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Overview</div>
+          <h1 className={styles.pageTitle}>Dashboard</h1>
+        </div>
+      </div>
+
+      <div className={styles.statsRow}>
+        <div className={styles.statCard}>
+          <div className={styles.statN}>{counts.portfolio}</div>
+          <div className={styles.statL}>Portfolio Items</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statN}>{counts.published}</div>
+          <div className={styles.statL}>Published</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statN}>{counts.draft}</div>
+          <div className={styles.statL}>Drafts</div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statN}>{counts.text}</div>
+          <div className={styles.statL}>Text Keys</div>
+        </div>
+      </div>
+
+      <div className={styles.quickGrid}>
+        <button className={styles.quickCard} onClick={() => onNav('portfolio')}>
+          <div className={styles.quickCardIcon}>⊞</div>
+          <div className={styles.quickCardTitle}>Add Portfolio Item</div>
+          <div className={styles.quickCardSub}>Upload a new project</div>
+        </button>
+        <button className={styles.quickCard} onClick={() => onNav('text')}>
+          <div className={styles.quickCardIcon}>✎</div>
+          <div className={styles.quickCardTitle}>Edit Site Text</div>
+          <div className={styles.quickCardSub}>Update bilingual copy</div>
+        </button>
+        <button className={styles.quickCard} onClick={() => onNav('portfolio')}>
+          <div className={styles.quickCardIcon}>⟳</div>
+          <div className={styles.quickCardTitle}>Reorder Portfolio</div>
+          <div className={styles.quickCardSub}>Drag to rearrange items</div>
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ── Main Dashboard shell ── */
+export default function Dashboard() {
+  const [section, setSection] = useState('dashboard')
+  const [counts, setCounts] = useState({ portfolio: 0, published: 0, draft: 0, text: 0 })
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from('portfolio_items').select('id, is_published'),
+      supabase.from('site_text').select('id'),
+    ]).then(([{ data: p }, { data: t }]) => {
+      const portfolio = p?.length ?? 0
+      const published = p?.filter(i => i.is_published).length ?? 0
+      setCounts({ portfolio, published, draft: portfolio - published, text: t?.length ?? 0 })
+    })
+  }, [])
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+  }
+
+  const navItems = [
+    { key: 'dashboard', icon: '◈', label: 'Dashboard', group: 'Overview' },
+    { key: 'portfolio', icon: '⊞', label: 'Portfolio', group: 'Content', count: counts.portfolio },
+    { key: 'text',      icon: '✎', label: 'Site Text', group: 'Content' },
+  ]
+
+  const groups = [...new Set(navItems.map(i => i.group))]
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.tbar} />
+
+      <header className={styles.header}>
+        <div className={styles.headerL}>
+          <img src="/logo.png" alt="TopRight" className={styles.headerLogo} />
+          <span className={styles.headerPortalLabel}>Admin Portal</span>
+        </div>
+        <div className={styles.headerR}>
+          <button className={styles.logoutBtn} onClick={handleLogout}>Sign Out</button>
+        </div>
+      </header>
+
+      <div className={styles.body}>
+        <nav className={styles.sidebar}>
+          {groups.map(group => (
+            <div key={group} className={styles.sidebarSection}>
+              <div className={styles.sidebarLabel}>{group}</div>
+              {navItems.filter(i => i.group === group).map(item => (
+                <button
+                  key={item.key}
+                  className={`${styles.slink} ${section === item.key ? styles.slinkActive : ''}`}
+                  onClick={() => setSection(item.key)}
+                >
+                  <span className={styles.slinkIcon}>{item.icon}</span>
+                  {item.label}
+                  {item.count !== undefined && (
+                    <span className={styles.slinkCount}>{item.count}</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          ))}
+        </nav>
+
+        <main className={styles.main}>
+          {section === 'dashboard' && <DashboardOverview onNav={setSection} counts={counts} />}
+          {section === 'portfolio' && <PortfolioManager onNav={setSection} />}
+          {section === 'text' && <SiteTextEditor />}
+        </main>
+      </div>
+    </div>
+  )
+}

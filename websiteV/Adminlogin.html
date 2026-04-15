@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top Right — Admin Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;900&family=Raleway:wght@100;200;300;400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Cairo',system-ui,sans-serif}
+
+body{
+  background:#000;
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+}
+
+/* LEFT PANEL — brand side */
+.brand-panel{
+  background:#000;
+  border-right:1px solid #111;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  padding:48px;
+  position:relative;
+  overflow:hidden;
+}
+
+/* grid bg */
+.brand-panel::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:linear-gradient(#0d0d0d 1px,transparent 1px),linear-gradient(90deg,#0d0d0d 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;
+}
+
+.tbar-top{height:3px;background:linear-gradient(90deg,#E7432B,#773E84,#0058A1,#01A6A6);position:absolute;top:0;left:0;right:0}
+
+.brand-logo{position:relative;z-index:1}
+.brand-logo svg{display:block}
+
+.brand-center{position:relative;z-index:1}
+.brand-eyebrow{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:#E7432B;margin-bottom:18px;display:flex;align-items:center;gap:10px}
+.brand-eyebrow::before{content:'';width:24px;height:1px;background:#E7432B}
+.brand-h{font-size:64px;font-weight:200;letter-spacing:3px;color:#fff;line-height:.95;font-family:'Raleway','Cairo',sans-serif;text-transform:uppercase;margin-bottom:20px}
+.brand-h span{color:#E7432B;display:block}
+.brand-sub{font-size:12px;color:white;line-height:1.75;max-width:320px}
+
+.brand-bottom{position:relative;z-index:1}
+.notice{display:flex;align-items:flex-start;gap:12px;padding:18px;border:1px solid #1a1a1a;background:rgba(231,67,43,.04)}
+.notice-icon{width:28px;height:28px;background:#E7432B;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:900;color:#fff}
+.notice p{font-size:10px;color:#444;line-height:1.65}
+.notice strong{display:block;font-size:10px;font-weight:700;color:red;margin-bottom:3px;letter-spacing:.5px}
+
+/* RIGHT PANEL — login form */
+.login-panel{
+  background:#F0F0F0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  padding:64px 72px;
+  position:relative;
+}
+
+.login-box{width:100%;max-width:380px}
+
+.login-tag{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:#333;margin-bottom:36px;display:flex;align-items:center;gap:10px}
+.login-tag::after{content:'';flex:1;height:1px;background:#111}
+
+.login-ttl{font-size:28px;font-weight:200;letter-spacing:2px;color:#000000;font-family:'Raleway',sans-serif;text-transform:uppercase;margin-bottom:6px}
+.login-sub{font-size:10px;color:#333;margin-bottom:40px;line-height:1.6}
+
+.fg{margin-bottom:20px}
+.fg label{display:block;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:#2a2a2a;margin-bottom:7px}
+.fg input{
+  width:100%;
+  background:none;
+  border:none;
+  border-bottom:1px solid #1a1a1a;
+  border-left:2px solid transparent;
+  padding:12px 14px;
+  font-size:12px;
+  color:#000000;
+  font-family:'Cairo',sans-serif;
+  outline:none;
+  transition:all .25s;
+  letter-spacing:.5px;
+}
+.fg input:focus{
+  border-bottom-color:#E7432B;
+  border-left-color:#E7432B;
+  background:none;
+}
+.fg input::placeholder{color:#1f1f1f}
+
+.fg-row-check{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.remember{display:flex;align-items:center;gap:8px;cursor:pointer}
+.remember input[type=checkbox]{
+  width:14px;height:14px;
+  accent-color:#E7432B;
+  cursor:pointer;
+}
+.remember span{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:#333}
+
+.btn-login{
+  width:100%;
+  background:#E7432B;
+  color:#fff;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:2.5px;
+  text-transform:uppercase;
+  padding:15px;
+  border:none;
+  cursor:pointer;
+  transition:background .2s, transform .1s;
+  font-family:'Cairo',sans-serif;
+}
+.btn-login:hover{background:#c93520}
+.btn-login:active{transform:scale(.99)}
+
+.login-divider{display:flex;align-items:center;gap:12px;margin:24px 0}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:#111}
+.login-divider span{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#222}
+
+.security-note{display:flex;align-items:center;gap:10px;padding:14px;border:1px solid #0f0f0f}
+.sec-dot{width:6px;height:6px;border-radius:50%;background:#333;flex-shrink:0}
+.security-note span{font-size:9px;color:#222;letter-spacing:.5px}
+
+.login-footer{position:absolute;bottom:28px;left:0;right:0;text-align:center}
+.login-footer p{font-size:8px;color:#1a1a1a;letter-spacing:1px;text-transform:uppercase}
+
+/* Error state */
+.error-msg{
+  display:none;
+  background:rgba(231,67,43,.1);
+  border:1px solid rgba(231,67,43,.2);
+  border-left:3px solid #E7432B;
+  padding:11px 14px;
+  margin-bottom:20px;
+}
+.error-msg span{font-size:10px;color:#E7432B}
+.error-msg.show{display:block}
+
+/* Loading state */
+.btn-login.loading{
+  background:#1a1a1a;
+  color:#333;
+  cursor:not-allowed;
+  pointer-events:none;
+}
+
+@media (max-width: 768px){
+  body{grid-template-columns:1fr}
+  .brand-panel{display:none}
+  .login-panel{padding:48px 32px}
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT: Brand -->
+<div class="brand-panel">
+  <div class="tbar-top"></div>
+
+  <div class="brand-logo">
+    <img src="references/logo.png" alt="Top Right" style="height:56px;width:auto;display:block;object-fit:contain"/>
+  </div>
+
+  <div class="brand-center">
+    <span class="brand-eyebrow">Admin Access</span>
+    <h1 class="brand-h">Content<br><span>Control</span><br>Panel</h1>
+    <p class="brand-sub">Restricted area for TopRight administrators. Manage website content, portfolio items, services, testimonials, and more from a single dashboard.</p>
+  </div>
+
+  <div class="brand-bottom">
+    <div class="notice">
+      <div class="notice-icon">!</div>
+      <div>
+        <strong>Restricted Access</strong>
+        <p>This portal is for authorised TopRight staff only. Unauthorised access attempts are logged and reported.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT: Login Form -->
+<div class="login-panel">
+  <div class="login-box">
+
+    <div class="login-tag">Admin Portal</div>
+
+    <h2 class="login-ttl">Sign In</h2>
+    <p class="login-sub">Enter your admin credentials to access the content management panel.</p>
+
+    <div class="error-msg" id="errMsg">
+      <span>⚠ Invalid username or password. Please try again.</span>
+    </div>
+
+    <div class="fg">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="admin@topright.bh" autocomplete="username"/>
+    </div>
+
+    <div class="fg">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••••••" autocomplete="current-password"/>
+    </div>
+
+    <div class="fg-row-check">
+      <label class="remember">
+        <input type="checkbox" id="remember"/>
+        <span>Keep me signed in</span>
+      </label>
+    </div>
+
+    <button class="btn-login" id="loginBtn" onclick="handleLogin()">
+      Sign In →
+    </button>
+
+    <div class="login-divider"><span>Secured</span></div>
+
+    <div class="security-note">
+      <div class="sec-dot"></div>
+      <span>Sessions expire after 2 hours of inactivity for security.</span>
+    </div>
+
+  </div>
+
+  <div class="login-footer">
+    <p>Top Right Design & Support Services · Bahrain · CR: 46817-1</p>
+  </div>
+</div>
+
+<script>
+// MOCKUP ONLY — demo credentials
+const DEMO_USER = 'admin';
+const DEMO_PASS = 'topright2025';
+
+function handleLogin() {
+  const username = document.getElementById('username').value.trim();
+  const password = document.getElementById('password').value;
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('errMsg');
+
+  if (!username || !password) {
+    err.querySelector('span').textContent = '⚠ Please enter both username and password.';
+    err.classList.add('show');
+    return;
+  }
+
+  // Loading state
+  btn.classList.add('loading');
+  btn.textContent = 'Signing in...';
+  err.classList.remove('show');
+
+  setTimeout(() => {
+    // Demo: accept any non-empty credentials → redirect to portal
+    // In production, this would be a real auth API call
+    if (username && password) {
+      // Successful login → go to admin portal
+      window.location.href = 'adminPortal.html';
+    } else {
+      btn.classList.remove('loading');
+      btn.textContent = 'Sign In →';
+      err.querySelector('span').textContent = '⚠ Invalid credentials. Please try again.';
+      err.classList.add('show');
+    }
+  }, 900);
+}
+
+// Allow Enter key to submit
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleLogin();
+});
+</script>
+</body>
+</html>

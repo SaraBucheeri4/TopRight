@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top Right — Admin Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@200;300;400;500;600;700;900&family=Raleway:wght@100;200;300;400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Cairo',system-ui,sans-serif}
+
+:root{
+  --red:#E7432B;
+  --teal:#01A6A6;
+  --blue:#0058A1;
+  --purple:#773E84;
+  --bg:#1A1A1A;
+  --surface:#242424;
+  --surface2:#2E2E2E;
+  --border:#333333;
+  --border2:#404040;
+  --text:#E0E0E0;
+  --muted:#888;
+  --subtle:#aaa;
+  --sidebar-w:240px;
+}
+
+body{background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;font-size:13px}
+
+.tbar{height:3px;background:linear-gradient(90deg,#E7432B,#773E84,#0058A1,#01A6A6);flex-shrink:0}
+
+/* TOP NAV */
+.topnav{
+  height:52px;background:#000000;border-bottom:1px solid #1a1a1a;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;flex-shrink:0;position:sticky;top:0;z-index:100;
+}
+.topnav-l{display:flex;align-items:center;gap:16px}
+.topnav-logo{display:flex;align-items:center;gap:10px}
+.topnav-logo span{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#555}
+.topnav-badge{background:var(--red);color:#fff;font-size:7px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px}
+.topnav-r{display:flex;align-items:center;gap:12px}
+.nav-btn{
+  display:flex;align-items:center;gap:7px;
+  font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);background:none;border:1px solid #3a3a3a;
+  padding:7px 14px;cursor:pointer;transition:all .2s;text-decoration:none;
+}
+.nav-btn:hover{color:#fff;border-color:#666}
+.nav-btn.danger{color:#E7432B;border-color:rgba(231,67,43,.2)}
+.nav-btn.danger:hover{background:rgba(231,67,43,.08)}
+.view-site{background:var(--red);color:#fff;border-color:var(--red)}
+.view-site:hover{background:#c93520;border-color:#c93520;color:#fff}
+.admin-avatar{width:32px;height:32px;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;cursor:pointer}
+
+/* LAYOUT */
+.app-body{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:#1E1E1E;border-right:1px solid #2a2a2a;
+  display:flex;flex-direction:column;
+  position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;
+}
+.sidebar-section{padding:20px 0 8px;border-bottom:1px solid #2a2a2a}
+.sidebar-section:last-child{border-bottom:none}
+.sidebar-label{font-size:7px;letter-spacing:2.5px;text-transform:uppercase;color:#666;padding:0 18px;margin-bottom:8px}
+.slink{
+  display:flex;align-items:center;gap:11px;
+  padding:10px 18px;font-size:10px;letter-spacing:.5px;color:#888;
+  cursor:pointer;transition:all .18s;border-left:2px solid transparent;
+  text-decoration:none;
+}
+.slink:hover{color:#ccc;background:#2a2a2a}
+.slink.active{color:#fff;background:#2a2a2a;border-left-color:var(--red)}
+.slink-icon{width:16px;height:16px;flex-shrink:0;opacity:.5;display:flex;align-items:center;justify-content:center;font-size:13px}
+.slink.active .slink-icon{opacity:1}
+.sidebar-count{margin-left:auto;font-size:8px;background:#3a3a3a;color:#aaa;padding:2px 7px;border-radius:2px}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:32px;background:#242424}
+
+/* SECTIONS (tabs) */
+.section{display:none}
+.section.active{display:block}
+
+/* PAGE HEADER */
+.page-hd{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px}
+.page-eyebrow{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:8px}
+.page-eyebrow::before{content:'/ ';font-weight:900;color:rgba(231,67,43,.4)}
+.page-title{font-size:32px;font-weight:200;letter-spacing:2px;font-family:'Raleway',sans-serif;text-transform:uppercase;line-height:1;color:#fff}
+.btn-add{
+  display:flex;align-items:center;gap:8px;
+  background:var(--red);color:#fff;font-size:8px;font-weight:700;letter-spacing:2px;
+  text-transform:uppercase;padding:11px 20px;border:none;cursor:pointer;transition:background .2s;
+}
+.btn-add:hover{background:#c93520}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:28px}
+.stat-card{background:#1E1E1E;border:1px solid #2e2e2e;padding:20px 22px;border-radius:2px}
+.stat-n{font-size:36px;font-weight:200;color:var(--red);letter-spacing:2px;line-height:1;font-family:'Raleway',sans-serif}
+.stat-l{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:5px}
+
+/* DATA TABLE */
+.table-wrap{background:#1E1E1E;border:1px solid #2e2e2e;border-radius:2px;overflow:hidden}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #2e2e2e;gap:12px}
+.table-search{display:flex;align-items:center;gap:8px;background:#2a2a2a;border:1px solid #3a3a3a;padding:8px 14px;flex:1;max-width:300px}
+.table-search input{background:none;border:none;outline:none;font-size:11px;color:#ccc;width:100%;font-family:'Cairo',sans-serif}
+.table-search input::placeholder{color:#555}
+.table-search span{color:#666;font-size:12px;flex-shrink:0}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+colgroup col.col-title{width:30%}
+colgroup col.col-cat{width:16%}
+colgroup col.col-client{width:18%}
+colgroup col.col-status{width:12%}
+colgroup col.col-actions{width:14%}
+th{text-align:left;font-size:7px;letter-spacing:2px;text-transform:uppercase;color:#999;padding:11px 16px;border-bottom:1px solid #2e2e2e;font-weight:700;background:#1a1a1a;white-space:nowrap}
+td{padding:13px 16px;font-size:11px;color:#999;border-bottom:1px solid #252525;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.025);color:#ccc}
+.td-title{font-size:12px;font-weight:600;color:#e0e0e0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.td-cat{font-size:7px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;display:inline-block;white-space:nowrap;border-radius:2px}
+.cat-hse{background:rgba(1,166,166,.12);color:#01A6A6}
+.cat-books{background:rgba(119,62,132,.12);color:#a06ab4}
+.cat-corporate{background:rgba(0,88,161,.12);color:#5B9BD5}
+.cat-illustration{background:rgba(231,67,43,.12);color:#E7432B}
+.td-status{font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:4px 9px;border-radius:2px;display:inline-block;white-space:nowrap}
+.status-live{background:rgba(1,166,166,.12);color:#01A6A6;border:1px solid rgba(1,166,166,.25)}
+.status-draft{background:rgba(255,255,255,.05);color:#777;border:1px solid #3a3a3a}
+.td-actions{display:flex;gap:5px;align-items:center}
+.btn-sm{font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:5px 11px;cursor:pointer;transition:all .18s;font-family:'Cairo',sans-serif;white-space:nowrap;border-radius:2px}
+.btn-edit{background:#2a2a2a;color:#aaa;border:1px solid #383838}
+.btn-edit:hover{border-color:#888;color:#fff;background:#333}
+.btn-del{background:transparent;color:#c0392b;border:1px solid rgba(192,57,43,.4)}
+.btn-del:hover{background:rgba(231,67,43,.1);color:#E7432B;border-color:rgba(231,67,43,.5)}
+
+/* MODAL */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:200;
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:#242424;border:1px solid #333;width:600px;max-width:90vw;
+  max-height:90vh;overflow-y:auto;
+  animation:modal-in .2s ease;
+}
+@keyframes modal-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid #333}
+.modal-ttl{font-size:14px;font-weight:700;letter-spacing:1px;color:#fff;text-transform:uppercase}
+.modal-close{background:none;border:none;color:#666;font-size:18px;cursor:pointer;padding:4px 8px;transition:color .2s}
+.modal-close:hover{color:#fff}
+.modal-body{padding:28px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid #333;display:flex;gap:8px;justify-content:flex-end}
+
+/* FORM FIELDS */
+.mfg{margin-bottom:20px}
+.mfg label{display:block;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:white;margin-bottom:7px}
+.mfg input,.mfg textarea,.mfg select{
+  width:100%;background:none;border:none;border-bottom:1px solid #3a3a3a;
+  border-left:2px solid transparent;padding:11px 13px;font-size:12px;color:#ddd;
+  font-family:'Cairo',sans-serif;outline:none;transition:all .22s;
+}
+.mfg input:focus,.mfg textarea:focus,.mfg select:focus{border-bottom-color:var(--red);border-left-color:var(--red);background:#2a2a2a}
+.mfg textarea{height:90px;resize:none}
+.mfg select option{background:#2a2a2a;color:#ddd}
+.mfg-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mfg-hint{font-size:9px;color:var(--subtle);margin-top:5px;line-height:1.5}
+
+/* UPLOAD AREA */
+.upload-area{
+  border:1px dashed #3a3a3a;padding:28px;text-align:center;
+  cursor:pointer;transition:all .2s;background:#2a2a2a;
+}
+.upload-area:hover{border-color:#666;background:#303030}
+.upload-area p{font-size:11px;color:#888;margin-top:8px}
+.upload-area span{font-size:8px;letter-spacing:1px;text-transform:uppercase;color:#aaa;display:block;margin-top:4px}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #2e2e2e}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:11px;color:#aaa}
+.toggle-desc{font-size:9px;color:#666;margin-top:2px}
+.toggle{
+  position:relative;width:38px;height:21px;flex-shrink:0;cursor:pointer;
+}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{
+  position:absolute;inset:0;background:#111;border:1px solid var(--border2);
+  transition:all .22s;
+}
+.toggle input:checked + .toggle-slider{background:var(--red);border-color:var(--red)}
+.toggle-slider::after{
+  content:'';position:absolute;left:3px;top:50%;transform:translateY(-50%);
+  width:13px;height:13px;background:#fff;transition:all .22s;
+}
+.toggle input:checked + .toggle-slider::after{left:20px}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:28px;right:28px;z-index:300;
+  background:#2a2a2a;border:1px solid #3a3a3a;border-left:3px solid var(--red);
+  padding:14px 18px;min-width:260px;
+  animation:toast-in .25s ease;display:none;
+}
+.toast.show{display:block}
+.toast.success{border-left-color:#01A6A6}
+@keyframes toast-in{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+.toast-title{font-size:11px;font-weight:700;color:#fff;margin-bottom:2px}
+.toast-msg{font-size:10px;color:var(--muted)}
+
+/* EDITOR TOOLBAR */
+.editor-bar{display:flex;gap:4px;padding:8px;background:#2a2a2a;border:1px solid #3a3a3a;border-bottom:none;flex-wrap:wrap}
+.ed-btn{background:none;border:none;color:#777;font-size:12px;padding:4px 8px;cursor:pointer;transition:color .15s;font-family:'Cairo',sans-serif}
+.ed-btn:hover{color:#fff;background:#3a3a3a}
+.ed-sep{width:1px;height:20px;background:#3a3a3a;margin:0 2px;align-self:center}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:56px 24px}
+.empty-icon{font-size:32px;margin-bottom:16px;opacity:.3}
+.empty-title{font-size:14px;font-weight:700;color:white;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.empty-sub{font-size:11px;color:var(--subtle)}
+
+/* QUICK ACTIONS */
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:28px}
+.quick-card{
+  background:#1E1E1E;border:1px solid #2e2e2e;padding:22px 20px;
+  cursor:pointer;transition:all .2s;text-decoration:none;display:block;border-radius:2px;
+}
+.quick-card:hover{border-color:#555;background:#2a2a2a}
+.quick-card-icon{font-size:20px;margin-bottom:12px;opacity:.6}
+.quick-card-title{font-size:11px;font-weight:700;color:#ddd;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.quick-card-sub{font-size:9px;color:#777}
+
+/* ACTIVITY FEED */
+.activity{background:#1E1E1E;border:1px solid #2e2e2e;margin-bottom:28px;border-radius:2px}
+.activity-hd{padding:16px 20px;border-bottom:1px solid #2e2e2e;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#666}
+.activity-item{display:flex;align-items:flex-start;gap:12px;padding:14px 20px;border-bottom:1px solid #282828}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.activity-text{font-size:11px;color:#777;line-height:1.5}
+.activity-text strong{color:#aaa;font-weight:600}
+.activity-time{margin-left:auto;font-size:9px;color:#555;flex-shrink:0}
+
+/* CONFIRM DIALOG */
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;align-items:center;justify-content:center}
+.confirm-overlay.open{display:flex}
+.confirm-box{background:#242424;border:1px solid #333;border-top:3px solid var(--red);padding:32px;width:400px;max-width:90vw}
+.confirm-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:10px}
+.confirm-msg{font-size:12px;color:#888;line-height:1.65;margin-bottom:24px}
+.confirm-btns{display:flex;gap:8px;justify-content:flex-end}
+.btn-cancel{background:none;border:1px solid #3a3a3a;color:#888;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px;cursor:pointer;transition:all .2s;font-family:'Cairo',sans-serif}
+.btn-cancel:hover{border-color:#666;color:#ccc}
+.btn-confirm-del{background:var(--red);color:#fff;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 18px;border:none;cursor:pointer;font-family:'Cairo',sans-serif}
+
+/* INLINE STATUS SWITCH */
+.status-pill{cursor:pointer;transition:all .2s;user-select:none}
+.status-pill:hover{opacity:.75}
+</style>
+</head>
+<body>
+
+<div class="tbar"></div>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="topnav-l">
+    <div class="topnav-logo">
+      <img src="references/logo.png" alt="Top Right" style="height:32px;width:auto;display:block;object-fit:contain"/>
+      <span>Admin Portal</span>
+    </div>
+  </div>
+  <div class="topnav-r">
+    <a href="user.html" class="nav-btn view-site" target="_blank">↗ View Site</a>
+    <div class="admin-avatar" title="Admin">A</div>
+    <a href="Adminlogin.html" class="nav-btn danger">Sign Out</a>
+  </div>
+</nav>
+
+<!-- BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Overview</div>
+      <div class="slink active" onclick="showSection('dashboard')">
+        <span class="slink-icon">◈</span> Dashboard
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Website Content</div>
+      <div class="slink" onclick="showSection('hero')">
+        <span class="slink-icon">⬒</span> Hero Section
+      </div>
+      <div class="slink" onclick="showSection('portfolio')">
+        <span class="slink-icon">⊞</span> Portfolio
+        <span class="sidebar-count">5</span>
+      </div>
+      <div class="slink" onclick="showSection('services')">
+        <span class="slink-icon">◧</span> Services
+        <span class="sidebar-count">6</span>
+      </div>
+      <div class="slink" onclick="showSection('testimonials')">
+        <span class="slink-icon">❝</span> Testimonials
+        <span class="sidebar-count">4</span>
+      </div>
+      <div class="slink" onclick="showSection('clients')">
+        <span class="slink-icon">◉</span> Clients Bar
+        <span class="sidebar-count">7</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Pages</div>
+      <div class="slink" onclick="showSection('contact')">
+        <span class="slink-icon">✉</span> Contact Info
+      </div>
+      <!-- <div class="slink" onclick="showSection('community')">
+        <span class="slink-icon">🤝</span> Community &amp; CSR
+        <span class="sidebar-count">8</span>
+      </div> -->
+      <div class="slink" onclick="showSection('footer')">
+        <span class="slink-icon">▭</span> Footer
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Settings</div>
+      <div class="slink" onclick="showSection('settings')">
+        <span class="slink-icon">⚙</span> Site Settings
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ============================
+         DASHBOARD
+    ============================= -->
+    <div class="section active" id="sec-dashboard">
+      <div class="page-hd">
+        <div>
+          <div class="page-eyebrow">Overview</div>
+          <h1 class="page-title">Dashboard</h1>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-n">5</div>
+          <div class="stat-l">Portfolio Items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-n">6</div>
+          <div class="stat-l">Services Listed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-n">4</div>
+          <div class="stat-l">Testimonials</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-n">7</div>
+          <div class="stat-l">Client Logos</div>
+        </div>
+      </div>
+
+      <div class="quick-grid">
+        <div class="quick-card" onclick="showSection('portfolio')">
+          <div class="quick-card-icon">⊞</div>
+          <div class="quick-card-title">Add Portfolio Item</div>
+          <div class="quick-card-sub">Upload a new project to the bento grid</div>
+        </div>
+        <div class="quick-card" onclick="showSection('testimonials')">
+          <div class="quick-card-icon">❝</div>
+          <div class="quick-card-title">New Testimonial</div>
+          <div class="quick-card-sub">Add a client quote to the site</div>
+        </div>
+        <div class="quick-card" onclick="showSection('hero')">
+          <div class="quick-card-icon">⬒</div>
+          <div class="quick-card-title">Edit Hero Text</div>
+          <div class="quick-card-sub">Update the homepage headline copy</div>
+        </div>
+        <!-- <div class="quick-card" onclick="showSection('community')">
+          <div class="quick-card-icon">🤝</div>
+          <div class="quick-card-title">Community &amp; CSR</div>
+          <div class="quick-card-sub">Manage social initiatives and events</div>
+        </div> -->
+      </div>
+
+      <div class="activity">
+        <div class="activity-hd">Recent Activity</div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:#01A6A6"></div>
+          <div class="activity-text"><strong>Portfolio item added</strong> — "Safety with Namool" HSE series</div>
+          <div class="activity-time">2h ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:#E7432B"></div>
+          <div class="activity-text"><strong>Hero copy updated</strong> — Tagline changed (EN + AR)</div>
+          <div class="activity-time">Yesterday</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:#773E84"></div>
+          <div class="activity-text"><strong>Testimonial published</strong> — New quote from Bapco Energies</div>
+          <div class="activity-time">3 days ago</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-dot" style="background:#0058A1"></div>
+          <div class="activity-text"><strong>Client added</strong> — GCC Secretariat to trusted clients bar</div>
+          <div class="activity-time">1 week ago</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================
+         HERO SECTION
+    ============================= -->
+    <div class="section" id="sec-hero">
+      <div class="page-hd">
+        <div>
+          <div class="page-eyebrow">Website Content</div>
+          <h1 class="page-title">Hero Section</h1>
+        </div>
+        <button class="btn-add" onclick="saveHero()">Save Changes ↓</button>
+      </div>
+
+      <div class="table-wrap" style="padding:28px">
+        <div class="mfg">
+          <label>Eyebrow Tag (English)</label>
+          <input type="text" value="Bahrain · Est. 2001 · Bilingual Studio"/>
+        </div>
+        <div class="mfg">
+          <label>Eyebrow Tag (Arabic)</label>
+          <input type="text" value="البحرين · منذ ٢٠٠١ · استوديو ثنائي اللغة" dir="rtl"/>
+        </div>
+        <div class="mfg-row">
+          <div class="mfg">
+            <label>Headline Line 1 (EN)</label>
+            <input type="text" value="We tell"/>
+          </div>
+          <div class="mfg">
+            <label>Headline Line 1 (AR)</label>
+            <input type="text" value="نروي قصتك" dir="rtl"/>
+          </div>
+        </div>
+        <div class="mfg-row">
+          <div class="mfg">
+            <label>Headline Line 2 (EN)</label>
+            <input type="text" value="your story"/>
+          </div>
+          <div class="mfg">
+            <label>Headline Line 2 (AR)</label>
+            <input type="text" value="من خلال" dir="rtl"/>
+          </div>
+        </div>
+        <div class="mfg-row">
+          <div class="mfg">
+            <label>Highlighted Line (EN)</label>
+            <input type="text" value="through design"/>
+          </div>
+          <div class="mfg">
+            <label>Highlighted Line (AR)</label>
+            <input type="text" value="التصميم" dir="rtl"/>
+          </div>
+        </div>
+        <div class="mfg">
+          <label>Subheading Paragraph (EN)</label>
+          <textarea>A Bahraini creative studio specialising in bilingual illustration, publication design and brand development across the GCC.</textarea>
+        </div>
+        <div class="mfg">
+          <label>Subheading Paragraph (AR)</label>
+          <textarea dir="rtl">استوديو إبداعي بحريني متخصص في الرسوم التوضيحية ثنائية اللغة وتصميم المنشورات وتطوير العلامات التجارية في منطقة الخليج.</textarea>
+        </div>
+        <div class="mfg-row">
+          <div class="mfg">
+            <label>Stat 1 — Number</label>
+            <input type="text" value="20+"/>
+          </div>
+          <div class="mfg">
+            <label>Stat 1 — Label</label>
+            <input type="text" value="Years of work"/>
+          </div>
+        </div>
+        <div class="mfg-row">
+          <div class="mfg">
+            <label>Stat 2 — Number</label>
+            <input type="text" value="200+"/>
+          </div>
+          <div class="mfg">
+            <label>Stat 2 — Label</label>
+            <input type="text" value="Projects delivered"/>
+          </div>
+        </div>
+        <div class="mfg-row">
+          <div class="mfg">
+            <label>Stat 3 — Number</label>
+            <input type="text" value="60+"/>
+          </div>
+          <div class="mfg">
+            <label>Stat 3 — Label</label>
+            <input type="text" value="Clients served"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================
+         PORTFOLIO
+    ============================= -->
+    <div class="section" id="sec-portfolio">
+      <div class="page-hd">
+        <div>
+          <div class="page-eyebrow">Website Content</div>
+          <h1 class="page-title">Portfolio</h1>
+        </div>
+        <button class="btn-add" onclick="openModal('portfolio')">+ Add Project</button>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="table-search">
+            <span>⊘</span>
+            <input type="text" placeholder="Search projects..." oninput="filterTable(this,'port-table')"/>
+          </div>
+          <span style="font-size:9px;color:white;letter-spacing:1px;text-transform:uppercase">5 items</span>
+        </div>
+        <table id="port-table">
+          <colgroup>
+            <col class="col-title"/><col class="col-cat"/><col class="col-client"/><col class="col-status"/><col class="col-actions"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Project Title</th>
+              <th>Category</th>
+              <th>Client</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-title">Safety with Namool</td>
+              <td><span class="td-cat cat-hse">HSE</span></td>
+              <td>GPIC</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit" onclick="openEditPortfolio('Safety with Namool','hse','GPIC')">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('Safety with Namool', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">Khaleejieh Annual Bilingual Magazine</td>
+              <td><span class="td-cat cat-corporate">Corporate</span></td>
+              <td>GPIC</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit" onclick="openEditPortfolio('Khaleejieh','corporate','GPIC')">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('Khaleejieh', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">Flies Without Wings — Children's Book</td>
+              <td><span class="td-cat cat-books">Books</span></td>
+              <td>Sharjah Heritage Institute</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit" onclick="openEditPortfolio('Flies Without Wings','books','Sharjah Heritage Institute')">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('Flies Without Wings', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">SDG Booklets Series</td>
+              <td><span class="td-cat cat-hse">HSE</span></td>
+              <td>Bapco Energies</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit" onclick="openEditPortfolio('SDG Booklets','hse','Bapco Energies')">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('SDG Booklets', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">Al Basta — Bahrain TV Characters</td>
+              <td><span class="td-cat cat-illustration">Illustration</span></td>
+              <td>Bahrain Television</td>
+              <td><span class="td-status status-draft status-pill" onclick="toggleStatus(this)">○ Draft</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit" onclick="openEditPortfolio('Al Basta','illustration','Bahrain Television')">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('Al Basta', this)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================
+         SERVICES
+    ============================= -->
+    <div class="section" id="sec-services">
+      <div class="page-hd">
+        <div>
+          <div class="page-eyebrow">Website Content</div>
+          <h1 class="page-title">Services</h1>
+        </div>
+        <button class="btn-add" onclick="openModal('service')">+ Add Service</button>
+      </div>
+      <div class="table-wrap">
+        <table style="table-layout:fixed">
+          <colgroup>
+            <col style="width:8%"/><col style="width:32%"/><col style="width:18%"/><col style="width:14%"/><col style="width:18%"/>
+          </colgroup>
+          <thead>
+            <tr><th>#</th><th>Service Name</th><th>Colour</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="services-body">
+            <tr>
+              <td>01</td><td class="td-title">Publication Design</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#E7432B;vertical-align:middle;margin-right:6px"></span>Orange</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('service')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Publication Design',this)">Delete</button></td>
+            </tr>
+            <tr>
+              <td>02</td><td class="td-title">Illustration & Art Direction</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#1a1a1a;vertical-align:middle;margin-right:6px;border:1px solid white"></span>Black</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('service')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Illustration',this)">Delete</button></td>
+            </tr>
+            <tr>
+              <td>03</td><td class="td-title">Animation</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#01A6A6;vertical-align:middle;margin-right:6px"></span>Teal</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('service')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Animation',this)">Delete</button></td>
+            </tr>
+            <tr>
+              <td>04</td><td class="td-title">Corporate Books & Annual Reports</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#0058A1;vertical-align:middle;margin-right:6px"></span>Blue</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('service')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Corporate Books',this)">Delete</button></td>
+            </tr>
+            <tr>
+              <td>05</td><td class="td-title">Digital Publications</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:#773E84;vertical-align:middle;margin-right:6px"></span>Purple</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('service')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Digital Publications',this)">Delete</button></td>
+            </tr>
+            <tr>
+              <td>06</td><td class="td-title">Coaching & Workshops</td>
+              <td><span style="display:inline-block;width:14px;height:14px;background:white;vertical-align:middle;margin-right:6px"></span>Charcoal</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('service')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Coaching',this)">Delete</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================
+         TESTIMONIALS
+    ============================= -->
+    <div class="section" id="sec-testimonials">
+      <div class="page-hd">
+        <div>
+          <div class="page-eyebrow">Website Content</div>
+          <h1 class="page-title">Testimonials</h1>
+        </div>
+        <button class="btn-add" onclick="openModal('testimonial')">+ Add Testimonial</button>
+      </div>
+      <div class="table-wrap">
+        <table style="table-layout:fixed">
+          <colgroup>
+            <col style="width:36%"/><col style="width:22%"/><col style="width:16%"/><col style="width:12%"/><col style="width:14%"/>
+          </colgroup>
+          <thead>
+            <tr><th>Quote (excerpt)</th><th>Name / Role</th><th>Company</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="white-space:normal"><span style="font-size:11px;font-style:italic;color:#aaa">"TopRight's approach to bilingual design made the manual accessible..."</span></td>
+              <td>Senior Communications Manager</td>
+              <td>GPIC</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('testimonial')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('GPIC testimonial',this)">Delete</button></td>
+            </tr>
+            <tr>
+              <td style="white-space:normal"><span style="font-size:11px;font-style:italic;color:#aaa">"The illustrated HSE booklets were a major success on Safety Day..."</span></td>
+              <td>HSE Manager</td>
+              <td>Bapco Energies</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('testimonial')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Bapco testimonial',this)">Delete</button></td>
+            </tr>
+            <tr>
+              <td style="white-space:normal"><span style="font-size:11px;font-style:italic;color:#aaa">"The children's book series exceeded our expectations..."</span></td>
+              <td>Publications Director</td>
+              <td>Sharjah Heritage Institute</td>
+              <td><span class="td-status status-draft status-pill" onclick="toggleStatus(this)">○ Draft</span></td>
+              <td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('testimonial')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('SHI testimonial',this)">Delete</button></td>
+            </tr>
+            <tr>
+              <td style="white-space:normal"><span style="font-size:11px;font-style:italic;color:#aaa">"Working with TopRight on the GCC report was seamless..."</span></td>
+              <td>Media Relations Officer</td>
+              <td>GCC Secretariat</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('testimonial')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('GCC testimonial',this)">Delete</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================
+         CLIENTS BAR
+    ============================= -->
+    <div class="section" id="sec-clients">
+      <div class="page-hd">
+        <div>
+          <div class="page-eyebrow">Website Content</div>
+          <h1 class="page-title">Clients Bar</h1>
+        </div>
+        <button class="btn-add" onclick="openModal('client')">+ Add Client</button>
+      </div>
+      <div class="table-wrap">
+        <table style="table-layout:fixed">
+          <colgroup>
+            <col style="width:8%"/><col style="width:44%"/><col style="width:14%"/><col style="width:18%"/>
+          </colgroup>
+          <thead><tr><th>Order</th><th>Client Name</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="clients-body">
+            <tr><td>1</td><td class="td-title">GPIC</td><td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td><td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('client')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('GPIC',this)">Delete</button></td></tr>
+            <tr><td>2</td><td class="td-title">Bapco Energies</td><td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td><td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('client')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Bapco Energies',this)">Delete</button></td></tr>
+            <tr><td>3</td><td class="td-title">Ministry of Interior</td><td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td><td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('client')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Ministry of Interior',this)">Delete</button></td></tr>
+            <tr><td>4</td><td class="td-title">Sharjah Heritage Institute</td><td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td><td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('client')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Sharjah Heritage Institute',this)">Delete</button></td></tr>
+            <tr><td>5</td><td class="td-title">GCC Secretariat</td><td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td><td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('client')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('GCC Secretariat',this)">Delete</button></td></tr>
+            <tr><td>6</td><td class="td-title">INJAZ Bahrain</td><td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td><td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('client')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('INJAZ Bahrain',this)">Delete</button></td></tr>
+            <tr><td>7</td><td class="td-title">Bahrain Television</td><td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td><td class="td-actions"><button class="btn-sm btn-edit" onclick="openModal('client')">Edit</button><button class="btn-sm btn-del" onclick="confirmDelete('Bahrain Television',this)">Delete</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ============================
+         CONTACT INFO
+    ============================= -->
+    <div class="section" id="sec-contact">
+      <div class="page-hd">
+        <div>
+          <div class="page-eyebrow">Pages</div>
+          <h1 class="page-title">Contact Info</h1>
+        </div>
+        <button class="btn-add" onclick="showToast('Contact info saved.','success')">Save Changes ↓</button>
+      </div>
+      <div class="table-wrap" style="padding:28px">
+        <div class="mfg-row">
+          <div class="mfg">
+            <label>Email Address</label>
+            <input type="email" value="hello@topright.bh"/>
+          </div>
+          <div class="mfg">
+            <label>Phone</label>
+            <input type="text" value="(+973) 36622100 / 17566726"/>
+          </div>
+        </div>
+        <div class="mfg-row">
+          <div class="mfg">
+            <label>WhatsApp Number</label>
+            <input type="text" value="(+973) 36622100"/>
+          </div>
+          <div class="mfg">
+            <label>Location</label>
+            <input type="text" value="Bahrain · CR: 46817-1"/>
+          </div>
+        </div>
+        <div class="mfg">
+          <label>Section Title (EN)</label>
+          <input type="text" value="Let's work together"/>
+        </div>
+        <div class="mfg">
+          <label>Section Title (AR)</label>
+          <input type="text" value="لنعمل معًا" dir="rtl"/>
+        </div>
+        <div class="mfg">
+          <label>Description (EN)</label>
+          <textarea>Tell us about your project and we will get back to you within 24 hours. We work with organisations across Bahrain and the GCC.</textarea>
+        </div>
+        <div class="mfg">
+          <label>Description (AR)</label>
+          <textarea dir="rtl">أخبرنا عن مشروعك وسنعود إليك خلال ٢٤ ساعة. نعمل مع المؤسسات في البحرين ودول الخليج.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================
+         COMMUNITY & CSR
+    ============================= -->
+    <div class="section" id="sec-community">
+      <div class="page-hd">
+        <div>
+          <div class="page-eyebrow">Pages</div>
+          <h1 class="page-title">Community &amp; CSR</h1>
+        </div>
+        <button class="btn-add" onclick="openModal('community')">+ Add Initiative</button>
+      </div>
+
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card">
+          <div class="stat-n">8</div>
+          <div class="stat-l">Total Initiatives</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-n">3</div>
+          <div class="stat-l">CSR Projects</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-n">2</div>
+          <div class="stat-l">Public Events</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-n">8</div>
+          <div class="stat-l">Partner Orgs</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="table-search">
+            <span>⊘</span>
+            <input type="text" placeholder="Search initiatives..." oninput="filterTable(this,'comm-table')"/>
+          </div>
+          <span style="font-size:9px;color:#aaa;letter-spacing:1px;text-transform:uppercase">8 items</span>
+        </div>
+        <table id="comm-table">
+          <colgroup>
+            <col style="width:28%"/><col style="width:18%"/><col style="width:18%"/><col style="width:8%"/><col style="width:11%"/><col style="width:14%"/>
+          </colgroup>
+          <thead>
+            <tr>
+              <th>Initiative</th>
+              <th>Type</th>
+              <th>Partner</th>
+              <th>Year</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="td-title">منمنمات محلية — Local Miniatures</td>
+              <td><span class="td-cat cat-illustration">CSR · Arts</span></td>
+              <td>Local Illustrators</td>
+              <td>2018–</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('Local Miniatures', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">Bapco Safety Day — Namool Launch</td>
+              <td><span class="td-cat cat-hse">Events · HSE</span></td>
+              <td>Bapco Energies</td>
+              <td>2024</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('Namool Launch', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">Bahrain International Book Fair</td>
+              <td><span class="td-cat cat-corporate">Events · Culture</span></td>
+              <td>Bahrain Book Fair Org</td>
+              <td>Annual</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('Book Fair', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">Storytelling for Educators — INJAZ Workshop</td>
+              <td><span class="td-cat cat-books">Education</span></td>
+              <td>INJAZ Bahrain</td>
+              <td>2022</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('INJAZ Workshop', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">UN SDG Awareness Booklets — Bapco</td>
+              <td><span class="td-cat cat-hse">Campaigns · SDG</span></td>
+              <td>Bapco Energies</td>
+              <td>2018</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('SDG Booklets', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">Bahraini Heritage Documentation</td>
+              <td><span class="td-cat cat-illustration">CSR · Heritage</span></td>
+              <td>Ministry of Culture</td>
+              <td>Ongoing</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('Heritage Docs', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">INJAZ Annual Publications Partnership</td>
+              <td><span class="td-cat cat-books">Education · Design</span></td>
+              <td>INJAZ Bahrain</td>
+              <td>Multi-year</td>
+              <td><span class="td-status status-live status-pill" onclick="toggleStatus(this)">● Live</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('INJAZ Publications', this)">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="td-title">Public Sector Awareness Campaigns</td>
+              <td><span class="td-cat cat-corporate">CSR · Public Sector</span></td>
+              <td>Ministry of Interior</td>
+              <td>Ongoing</td>
+              <td><span class="td-status status-draft status-pill" onclick="toggleStatus(this)">○ Draft</span></td>
+              <td class="td-actions">
+                <button class="btn-sm btn-edit">Edit</button>
+                <button class="btn-sm btn-del" onclick="confirmDelete('Public Campaigns', this)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:16px;display:flex;justify-content:flex-end">
+        <a href="community-initiatives.html" target="_blank" class="nav-btn view-site" style="font-size:8px">↗ Preview Initiatives Page</a>
+      </div>
+    </div>
+
+    <!-- ============================
+         FOOTER
+    ============================= -->
+    <div class="section" id="sec-footer">
+      <div class="page-hd">
+        <div>
+          <div class="page-eyebrow">Pages</div>
+          <h1 class="page-title">Footer</h1>
+        </div>
+        <button class="btn-add" onclick="showToast('Footer saved.','success')">Save Changes ↓</button>
+      </div>
+      <div class="table-wrap" style="padding:28px">
+        <div class="mfg">
+          <label>Tagline</label>
+          <input type="text" value="Design & Support Services · Bahrain · CR: 46817-1"/>
+        </div>
+        <div class="mfg">
+          <label>About Text</label>
+          <textarea>A Bahraini creative studio specialising in bilingual illustration, publication design and brand development. Partnering organisations across the GCC since 2001.</textarea>
+        </div>
+        <div class="mfg">
+          <label>Copyright Line</label>
+          <input type="text" value="© 2025 TopRight Design & Support Services · Bahrain · CR: 46817-1"/>
+        </div>
+        <div class="mfg-row">
+          <div class="mfg">
+            <label>LinkedIn URL</label>
+            <input type="text" placeholder="https://linkedin.com/company/..."/>
+          </div>
+          <div class="mfg">
+            <label>Instagram URL</label>
+            <input type="text" placeholder="https://instagram.com/..."/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================
+         SETTINGS
+    ============================= -->
+    <div class="section" id="sec-settings">
+      <div class="page-hd">
+        <div>
+          <div class="page-eyebrow">Configuration</div>
+          <h1 class="page-title">Site Settings</h1>
+        </div>
+      </div>
+      <div class="table-wrap" style="padding:28px">
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Maintenance Mode</div>
+            <div class="toggle-desc">Show a maintenance page to visitors</div>
+          </div>
+          <label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Show Marquee Banner</div>
+            <div class="toggle-desc">The scrolling red text bar below the hero</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Arabic Language Toggle</div>
+            <div class="toggle-desc">Display the EN/AR language switcher in nav</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">Contact Form Active</div>
+            <div class="toggle-desc">Allow visitors to submit contact messages</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <div>
+            <div class="toggle-label">WhatsApp Button</div>
+            <div class="toggle-desc">Show the WhatsApp quick-contact button</div>
+          </div>
+          <label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label>
+        </div>
+        <div style="margin-top:28px">
+          <div class="mfg">
+            <label>Site Title (Browser Tab)</label>
+            <input type="text" value="Top Right — Design & Support Services"/>
+          </div>
+          <div class="mfg">
+            <label>Google Analytics ID</label>
+            <input type="text" placeholder="G-XXXXXXXXXX"/>
+          </div>
+          <button class="btn-add" onclick="showToast('Settings saved.','success')" style="margin-top:8px">Save Settings ↓</button>
+        </div>
+      </div>
+    </div>
+
+  </main><!-- end .main -->
+</div><!-- end .app-body -->
+
+<!-- ============================
+     MODAL — ADD/EDIT
+============================= -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div class="modal-ttl" id="modal-title">Add Portfolio Item</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <!-- Filled dynamically -->
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-add" onclick="saveModal()">Save Item ↓</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     CONFIRM DELETE DIALOG
+============================= -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title">Delete Item?</div>
+    <div class="confirm-msg" id="confirm-msg">This action cannot be undone. Are you sure you want to delete this item from the website?</div>
+    <div class="confirm-btns">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm-del" onclick="doDelete()">Delete →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-title" id="toast-title">Saved</div>
+  <div class="toast-msg" id="toast-msg">Your changes have been applied.</div>
+</div>
+
+<script>
+// ============================================================
+//  SECTION NAV
+// ============================================================
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.slink').forEach(l => l.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ============================================================
+//  MODAL
+// ============================================================
+const MODAL_FORMS = {
+  portfolio: {
+    title: 'Add Portfolio Item',
+    body: `
+      <div class="mfg-row">
+        <div class="mfg"><label>Project Title (EN)</label><input type="text" placeholder="e.g. Safety with Namool"/></div>
+        <div class="mfg"><label>Project Title (AR)</label><input type="text" placeholder="بالعربي" dir="rtl"/></div>
+      </div>
+      <div class="mfg-row">
+        <div class="mfg">
+          <label>Category</label>
+          <select>
+            <option>HSE</option><option>Children's Books</option><option>Corporate</option><option>Illustration</option><option>Animation</option>
+          </select>
+        </div>
+        <div class="mfg"><label>Client Name</label><input type="text" placeholder="e.g. GPIC"/></div>
+      </div>
+      <div class="mfg">
+        <label>Short Description (EN)</label>
+        <textarea placeholder="Brief project description..."></textarea>
+      </div>
+      <div class="mfg">
+        <label>Cover Image</label>
+        <div class="upload-area" onclick="this.querySelector('input').click()">
+          <div style="font-size:22px;opacity:.3">⊕</div>
+          <p>Click to upload cover image</p>
+          <span>PNG, JPG up to 4MB</span>
+          <input type="file" accept="image/*" style="display:none" onchange="previewUpload(this)"/>
+        </div>
+      </div>
+      <div class="mfg-row">
+        <div class="mfg">
+          <label>Grid Position</label>
+          <select><option>Auto</option><option>Large (col 1-8)</option><option>Small (col 8-13)</option></select>
+        </div>
+        <div class="mfg">
+          <label>Visibility</label>
+          <select><option>Live</option><option>Draft</option></select>
+        </div>
+      </div>
+    `
+  },
+  service: {
+    title: 'Edit Service',
+    body: `
+      <div class="mfg-row">
+        <div class="mfg"><label>Service Name (EN)</label><input type="text" placeholder="e.g. Publication Design"/></div>
+        <div class="mfg"><label>Service Name (AR)</label><input type="text" placeholder="بالعربي" dir="rtl"/></div>
+      </div>
+      <div class="mfg">
+        <label>Card Color</label>
+        <select>
+          <option value="#E7432B">Orange (#E7432B)</option>
+          <option value="#000">Black (#000)</option>
+          <option value="#01A6A6">Teal (#01A6A6)</option>
+          <option value="#0058A1">Blue (#0058A1)</option>
+          <option value="#773E84">Purple (#773E84)</option>
+          <option value="#1a1a1a">Charcoal (#1a1a1a)</option>
+        </select>
+      </div>
+      <div class="mfg-row">
+        <div class="mfg"><label>Tag Label</label><input type="text" placeholder="e.g. Print · Digital"/></div>
+        <div class="mfg"><label>Order Number</label><input type="number" placeholder="1–6"/></div>
+      </div>
+      <div class="mfg">
+        <label>Description (EN)</label>
+        <textarea placeholder="Service description..."></textarea>
+      </div>
+      <div class="mfg">
+        <label>Description (AR)</label>
+        <textarea placeholder="وصف الخدمة..." dir="rtl"></textarea>
+      </div>
+    `
+  },
+  testimonial: {
+    title: 'Add Testimonial',
+    body: `
+      <div class="mfg">
+        <label>Quote (EN)</label>
+        <textarea placeholder="Client quote in English..."></textarea>
+      </div>
+      <div class="mfg">
+        <label>Quote (AR)</label>
+        <textarea placeholder="اقتباس العميل بالعربية..." dir="rtl"></textarea>
+      </div>
+      <div class="mfg-row">
+        <div class="mfg"><label>Person Name / Role</label><input type="text" placeholder="e.g. HSE Manager"/></div>
+        <div class="mfg"><label>Company</label><input type="text" placeholder="e.g. Bapco Energies"/></div>
+      </div>
+      <div class="mfg-row">
+        <div class="mfg">
+          <label>Avatar Color</label>
+          <select>
+            <option>Orange (#E7432B)</option><option>Teal (#01A6A6)</option>
+            <option>Blue (#0058A1)</option><option>Purple (#773E84)</option>
+          </select>
+        </div>
+        <div class="mfg">
+          <label>Visibility</label>
+          <select><option>Live</option><option>Draft</option></select>
+        </div>
+      </div>
+    `
+  },
+  client: {
+    title: 'Add Client',
+    body: `
+      <div class="mfg"><label>Client Name</label><input type="text" placeholder="e.g. Bapco Energies"/></div>
+      <div class="mfg">
+        <label>Logo (optional)</label>
+        <div class="upload-area" onclick="this.querySelector('input').click()">
+          <div style="font-size:22px;opacity:.3">⊕</div>
+          <p>Upload client logo</p>
+          <span>SVG or PNG preferred</span>
+          <input type="file" accept="image/*" style="display:none"/>
+        </div>
+      </div>
+      <div class="mfg-row">
+        <div class="mfg"><label>Display Order</label><input type="number" placeholder="8"/></div>
+        <div class="mfg">
+          <label>Visibility</label>
+          <select><option>Live</option><option>Draft</option></select>
+        </div>
+      </div>
+    `
+  },
+  community: {
+    title: 'Add Initiative',
+    body: `
+      <div class="mfg-row">
+        <div class="mfg"><label>Initiative Title (EN)</label><input type="text" placeholder="e.g. Local Miniatures Series"/></div>
+        <div class="mfg"><label>Initiative Title (AR)</label><input type="text" placeholder="بالعربي" dir="rtl"/></div>
+      </div>
+      <div class="mfg-row">
+        <div class="mfg">
+          <label>Type / Category</label>
+          <select>
+            <option>CSR · Community Arts</option>
+            <option>Events · HSE</option>
+            <option>Events · Culture</option>
+            <option>Education · Workshop</option>
+            <option>Campaigns · SDG</option>
+            <option>CSR · Heritage</option>
+            <option>CSR · Public Sector</option>
+          </select>
+        </div>
+        <div class="mfg"><label>Partner Organisation</label><input type="text" placeholder="e.g. Bapco Energies"/></div>
+      </div>
+      <div class="mfg-row">
+        <div class="mfg"><label>Year / Period</label><input type="text" placeholder="e.g. 2024 or Ongoing"/></div>
+        <div class="mfg">
+          <label>Visibility</label>
+          <select><option>Live</option><option>Draft</option></select>
+        </div>
+      </div>
+      <div class="mfg">
+        <label>Description (EN)</label>
+        <textarea placeholder="Describe the initiative..."></textarea>
+      </div>
+      <div class="mfg">
+        <label>Description (AR)</label>
+        <textarea placeholder="وصف المبادرة..." dir="rtl"></textarea>
+      </div>
+      <div class="mfg">
+        <label>Tags (comma-separated)</label>
+        <input type="text" placeholder="e.g. Community Arts, Bilingual, Bahrain"/>
+      </div>
+    `
+  }
+};
+
+let currentModal = null;
+
+function openModal(type) {
+  const form = MODAL_FORMS[type];
+  currentModal = type;
+  document.getElementById('modal-title').textContent = form.title;
+  document.getElementById('modal-body').innerHTML = form.body;
+  document.getElementById('modal').classList.add('open');
+}
+
+function openEditPortfolio(title, cat, client) {
+  currentModal = 'portfolio';
+  document.getElementById('modal-title').textContent = 'Edit: ' + title;
+  document.getElementById('modal-body').innerHTML = MODAL_FORMS.portfolio.body;
+  // Pre-fill
+  const inputs = document.querySelectorAll('#modal-body input[type=text]');
+  if(inputs[0]) inputs[0].value = title;
+  if(inputs[1]) inputs[1].value = client;
+  const sel = document.querySelector('#modal-body select');
+  if(sel) { Array.from(sel.options).forEach(o => { if(o.text.toLowerCase().includes(cat)) o.selected = true; }); }
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  currentModal = null;
+}
+
+function saveModal() {
+  closeModal();
+  showToast('Item saved successfully.', 'success');
+}
+
+// ============================================================
+//  DELETE CONFIRM
+// ============================================================
+let deleteTarget = null;
+let deleteRow = null;
+
+function confirmDelete(name, btn) {
+  deleteTarget = name;
+  deleteRow = btn.closest('tr');
+  document.getElementById('confirm-msg').textContent = `You're about to delete "${name}". This cannot be undone.`;
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  deleteTarget = null;
+  deleteRow = null;
+}
+
+function doDelete() {
+  if (deleteRow) {
+    deleteRow.style.transition = 'opacity .3s';
+    deleteRow.style.opacity = '0';
+    setTimeout(() => deleteRow.remove(), 300);
+  }
+  closeConfirm();
+  showToast(`"${deleteTarget}" has been deleted.`);
+}
+
+// ============================================================
+//  STATUS TOGGLE
+// ============================================================
+function toggleStatus(el) {
+  const isLive = el.classList.contains('status-live');
+  el.classList.toggle('status-live', !isLive);
+  el.classList.toggle('status-draft', isLive);
+  el.textContent = isLive ? '○ Draft' : '● Live';
+  showToast(isLive ? 'Item set to Draft.' : 'Item published Live.', isLive ? '' : 'success');
+}
+
+// ============================================================
+//  SEARCH / FILTER
+// ============================================================
+function filterTable(input, tableId) {
+  const q = input.value.toLowerCase();
+  document.querySelectorAll('#' + tableId + ' tbody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  const title = document.getElementById('toast-title');
+  const msgEl = document.getElementById('toast-msg');
+  title.textContent = type === 'success' ? '✓ Saved' : '⚠ Notice';
+  msgEl.textContent = msg;
+  t.className = 'toast show' + (type === 'success' ? ' success' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ============================================================
+//  HERO SAVE
+// ============================================================
+function saveHero() {
+  showToast('Hero section saved successfully.', 'success');
+}
+
+// ============================================================
+//  CLOSE MODAL ON OVERLAY CLICK
+// ============================================================
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.getElementById('confirm-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeConfirm();
+});
+</script>
+</body>
+</html>

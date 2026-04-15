@@ -1,0 +1,112 @@
+/* Dark theme to match admin portal mockup */
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1A1A1A;
+  padding: 2rem;
+  font-family: 'Cairo', system-ui, sans-serif;
+}
+
+.card {
+  background: #242424;
+  border: 1px solid #333;
+  border-top: 3px solid #E7432B;
+  padding: 3rem 2.5rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.logo img {
+  height: 40px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.title {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-align: center;
+  color: #555;
+  margin: 0 0 2.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.input {
+  width: 100%;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #3a3a3a;
+  border-left: 2px solid transparent;
+  padding: 11px 13px;
+  font-size: 12px;
+  color: #ddd;
+  font-family: 'Cairo', system-ui, sans-serif;
+  outline: none;
+  transition: all 0.22s;
+}
+
+.input:focus {
+  border-bottom-color: #E7432B;
+  border-left-color: #E7432B;
+  background: #2a2a2a;
+}
+
+.error {
+  font-size: 10px;
+  color: #E7432B;
+  margin: 0;
+  padding: 0.6rem 0.8rem;
+  background: rgba(231, 67, 43, 0.08);
+  border-left: 2px solid #E7432B;
+  letter-spacing: 0.03em;
+}
+
+.btn {
+  margin-top: 0.5rem;
+  padding: 12px;
+  background: #E7432B;
+  color: #fff;
+  border: none;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  font-family: 'Cairo', system-ui, sans-serif;
+  transition: background 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  background: #c93520;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

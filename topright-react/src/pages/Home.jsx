@@ -1,50 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Marquee from '../components/Marquee'
 import styles from './Home.module.css'
 import { useLang } from '../LangContext'
+import { supabase } from '../lib/supabase'
 
 const clients = ['GPIC', 'Bapco Energies', 'Ministry of Interior',
   'Sharjah Heritage Institute', 'GCC Secretariat', 'INJAZ Bahrain', 'Bahrain Television']
 
-const portfolioCards = [
-  {
-    cat: 'newsletter', img: '/photos/khaleej.jpeg',
-    label: { en: 'Newsletter · GPIC', ar: 'نشرة · GPIC' },
-    title: 'Khaleejieh · خليجية',
-    sub: { en: 'Monthly bilingual newsletter · Print & Digital · 118+ issues since 2001', ar: 'نشرة شهرية ثنائية اللغة · طباعة ورقمية · أكثر من ١١٨ إصدارًا منذ ٢٠٠١' },
-  },
-  {
-    cat: 'newsletter', img: '/photos/injaz.jpeg',
-    label: { en: 'Annual Report · INJAZ Bahrain', ar: 'تقرير سنوي · إنجاز البحرين' },
-    title: 'INJAZ Annual Report',
-    sub: { en: 'Bilingual annual report · Arabic & English · Full design, layout & print', ar: 'تقرير سنوي ثنائي اللغة · عربي وإنجليزي · تصميم وتخطيط وطباعة متكاملة' },
-  },
-  {
-    cat: 'hse', img: '/photos/alnamlah.jpeg',
-    label: { en: 'HSE · Bapco Energies', ar: 'السلامة المهنية · باب كو إينرجيز' },
-    title: 'Safety with Namool · السلامة مع نمول',
-    sub: { en: 'Bilingual illustrated HSE storybook · Full illustration, layout & print · 2024', ar: 'قصة مصورة ثنائية اللغة للسلامة المهنية · رسوم وتخطيط وطباعة متكاملة · ٢٠٢٤' },
-  },
-  {
-    cat: 'hse', img: '/photos/babco.jpeg',
-    label: { en: 'HSE Education · Bapco Energies', ar: 'تعليم السلامة · باب كو إينرجيز' },
-    title: 'UN SDG Booklet Series',
-    sub: { en: 'Bilingual illustrated education series · 3 booklets · Arabic & English', ar: 'سلسلة تعليمية مصورة ثنائية اللغة · ٣ كتيبات · عربي وإنجليزي' },
-  },
-  {
-    cat: 'storybooks', img: '/photos/qadamai.jpeg',
-    label: { en: "Children's Book", ar: 'كتاب أطفال' },
-    title: 'قدماي متحجرتان',
-    sub: { en: 'Full illustration & layout · Author: Hanan Saleh', ar: 'رسوم وتخطيط متكاملة · المؤلفة: حنان صالح' },
-  },
-  {
-    cat: 'illustration', img: '/photos/albasta.jpeg',
-    label: { en: 'Illustration · Bahrain TV', ar: 'رسوم توضيحية · تلفزيون البحرين' },
-    title: 'Al Basta Market · سوق البسطة',
-    sub: { en: 'Character & scene illustration series · Bahrain Television', ar: 'سلسلة رسوم توضيحية للشخصيات والمشاهد · تلفزيون البحرين' },
-  },
-]
+function getPublicUrl(filename) {
+  if (!filename) return null
+  const { data } = supabase.storage.from('portfolio-images').getPublicUrl(filename)
+  return data.publicUrl
+}
 
 const tabs = [
   { key: 'All',          en: 'All',          ar: 'الكل' },
@@ -108,11 +76,30 @@ const services = [
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('All')
+  const [portfolioCards, setPortfolioCards] = useState([])
   const navigate = useNavigate()
   const { lang } = useLang()
   const isAr = lang === 'ar'
 
   const t = (obj) => isAr ? obj.ar : obj.en
+
+  useEffect(() => {
+    supabase
+      .from('portfolio_items')
+      .select('*')
+      .eq('is_published', true)
+      .order('display_order')
+      .then(({ data }) => {
+        if (!data) return
+        setPortfolioCards(data.map(item => ({
+          cat: item.category,
+          img: item.image_url ? getPublicUrl(item.image_url) : null,
+          label: { en: item.label_en ?? '', ar: item.label_ar ?? '' },
+          title: item.title,
+          sub: { en: item.subtitle_en ?? '', ar: item.subtitle_ar ?? '' },
+        })))
+      })
+  }, [])
 
   const filtered = portfolioCards.filter(c =>
     activeTab === 'All' || c.cat === activeTab.toLowerCase()

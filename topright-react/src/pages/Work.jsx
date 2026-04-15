@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./Work.module.css";
 import { useLang } from "../LangContext";
+import { supabase } from "../lib/supabase";
 
 const tabs = [
   { key: "All", en: "All", ar: "الكل" },
@@ -12,96 +13,38 @@ const tabs = [
   { key: "Corporate", en: "Corporate", ar: "المؤسسي" },
 ];
 
-const projects = [
-  {
-    cat: "newsletter",
-    img: "/photos/khaleej.jpeg",
-    label: "Newsletter · GPIC",
-    labelAr: "نشرة · GPIC",
-    title: "Khaleejieh · خليجية",
-    sub: "Monthly bilingual newsletter · Print & Digital · 118+ issues since 2001",
-    subAr:
-      "نشرة شهرية ثنائية اللغة · طباعة ورقمية · أكثر من ١١٨ إصدارًا منذ ٢٠٠١",
-    year: "2001–present",
-  },
-  {
-    cat: "newsletter",
-    img: "/photos/injaz.jpeg",
-    label: "Annual Report · INJAZ Bahrain",
-    labelAr: "تقرير سنوي · إنجاز البحرين",
-    title: "INJAZ Annual Report",
-    sub: "Bilingual annual report · Arabic & English · Full design, layout & print",
-    subAr:
-      "تقرير سنوي ثنائي اللغة · عربي وإنجليزي · تصميم وتخطيط وطباعة متكاملة",
-    year: "2023",
-  },
-  {
-    cat: "hse",
-    img: "/photos/alnamlah.jpeg",
-    label: "HSE · Bapco Energies",
-    labelAr: "السلامة المهنية · باب كو إينرجيز",
-    title: "Safety with Namool · السلامة مع نمول",
-    sub: "Bilingual illustrated HSE storybook · Full illustration, layout & print",
-    subAr:
-      "قصة مصورة ثنائية اللغة للسلامة المهنية · رسوم وتخطيط وطباعة متكاملة",
-    year: "2024",
-  },
-  {
-    cat: "hse",
-    img: "/photos/babco.jpeg",
-    label: "HSE Education · Bapco Energies",
-    labelAr: "تعليم السلامة · باب كو إينرجيز",
-    title: "UN SDG Booklet Series",
-    sub: "Bilingual illustrated education series · 3 booklets · Arabic & English",
-    subAr: "سلسلة تعليمية مصورة ثنائية اللغة · ٣ كتيبات · عربي وإنجليزي",
-    year: "2023",
-  },
-  {
-    cat: "storybooks",
-    img: "/photos/qadamai.jpeg",
-    label: "Children's Book",
-    labelAr: "كتاب أطفال",
-    title: "قدماي متحجرتان",
-    sub: "Full illustration & layout · Author: Hanan Saleh",
-    subAr: "رسوم وتخطيط متكاملة · المؤلفة: حنان صالح",
-    year: "2022",
-  },
-  {
-    cat: "illustration",
-    img: "/photos/albasta.jpeg",
-    label: "Illustration · Bahrain TV",
-    labelAr: "رسوم توضيحية · تلفزيون البحرين",
-    title: "Al Basta Market · سوق البسطة",
-    sub: "Character & scene illustration series · Bahrain Television",
-    subAr: "سلسلة رسوم توضيحية للشخصيات والمشاهد · تلفزيون البحرين",
-    year: "2022",
-  },
-  {
-    cat: "animation",
-    img: null,
-    label: "Animation",
-    labelAr: "رسوم متحركة",
-    title: "Animated eBook Series",
-    sub: "HTML5 embedded animation · Digital publication · GCC Secretariat",
-    subAr: "رسوم متحركة HTML5 مدمجة · منشور رقمي · أمانة مجلس التعاون الخليجي",
-    year: "2023",
-  },
-  {
-    cat: "corporate",
-    img: null,
-    label: "Corporate · Ministry of Interior",
-    labelAr: "مؤسسي · وزارة الداخلية",
-    title: "Annual Corporate Report",
-    sub: "Full bilingual design, layout and print · Ministry of Interior, Bahrain",
-    subAr: "تصميم وتخطيط وطباعة متكاملة ثنائية اللغة · وزارة الداخلية، البحرين",
-    year: "2024",
-  },
-];
+function getPublicUrl(filename) {
+  if (!filename) return null;
+  const { data } = supabase.storage.from("portfolio-images").getPublicUrl(filename);
+  return data.publicUrl;
+}
 
 export default function Work() {
   const [activeTab, setActiveTab] = useState("All");
+  const [projects, setProjects] = useState([]);
   const { lang } = useLang();
   const isAr = lang === "ar";
+
+  useEffect(() => {
+    supabase
+      .from("portfolio_items")
+      .select("*")
+      .eq("is_published", true)
+      .order("display_order")
+      .then(({ data }) => {
+        if (!data) return;
+        setProjects(data.map(item => ({
+          cat: item.category,
+          img: item.image_url ? getPublicUrl(item.image_url) : null,
+          label: item.label_en ?? "",
+          labelAr: item.label_ar ?? "",
+          title: item.title,
+          sub: item.subtitle_en ?? "",
+          subAr: item.subtitle_ar ?? "",
+          year: item.year ?? "",
+        })));
+      });
+  }, []);
 
   const filtered = projects.filter(
     (p) => activeTab === "All" || p.cat === activeTab.toLowerCase(),
