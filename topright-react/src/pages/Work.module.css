@@ -1,0 +1,96 @@
+.section { background: #1E1E1E; padding: 48px 32px 72px; }
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #2a2a2a;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+.tab {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #555;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 18px 12px;
+  margin-bottom: -1px;
+  transition: all .2s;
+  font-family: var(--font-body);
+}
+.tab:hover { color: #fff; }
+.tabOn { color: #fff; border-bottom-color: #E7432B; }
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+
+.card {
+  display: flex;
+  background: #262626;
+  transition: background .2s;
+  cursor: pointer;
+}
+.card:hover { background: #2e2e2e; }
+
+.thumb { width: 220px; height: 180px; flex-shrink: 0; overflow: hidden; }
+
+.info {
+  flex: 1;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-left: 1px solid #333;
+}
+.cardCat {
+  font-size: 8px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #E7432B;
+  margin-bottom: 8px;
+}
+.cardTtl { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 8px; }
+.cardSub { font-size: 11px; color: #888; line-height: 1.65; flex: 1; }
+.cardYear { font-size: 9px; color: #555; letter-spacing: 1px; margin-top: 8px; }
+.cardArrow { font-size: 10px; color: #444; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; transition: color .2s; }
+.card:hover .cardArrow { color: #E7432B; }
+
+.empty { color: #444; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 60px 0; grid-column: 1 / -1; text-align: center; }
+
+/* CTA */
+.cta {
+  background: #000;
+  border-top: 1px solid #1a1a1a;
+  padding: 72px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.cta h2 {
+  font-size: 42px;
+  font-weight: 200;
+  letter-spacing: 3px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  color: #fff;
+}
+.cta p { font-size: 13px; color: #555; }
+.ctaBtn {
+  display: inline-block;
+  margin-top: 8px;
+  background: #E7432B;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 14px 32px;
+  transition: background 0.2s;
+}
+.ctaBtn:hover { background: #c93520; }
