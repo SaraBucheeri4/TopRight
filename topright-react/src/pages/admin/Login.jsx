@@ -21,9 +21,9 @@ export default function Login() {
       setError(authError.message)
     } else {
       navigate('/admin')
-    }
+    } 
   }
-
+ 
   return (
     <>
       <div className={styles.tbar} />

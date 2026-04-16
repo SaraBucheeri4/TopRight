@@ -200,14 +200,14 @@ function PortfolioManager({ onNav }) {
             <div className={styles.modalHd}>
               <span className={styles.modalTtl}>{isNew ? 'New Project' : 'Edit Project'}</span>
               <button className={styles.modalClose} onClick={closeEdit}>✕</button>
-            </div>
+            </div> 
 
             <div className={styles.modalBody}>
               <div className={styles.mfgRow}>
-                <div className={styles.mfg}>
+                {/* <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Slug</label>
                   <input className={styles.fieldInput} value={editItem.slug} onChange={e => setEditItem(p => ({ ...p, slug: e.target.value }))} />
-                </div>
+                </div> */} 
                 <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Category</label>
                   <select className={styles.fieldInput} value={editItem.category} onChange={e => setEditItem(p => ({ ...p, category: e.target.value }))}>
