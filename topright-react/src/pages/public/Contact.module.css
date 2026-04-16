@@ -116,6 +116,14 @@ a.infoVal:hover { color: #E7432B; }
   font-size: 11px;
 }
 
+.error {
+  background: #5a1010;
+  color: #ff9a9a;
+  padding: 12px 16px;
+  font-size: 11px;
+  margin-top: 8px;
+}
+
 /* MAP */
 .mapPlaceholder {
   height: 280px;
