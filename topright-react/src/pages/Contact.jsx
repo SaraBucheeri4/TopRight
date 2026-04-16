@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import styles from './Contact.module.css'
 import { useLang } from '../LangContext'
+import { supabase } from '../lib/supabase'
 
 const WA_NUMBER = '97336622100'
 
@@ -27,9 +28,16 @@ export default function Contact() {
     return Object.keys(e).length === 0
   }
 
-  const handleSubmit = (ev) => {
+  const handleSubmit = async (ev) => {
     ev.preventDefault()
     if (!validate()) return
+    await supabase.from('contact_submissions').insert({
+      name: form.name,
+      organisation: form.org,
+      email: form.email,
+      project_type: form.type,
+      message: form.message,
+    })
     setSent(true)
     setForm({ name: '', org: '', email: '', type: '', message: '' })
     setTimeout(() => setSent(false), 6000)

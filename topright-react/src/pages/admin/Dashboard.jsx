@@ -12,7 +12,7 @@ const EMPTY_ITEM = {
 
 function getPublicUrl(filename) {
   if (!filename) return null
-  const { data } = supabase.storage.from('portfolio-images').getPublicUrl(filename)
+  const { data } = supabase.storage.from('images').getPublicUrl(filename)
   return data.publicUrl
 }
 
@@ -36,6 +36,8 @@ function PortfolioManager({ onNav }) {
   const [isNew, setIsNew] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState(null)
+  const [formErrors, setFormErrors] = useState({})
   const [search, setSearch] = useState('')
   const dragIdx = useRef(null)
   const fileRef = useRef(null)
@@ -79,21 +81,44 @@ function PortfolioManager({ onNav }) {
     )
   }
 
-  function openEdit(item) { setEditItem({ ...item }); setIsNew(false) }
-  function openNew() { setEditItem({ ...EMPTY_ITEM, display_order: items.length }); setIsNew(true) }
-  function closeEdit() { setEditItem(null) }
+  function openEdit(item) { setEditItem({ ...item }); setIsNew(false); setFormErrors({}); setUploadError(null) }
+  function openNew() { setEditItem({ ...EMPTY_ITEM, display_order: items.length }); setIsNew(true); setFormErrors({}); setUploadError(null) }
+  function closeEdit() { setEditItem(null); setFormErrors({}); setUploadError(null) }
 
   async function handleImageUpload(file) {
     if (!file) return
+    setUploadError(null)
     setUploading(true)
-    const ext = file.name.split('.').pop()
+    const ext = file.name.split('.').pop().toLowerCase()
     const filename = `${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('portfolio-images').upload(filename, file)
+    const { error } = await supabase.storage.from('images').upload(filename, file, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: file.type,
+    })
     setUploading(false)
-    if (!error) setEditItem(prev => ({ ...prev, image_url: filename }))
+    if (error) {
+      console.error('Upload error:', error)
+      setUploadError(error.message)
+    } else {
+      setEditItem(prev => ({ ...prev, image_url: filename }))
+    }
+  }
+
+  function validate() {
+    const e = {}
+    if (!editItem.title.trim()) e.title = 'Title is required'
+    if (!editItem.category) e.category = 'Category is required'
+    if (!editItem.image_url) e.image_url = 'Please upload an image'
+    if (editItem.year && (Number(editItem.year) < 1990 || Number(editItem.year) > new Date().getFullYear())) {
+      e.year = `Year must be between 1990 and ${new Date().getFullYear()}`
+    }
+    setFormErrors(e)
+    return Object.keys(e).length === 0
   }
 
   async function handleSave() {
+    if (!validate()) return
     setSaving(true)
     if (isNew) {
       const safeSlug = editItem.slug || `item-${Date.now()}`
@@ -204,21 +229,28 @@ function PortfolioManager({ onNav }) {
 
             <div className={styles.modalBody}>
               <div className={styles.mfgRow}>
-                {/* <div className={styles.mfg}>
-                  <label className={styles.fieldLabel}>Slug</label>
-                  <input className={styles.fieldInput} value={editItem.slug} onChange={e => setEditItem(p => ({ ...p, slug: e.target.value }))} />
-                </div> */} 
                 <div className={styles.mfg}>
-                  <label className={styles.fieldLabel}>Category</label>
-                  <select className={styles.fieldInput} value={editItem.category} onChange={e => setEditItem(p => ({ ...p, category: e.target.value }))}>
+                  <label className={styles.fieldLabel}>Category *</label>
+                  <select
+                    className={`${styles.fieldInput} ${formErrors.category ? styles.fieldInputErr : ''}`}
+                    value={editItem.category}
+                    onChange={e => setEditItem(p => ({ ...p, category: e.target.value }))}
+                  >
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
+                  {formErrors.category && <span className={styles.fieldErr}>{formErrors.category}</span>}
                 </div>
               </div>
 
               <div className={styles.mfg}>
-                <label className={styles.fieldLabel}>Title</label>
-                <input className={styles.fieldInput} value={editItem.title} onChange={e => setEditItem(p => ({ ...p, title: e.target.value }))} />
+                <label className={styles.fieldLabel}>Title *</label>
+                <input
+                  className={`${styles.fieldInput} ${formErrors.title ? styles.fieldInputErr : ''}`}
+                  value={editItem.title}
+                  onChange={e => setEditItem(p => ({ ...p, title: e.target.value }))}
+                  placeholder="Project title"
+                />
+                {formErrors.title && <span className={styles.fieldErr}>{formErrors.title}</span>}
               </div>
 
               <div className={styles.mfgRow}>
@@ -246,7 +278,16 @@ function PortfolioManager({ onNav }) {
               <div className={styles.mfgRow}>
                 <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Year</label>
-                  <input className={styles.fieldInput} value={editItem.year ?? ''} onChange={e => setEditItem(p => ({ ...p, year: e.target.value }))} />
+                  <input
+                    className={`${styles.fieldInput} ${formErrors.year ? styles.fieldInputErr : ''}`}
+                    type="number"
+                    min="1990"
+                    max={new Date().getFullYear()}
+                    placeholder="e.g. 2024"
+                    value={editItem.year ?? ''}
+                    onChange={e => setEditItem(p => ({ ...p, year: e.target.value }))}
+                  />
+                  {formErrors.year && <span className={styles.fieldErr}>{formErrors.year}</span>}
                 </div>
                 <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Display Order</label>
@@ -255,26 +296,28 @@ function PortfolioManager({ onNav }) {
               </div>
 
               <div className={styles.mfg}>
-                <label className={styles.fieldLabel}>Image</label>
+                <label className={styles.fieldLabel}>Image *</label>
                 <div
-                  className={styles.uploadArea}
-                  onClick={() => fileRef.current?.click()}
+                  className={`${styles.uploadArea} ${formErrors.image_url ? styles.uploadAreaErr : ''}`}
+                  onClick={() => !uploading && fileRef.current?.click()}
                 >
                   {editItem.image_url
                     ? <img src={getPublicUrl(editItem.image_url)} alt="" className={styles.previewImg} />
                     : <span style={{ fontSize: 24, opacity: 0.3 }}>↑</span>}
                   <span className={styles.uploadAreaText}>
-                    {uploading ? 'Uploading…' : 'Click to upload image'}
+                    {uploading ? 'Uploading…' : editItem.image_url ? 'Click to replace image' : 'Click to upload image'}
                   </span>
                   {editItem.image_url && (
                     <span className={styles.uploadNote}>{editItem.image_url}</span>
                   )}
                   <span className={styles.uploadAreaHint}>JPG, PNG, WEBP</span>
                 </div>
+                {uploadError && <span className={styles.fieldErr}>Upload failed: {uploadError}</span>}
+                {formErrors.image_url && !uploadError && <span className={styles.fieldErr}>{formErrors.image_url}</span>}
                 <input
                   ref={fileRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                   className={styles.fileInput}
                   onChange={e => handleImageUpload(e.target.files?.[0])}
                 />
@@ -295,6 +338,147 @@ function PortfolioManager({ onNav }) {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/* ── Contact Submissions ── */
+function ContactSubmissions() {
+  const [submissions, setSubmissions] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState(null)
+  const [search, setSearch] = useState('')
+
+  async function load() {
+    setLoading(true)
+    const { data } = await supabase
+      .from('contact_submissions')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setSubmissions(data ?? [])
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [])
+
+  async function handleDelete(sub) {
+    if (!window.confirm(`Delete submission from "${sub.name}"? This cannot be undone.`)) return
+    await supabase.from('contact_submissions').delete().eq('id', sub.id)
+    if (selected?.id === sub.id) setSelected(null)
+    load()
+  }
+
+  const visible = submissions.filter(s =>
+    !search ||
+    s.name?.toLowerCase().includes(search.toLowerCase()) ||
+    s.email?.toLowerCase().includes(search.toLowerCase()) ||
+    s.organisation?.toLowerCase().includes(search.toLowerCase())
+  )
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Inbox</div>
+          <h1 className={styles.pageTitle}>Contact Submissions</h1>
+        </div>
+      </div>
+
+      <div className={styles.inboxLayout}>
+        {/* List */}
+        <div className={styles.inboxList}>
+          <div className={styles.tableToolbar}>
+            <div className={styles.tableSearch}>
+              <span className={styles.tableSearchIcon}>⊘</span>
+              <input
+                type="text"
+                placeholder="Search submissions…"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+              />
+            </div>
+            <span className={styles.tableCount}>{visible.length} total</span>
+          </div>
+
+          {visible.length === 0 && (
+            <div className={styles.empty}>No submissions yet.</div>
+          )}
+
+          {visible.map(sub => (
+            <div
+              key={sub.id}
+              className={`${styles.inboxRow} ${selected?.id === sub.id ? styles.inboxRowActive : ''}`}
+              onClick={() => setSelected(sub)}
+            >
+              <div className={styles.inboxRowTop}>
+                <span className={styles.inboxName}>{sub.name}</span>
+                <span className={styles.inboxDate}>
+                  {new Date(sub.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+              </div>
+              <div className={styles.inboxEmail}>{sub.email}</div>
+              {sub.organisation && (
+                <div className={styles.inboxOrg}>{sub.organisation}</div>
+              )}
+              {sub.project_type && (
+                <span className={styles.inboxTag}>{sub.project_type}</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Detail */}
+        <div className={styles.inboxDetail}>
+          {!selected ? (
+            <div className={styles.inboxEmpty}>
+              <div style={{ fontSize: 28, opacity: 0.2, marginBottom: 12 }}>✉</div>
+              <div style={{ fontSize: 11, color: '#666' }}>Select a submission to view</div>
+            </div>
+          ) : (
+            <>
+              <div className={styles.inboxDetailHd}>
+                <div>
+                  <div className={styles.inboxDetailName}>{selected.name}</div>
+                  <div className={styles.inboxDetailMeta}>
+                    <a href={`mailto:${selected.email}`} className={styles.inboxDetailEmail}>{selected.email}</a>
+                    {selected.organisation && <span> · {selected.organisation}</span>}
+                  </div>
+                  <div className={styles.inboxDetailDate}>
+                    {new Date(selected.created_at).toLocaleString('en-GB', {
+                      day: 'numeric', month: 'long', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit'
+                    })}
+                  </div>
+                </div>
+                <button
+                  className={`${styles.btnSm} ${styles.btnDel}`}
+                  onClick={() => handleDelete(selected)}
+                >Delete</button>
+              </div>
+
+              {selected.project_type && (
+                <div className={styles.inboxDetailSection}>
+                  <div className={styles.inboxDetailLabel}>Project Type</div>
+                  <div className={styles.inboxDetailValue}>{selected.project_type}</div>
+                </div>
+              )}
+
+              <div className={styles.inboxDetailSection}>
+                <div className={styles.inboxDetailLabel}>Message</div>
+                <div className={styles.inboxDetailMessage}>{selected.message}</div>
+              </div>
+
+              <div className={styles.inboxDetailActions}>
+                <a href={`mailto:${selected.email}`} className={styles.btnAdd}>
+                  Reply by Email →
+                </a>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -440,16 +624,17 @@ function DashboardOverview({ onNav, counts }) {
 /* ── Main Dashboard shell ── */
 export default function Dashboard() {
   const [section, setSection] = useState('dashboard')
-  const [counts, setCounts] = useState({ portfolio: 0, published: 0, draft: 0, text: 0 })
+  const [counts, setCounts] = useState({ portfolio: 0, published: 0, draft: 0, text: 0, inbox: 0 })
 
   useEffect(() => {
     Promise.all([
       supabase.from('portfolio_items').select('id, is_published'),
       supabase.from('site_text').select('id'),
-    ]).then(([{ data: p }, { data: t }]) => {
+      supabase.from('contact_submissions').select('id'),
+    ]).then(([{ data: p }, { data: t }, { data: c }]) => {
       const portfolio = p?.length ?? 0
       const published = p?.filter(i => i.is_published).length ?? 0
-      setCounts({ portfolio, published, draft: portfolio - published, text: t?.length ?? 0 })
+      setCounts({ portfolio, published, draft: portfolio - published, text: t?.length ?? 0, inbox: c?.length ?? 0 })
     })
   }, [])
 
@@ -458,9 +643,10 @@ export default function Dashboard() {
   }
 
   const navItems = [
-    { key: 'dashboard', icon: '◈', label: 'Dashboard', group: 'Overview' },
-    { key: 'portfolio', icon: '⊞', label: 'Portfolio', group: 'Content', count: counts.portfolio },
-    { key: 'text',      icon: '✎', label: 'Site Text', group: 'Content' },
+    { key: 'dashboard', icon: '◈', label: 'Dashboard',    group: 'Overview' },
+    { key: 'portfolio', icon: '⊞', label: 'Portfolio',    group: 'Content', count: counts.portfolio },
+    { key: 'text',      icon: '✎', label: 'Site Text',    group: 'Content' },
+    { key: 'inbox',     icon: '✉', label: 'Submissions',  group: 'Inbox',   count: counts.inbox },
   ]
 
   const groups = [...new Set(navItems.map(i => i.group))]
@@ -505,6 +691,7 @@ export default function Dashboard() {
           {section === 'dashboard' && <DashboardOverview onNav={setSection} counts={counts} />}
           {section === 'portfolio' && <PortfolioManager onNav={setSection} />}
           {section === 'text' && <SiteTextEditor />}
+          {section === 'inbox' && <ContactSubmissions />}
         </main>
       </div>
     </div>

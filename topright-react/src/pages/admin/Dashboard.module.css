@@ -680,6 +680,23 @@
   background: #2a2a2a;
 }
 
+.fieldInputErr {
+  border-bottom-color: #c0392b;
+  border-left-color: #c0392b;
+}
+
+.fieldErr {
+  display: block;
+  font-size: 9px;
+  color: #c0392b;
+  letter-spacing: 0.5px;
+  margin-top: 5px;
+}
+
+.uploadAreaErr {
+  border-color: #c0392b;
+}
+
 .fieldInput option {
   background: #2a2a2a;
   color: #ddd;
@@ -808,6 +825,172 @@
   border-radius: 2px;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+/* ── Inbox / Contact Submissions ── */
+.inboxLayout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 3px;
+  align-items: start;
+}
+
+.inboxList {
+  background: #1E1E1E;
+  border: 1px solid #2e2e2e;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.inboxRow {
+  padding: 14px 18px;
+  border-bottom: 1px solid #252525;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.inboxRow:last-child { border-bottom: none; }
+
+.inboxRow:hover {
+  background: #2a2a2a;
+}
+
+.inboxRowActive {
+  background: #2a2a2a;
+  border-left: 2px solid var(--red);
+}
+
+.inboxRowTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.inboxName {
+  font-size: 12px;
+  font-weight: 600;
+  color: #e0e0e0;
+}
+
+.inboxDate {
+  font-size: 8px;
+  color: #555;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.inboxEmail {
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 3px;
+}
+
+.inboxOrg {
+  font-size: 9px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.inboxTag {
+  font-size: 7px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(231,67,43,.1);
+  color: #E7432B;
+  padding: 2px 7px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.inboxDetail {
+  background: #1E1E1E;
+  border: 1px solid #2e2e2e;
+  border-radius: 2px;
+  min-height: 400px;
+}
+
+.inboxEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 8px;
+}
+
+.inboxDetailHd {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.inboxDetailName {
+  font-size: 18px;
+  font-weight: 200;
+  letter-spacing: 1px;
+  color: #fff;
+  font-family: 'Raleway', sans-serif;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.inboxDetailMeta {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.inboxDetailEmail {
+  color: var(--teal);
+  text-decoration: none;
+}
+
+.inboxDetailEmail:hover {
+  text-decoration: underline;
+}
+
+.inboxDetailDate {
+  font-size: 9px;
+  color: #555;
+  letter-spacing: 0.5px;
+}
+
+.inboxDetailSection {
+  padding: 20px 24px 0;
+}
+
+.inboxDetailLabel {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.inboxDetailValue {
+  font-size: 11px;
+  color: #ccc;
+}
+
+.inboxDetailMessage {
+  font-size: 12px;
+  color: #ccc;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+  padding: 16px;
+  border-radius: 2px;
+}
+
+.inboxDetailActions {
+  padding: 20px 24px 24px;
+  display: flex;
+  gap: 8px;
 }
 
 /* ── Toast ── */
