@@ -1,16 +1,8 @@
 import { useState } from 'react'
 import styles from './Contact.module.css'
-import { useLang } from '../LangContext'
-import { supabase } from '../lib/supabase'
-
-const WA_NUMBER = '97336622100'
-
-const contactDetails = [
-  { labelEn: 'Email',     labelAr: 'البريد الإلكتروني', val: 'info@topright.bh',            href: 'mailto:info@topright.bh' },
-  { labelEn: 'Phone',     labelAr: 'الهاتف',            val: '(+973) 36622100 / 17566726',   href: 'tel:+97336622100' },
-  { labelEn: 'WhatsApp',  labelAr: 'واتساب',            val: '(+973) 36622100',              href: `https://wa.me/${WA_NUMBER}` },
-  { labelEn: 'Location',  labelAr: 'الموقع',            val: 'Bahrain · CR: 46817-1',        href: null },
-]
+import { useLang } from '../../LangContext'
+import { submitContactForm } from '../../services/contactService'
+import { WA_NUMBER, CONTACT_DETAILS } from '../../config/constants'
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', org: '', email: '', type: '', message: '' })
@@ -31,7 +23,7 @@ export default function Contact() {
   const handleSubmit = async (ev) => {
     ev.preventDefault()
     if (!validate()) return
-    await supabase.from('contact_submissions').insert({
+    await submitContactForm({
       name: form.name,
       organisation: form.org,
       email: form.email,
@@ -63,7 +55,7 @@ export default function Contact() {
           <h2>{isAr ? <>تواصل معنا<br />مباشرة</> : <>Reach us<br />directly</>}</h2>
 
           <div className={styles.infoItems}>
-            {contactDetails.map(item => (
+            {CONTACT_DETAILS.map(item => (
               <div key={item.labelEn} className={styles.infoItem}>
                 <div className={styles.infoLabel}>{isAr ? item.labelAr : item.labelEn}</div>
                 {item.href

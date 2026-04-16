@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import styles from './Coaching.module.css'
-import { useLang } from '../LangContext'
+import { useLang } from '../../LangContext'
 
 const programmes = [
   {

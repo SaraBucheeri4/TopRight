@@ -1,5 +1,5 @@
 import styles from "./Services.module.css";
-import { useLang } from "../LangContext";
+import { useLang } from "../../LangContext";
 
 const services = [
   {

@@ -1,18 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Marquee from '../components/Marquee'
+import Marquee from '../../components/public/Marquee'
 import styles from './Home.module.css'
-import { useLang } from '../LangContext'
-import { supabase } from '../lib/supabase'
+import { useLang } from '../../LangContext'
+import { fetchPublishedPortfolioItems, getPublicUrl } from '../../services/portfolioService'
 
 const clients = ['GPIC', 'Bapco Energies', 'Ministry of Interior',
   'Sharjah Heritage Institute', 'GCC Secretariat', 'INJAZ Bahrain', 'Bahrain Television']
-
-function getPublicUrl(filename) {
-  if (!filename) return null
-  const { data } = supabase.storage.from('portfolio-images').getPublicUrl(filename)
-  return data.publicUrl
-}
 
 const tabs = [
   { key: 'All',          en: 'All',          ar: 'الكل' },
@@ -84,21 +78,15 @@ export default function Home() {
   const t = (obj) => isAr ? obj.ar : obj.en
 
   useEffect(() => {
-    supabase
-      .from('portfolio_items')
-      .select('*')
-      .eq('is_published', true)
-      .order('display_order')
-      .then(({ data }) => {
-        if (!data) return
-        setPortfolioCards(data.map(item => ({
-          cat: item.category,
-          img: item.image_url ? getPublicUrl(item.image_url) : null,
-          label: { en: item.label_en ?? '', ar: item.label_ar ?? '' },
-          title: item.title,
-          sub: { en: item.subtitle_en ?? '', ar: item.subtitle_ar ?? '' },
-        })))
-      })
+    fetchPublishedPortfolioItems().then(data => {
+      setPortfolioCards(data.map(item => ({
+        cat: item.category,
+        img: item.image_url ? getPublicUrl(item.image_url) : null,
+        label: { en: item.label_en ?? '', ar: item.label_ar ?? '' },
+        title: item.title,
+        sub: { en: item.subtitle_en ?? '', ar: item.subtitle_ar ?? '' },
+      })))
+    })
   }, [])
 
   const filtered = portfolioCards.filter(c =>

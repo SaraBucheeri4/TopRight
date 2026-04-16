@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
+import { signIn } from '../../services/authService'
 import styles from './Login.module.css'
 
 export default function Login() {
@@ -15,12 +15,13 @@ export default function Login() {
     e.preventDefault()
     setError('')
     setLoading(true)
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
-    setLoading(false)
-    if (authError) {
-      setError(authError.message)
-    } else {
+    try {
+      await signIn(email, password)
       navigate('/admin')
+    } catch (authError) {
+      setError(authError.message)
+    } finally {
+      setLoading(false)
     } 
   }
  

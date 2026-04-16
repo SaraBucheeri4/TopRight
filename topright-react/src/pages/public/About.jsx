@@ -1,5 +1,5 @@
 import styles from './About.module.css'
-import { useLang } from '../LangContext'
+import { useLang } from '../../LangContext'
 
 const team = [
   {

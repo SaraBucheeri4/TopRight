@@ -1,19 +1,26 @@
 import { useEffect, useState, useRef } from 'react'
-import { supabase } from '../../lib/supabase'
 import styles from './Dashboard.module.css'
+import {
+  fetchAllPortfolioItems,
+  createPortfolioItem,
+  updatePortfolioItem,
+  deletePortfolioItem,
+  updatePortfolioOrder,
+  uploadPortfolioImage,
+  getPublicUrl,
+} from '../../services/portfolioService'
+import { fetchContactSubmissions, deleteContactSubmission } from '../../services/contactService'
+import { fetchSiteText, updateSiteTextRow } from '../../services/siteTextService'
+import { fetchDashboardCounts } from '../../services/dashboardService'
+import { signOut } from '../../services/authService'
+import { PORTFOLIO_CATEGORIES } from '../../config/constants'
 
-const CATEGORIES = ['newsletter', 'hse', 'storybooks', 'illustration', 'animation', 'corporate']
+const CATEGORIES = PORTFOLIO_CATEGORIES
 
 const EMPTY_ITEM = {
   slug: '', category: 'newsletter', label_en: '', label_ar: '',
   title: '', subtitle_en: '', subtitle_ar: '', year: '',
   image_url: '', display_order: 0, is_published: true,
-}
-
-function getPublicUrl(filename) {
-  if (!filename) return null
-  const { data } = supabase.storage.from('images').getPublicUrl(filename)
-  return data.publicUrl
 }
 
 function catClass(cat) {
@@ -44,11 +51,8 @@ function PortfolioManager({ onNav }) {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase
-      .from('portfolio_items')
-      .select('*')
-      .order('display_order')
-    setItems(data ?? [])
+    const data = await fetchAllPortfolioItems()
+    setItems(data)
     setLoading(false)
   }
 
@@ -57,7 +61,7 @@ function PortfolioManager({ onNav }) {
   async function togglePublish(item) {
     const updated = !item.is_published
     setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_published: updated } : i))
-    await supabase.from('portfolio_items').update({ is_published: updated }).eq('id', item.id)
+    await updatePortfolioItem(item.id, { is_published: updated })
   }
 
   function onDragStart(idx) { dragIdx.current = idx }
@@ -74,11 +78,7 @@ function PortfolioManager({ onNav }) {
   }
   async function onDrop() {
     dragIdx.current = null
-    await Promise.all(
-      items.map((item, i) =>
-        supabase.from('portfolio_items').update({ display_order: i }).eq('id', item.id)
-      )
-    )
+    await updatePortfolioOrder(items)
   }
 
   function openEdit(item) { setEditItem({ ...item }); setIsNew(false); setFormErrors({}); setUploadError(null) }
@@ -89,19 +89,14 @@ function PortfolioManager({ onNav }) {
     if (!file) return
     setUploadError(null)
     setUploading(true)
-    const ext = file.name.split('.').pop().toLowerCase()
-    const filename = `${Date.now()}.${ext}`
-    const { error } = await supabase.storage.from('images').upload(filename, file, {
-      cacheControl: '3600',
-      upsert: false,
-      contentType: file.type,
-    })
-    setUploading(false)
-    if (error) {
-      console.error('Upload error:', error)
-      setUploadError(error.message)
-    } else {
+    try {
+      const filename = await uploadPortfolioImage(file)
       setEditItem(prev => ({ ...prev, image_url: filename }))
+    } catch (err) {
+      console.error('Upload error:', err)
+      setUploadError(err.message)
+    } finally {
+      setUploading(false)
     }
   }
 
@@ -121,10 +116,9 @@ function PortfolioManager({ onNav }) {
     if (!validate()) return
     setSaving(true)
     if (isNew) {
-      const safeSlug = editItem.slug || `item-${Date.now()}`
-      await supabase.from('portfolio_items').insert({ ...editItem, slug: safeSlug, updated_at: new Date().toISOString() })
+      await createPortfolioItem(editItem)
     } else {
-      await supabase.from('portfolio_items').update({ ...editItem, updated_at: new Date().toISOString() }).eq('id', editItem.id)
+      await updatePortfolioItem(editItem.id, editItem)
     }
     setSaving(false)
     closeEdit()
@@ -133,7 +127,7 @@ function PortfolioManager({ onNav }) {
 
   async function handleDelete(item) {
     if (!window.confirm(`Delete "${item.title}"? This cannot be undone.`)) return
-    await supabase.from('portfolio_items').delete().eq('id', item.id)
+    await deletePortfolioItem(item.id)
     load()
   }
 
@@ -351,11 +345,8 @@ function ContactSubmissions() {
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase
-      .from('contact_submissions')
-      .select('*')
-      .order('created_at', { ascending: false })
-    setSubmissions(data ?? [])
+    const data = await fetchContactSubmissions()
+    setSubmissions(data)
     setLoading(false)
   }
 
@@ -363,7 +354,7 @@ function ContactSubmissions() {
 
   async function handleDelete(sub) {
     if (!window.confirm(`Delete submission from "${sub.name}"? This cannot be undone.`)) return
-    await supabase.from('contact_submissions').delete().eq('id', sub.id)
+    await deleteContactSubmission(sub.id)
     if (selected?.id === sub.id) setSelected(null)
     load()
   }
@@ -490,8 +481,8 @@ function SiteTextEditor() {
   const [savedKeys, setSavedKeys] = useState({})
 
   useEffect(() => {
-    supabase.from('site_text').select('*').order('key').then(({ data }) => {
-      setRows(data ?? [])
+    fetchSiteText().then(data => {
+      setRows(data)
       setLoading(false)
     })
   }, [])
@@ -501,11 +492,7 @@ function SiteTextEditor() {
   }
 
   async function handleBlur(row) {
-    await supabase.from('site_text').update({
-      value_en: row.value_en,
-      value_ar: row.value_ar,
-      updated_at: new Date().toISOString(),
-    }).eq('id', row.id)
+    await updateSiteTextRow(row.id, { value_en: row.value_en, value_ar: row.value_ar })
     setSavedKeys(prev => ({ ...prev, [row.id]: true }))
     setTimeout(() => setSavedKeys(prev => ({ ...prev, [row.id]: false })), 2000)
   }
@@ -627,19 +614,11 @@ export default function Dashboard() {
   const [counts, setCounts] = useState({ portfolio: 0, published: 0, draft: 0, text: 0, inbox: 0 })
 
   useEffect(() => {
-    Promise.all([
-      supabase.from('portfolio_items').select('id, is_published'),
-      supabase.from('site_text').select('id'),
-      supabase.from('contact_submissions').select('id'),
-    ]).then(([{ data: p }, { data: t }, { data: c }]) => {
-      const portfolio = p?.length ?? 0
-      const published = p?.filter(i => i.is_published).length ?? 0
-      setCounts({ portfolio, published, draft: portfolio - published, text: t?.length ?? 0, inbox: c?.length ?? 0 })
-    })
+    fetchDashboardCounts().then(setCounts)
   }, [])
 
   async function handleLogout() {
-    await supabase.auth.signOut()
+    await signOut()
   }
 
   const navItems = [

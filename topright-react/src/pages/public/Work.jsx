@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import styles from "./Work.module.css";
-import { useLang } from "../LangContext";
-import { supabase } from "../lib/supabase";
+import { useLang } from "../../LangContext";
+import { fetchPublishedPortfolioItems, getPublicUrl } from "../../services/portfolioService";
 
 const tabs = [
   { key: "All", en: "All", ar: "الكل" },
@@ -13,12 +13,6 @@ const tabs = [
   { key: "Corporate", en: "Corporate", ar: "المؤسسي" },
 ];
 
-function getPublicUrl(filename) {
-  if (!filename) return null;
-  const { data } = supabase.storage.from("portfolio-images").getPublicUrl(filename);
-  return data.publicUrl;
-}
-
 export default function Work() {
   const [activeTab, setActiveTab] = useState("All");
   const [projects, setProjects] = useState([]);
@@ -26,24 +20,18 @@ export default function Work() {
   const isAr = lang === "ar";
 
   useEffect(() => {
-    supabase
-      .from("portfolio_items")
-      .select("*")
-      .eq("is_published", true)
-      .order("display_order")
-      .then(({ data }) => {
-        if (!data) return;
-        setProjects(data.map(item => ({
-          cat: item.category,
-          img: item.image_url ? getPublicUrl(item.image_url) : null,
-          label: item.label_en ?? "",
-          labelAr: item.label_ar ?? "",
-          title: item.title,
-          sub: item.subtitle_en ?? "",
-          subAr: item.subtitle_ar ?? "",
-          year: item.year ?? "",
-        })));
-      });
+    fetchPublishedPortfolioItems().then(data => {
+      setProjects(data.map(item => ({
+        cat: item.category,
+        img: item.image_url ? getPublicUrl(item.image_url) : null,
+        label: item.label_en ?? "",
+        labelAr: item.label_ar ?? "",
+        title: item.title,
+        sub: item.subtitle_en ?? "",
+        subAr: item.subtitle_ar ?? "",
+        year: item.year ?? "",
+      })));
+    });
   }, []);
 
   const filtered = projects.filter(

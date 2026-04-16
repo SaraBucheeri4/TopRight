@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
-import { useLang } from "../LangContext";
+import { useLang } from "../../LangContext";
 import styles from "./Navbar.module.css";
 
 const links = [
