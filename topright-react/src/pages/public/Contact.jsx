@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import styles from './Contact.module.css'
 import { useLang } from '../../LangContext'
 import { submitContactForm } from '../../services/contactService'
-import { WA_NUMBER, CONTACT_DETAILS } from '../../config/constants'
+import { WA_NUMBER } from '../../config/constants'
+import { fetchPublishedClients, getClientLogoUrl } from '../../services/clientsService'
+import { fetchContactInfo } from '../../services/contactInfoService'
 
 export default function Contact() {
   const [form, setForm] = useState({ name: '', org: '', email: '', type: '', message: '' })
@@ -10,8 +12,15 @@ export default function Contact() {
   const [sent, setSent] = useState(false)
   const [submitError, setSubmitError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [clients, setClients] = useState([])
+  const [contactInfo, setContactInfo] = useState(null)
   const { lang } = useLang()
   const isAr = lang === 'ar'
+
+  useEffect(() => {
+    fetchPublishedClients().then(setClients)
+    fetchContactInfo().then(setContactInfo)
+  }, [])
 
   const validate = () => {
     const e = {}
@@ -54,8 +63,14 @@ export default function Contact() {
         <div className="hgrid" />
         <div className="page-hero-inner">
           <span className="sec-lbl">{isAr ? 'تواصل معنا' : 'Get in touch'}</span>
-          <h1>{isAr ? <>لنعمل<br />معًا</> : <>Let's work<br />together</>}</h1>
-          <p>{isAr ? 'أخبرنا عن مشروعك وسنردّ عليك خلال ٢٤ ساعة. نعمل مع مؤسسات في البحرين ومنطقة الخليج.' : 'Tell us about your project and we will get back to you within 24 hours. We work with organisations across Bahrain and the GCC.'}</p>
+          <h1>{contactInfo?.section_title_en || contactInfo?.section_title_ar
+            ? (isAr ? contactInfo.section_title_ar : contactInfo.section_title_en)
+            : (isAr ? <>لنعمل<br />معًا</> : <>Let's work<br />together</>)
+          }</h1>
+          <p>{contactInfo?.description_en || contactInfo?.description_ar
+            ? (isAr ? contactInfo.description_ar : contactInfo.description_en)
+            : (isAr ? 'أخبرنا عن مشروعك وسنردّ عليك خلال ٢٤ ساعة. نعمل مع مؤسسات في البحرين ومنطقة الخليج.' : 'Tell us about your project and we will get back to you within 24 hours. We work with organisations across Bahrain and the GCC.')
+          }</p>
         </div>
       </section>
 
@@ -66,23 +81,45 @@ export default function Contact() {
           <h2>{isAr ? <>تواصل معنا<br />مباشرة</> : <>Reach us<br />directly</>}</h2>
 
           <div className={styles.infoItems}>
-            {CONTACT_DETAILS.map(item => (
-              <div key={item.labelEn} className={styles.infoItem}>
-                <div className={styles.infoLabel}>{isAr ? item.labelAr : item.labelEn}</div>
-                {item.href
-                  ? <a href={item.href} target={item.href.startsWith('http') ? '_blank' : undefined} rel="noopener" className={styles.infoVal}>{item.val}</a>
-                  : <div className={styles.infoVal}>{item.val}</div>
-                }
+            {contactInfo?.email && (
+              <div className={styles.infoItem}>
+                <div className={styles.infoLabel}>{isAr ? 'البريد الإلكتروني' : 'Email'}</div>
+                <a href={`mailto:${contactInfo.email}`} className={styles.infoVal}>{contactInfo.email}</a>
               </div>
-            ))}
+            )}
+            {contactInfo?.phone_primary && (
+              <div className={styles.infoItem}>
+                <div className={styles.infoLabel}>{isAr ? 'الهاتف' : 'Phone'}</div>
+                <div className={styles.infoVal}>{contactInfo.phone_primary}</div>
+              </div>
+            )}
+            {contactInfo?.whatsapp && (
+              <div className={styles.infoItem}>
+                <div className={styles.infoLabel}>{isAr ? 'واتساب' : 'WhatsApp'}</div>
+                <a href={`https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener" className={styles.infoVal}>{contactInfo.whatsapp}</a>
+              </div>
+            )}
+            {(contactInfo?.address_en || contactInfo?.address_ar) && (
+              <div className={styles.infoItem}>
+                <div className={styles.infoLabel}>{isAr ? 'الموقع' : 'Location'}</div>
+                <div className={styles.infoVal}>
+                  {isAr ? contactInfo.address_ar : contactInfo.address_en}
+                  {contactInfo.cr_number ? ` · CR: ${contactInfo.cr_number}` : ''}
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className={styles.clients}>
-            <span className={styles.clientsLbl}>{isAr ? 'نعمل مع' : 'We work with'}</span>
-            {['GPIC', 'Bapco Energies', 'Ministry of Interior', 'Sharjah Heritage Institute', 'INJAZ Bahrain', 'Bahrain Television'].map(c => (
-              <span key={c} className={styles.clientTag}>{c}</span>
-            ))}
-          </div>
+          {clients.length > 0 && (
+            <div className={styles.clients}>
+              <span className={styles.clientsLbl}>{isAr ? 'نعمل مع' : 'We work with'}</span>
+              {clients.map(c => (
+                c.logo_url
+                  ? <img key={c.id} src={getClientLogoUrl(c.logo_url)} alt={c.name} className={styles.clientLogo} />
+                  : <span key={c.id} className={styles.clientTag}>{c.name}</span>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* RIGHT — form */}

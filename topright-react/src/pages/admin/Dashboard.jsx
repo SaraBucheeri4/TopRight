@@ -20,6 +20,17 @@ import {
   updateCalendarEvent,
   deleteCalendarEvent,
 } from '../../services/calendarService'
+import {
+  fetchAllClients,
+  createClient,
+  updateClient,
+  deleteClient,
+  updateClientsOrder,
+  uploadClientLogo,
+  getClientLogoUrl,
+} from '../../services/clientsService'
+import { fetchContactInfo, upsertContactInfo } from '../../services/contactInfoService'
+import { fetchFooter, upsertFooter } from '../../services/footerService'
 
 const CATEGORIES = PORTFOLIO_CATEGORIES
 
@@ -56,7 +67,7 @@ function CropSlider({ label, value, onChange, styles }) {
 }
 
 /* ── Portfolio Manager ── */
-function PortfolioManager({ onNav }) {
+function PortfolioManager({ onNav, showToast }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [editItem, setEditItem] = useState(null)
@@ -157,10 +168,14 @@ function PortfolioManager({ onNav }) {
   function validate() {
     const e = {}
     if (!editItem.title.trim()) e.title = 'Title is required'
+    if (editItem.title.trim().length > 120) e.title = 'Title must be 120 characters or fewer'
     if (!editItem.category) e.category = 'Category is required'
     if (!editItem.image_url) e.image_url = 'Please upload an image'
     if (editItem.year && (Number(editItem.year) < 1990 || Number(editItem.year) > new Date().getFullYear())) {
       e.year = `Year must be between 1990 and ${new Date().getFullYear()}`
+    }
+    if (editItem.project_url && editItem.project_url.trim() && !/^https?:\/\/.+/.test(editItem.project_url.trim())) {
+      e.project_url = 'Must be a valid URL starting with http:// or https://'
     }
     setFormErrors(e)
     return Object.keys(e).length === 0
@@ -171,8 +186,10 @@ function PortfolioManager({ onNav }) {
     setSaving(true)
     if (isNew) {
       await createPortfolioItem(editItem)
+      showToast?.('Project added', 'New portfolio item is now live.')
     } else {
       await updatePortfolioItem(editItem.id, editItem)
+      showToast?.('Project updated', 'Changes saved successfully.')
     }
     setSaving(false)
     closeEdit()
@@ -425,12 +442,13 @@ function PortfolioManager({ onNav }) {
               <div className={styles.mfg}>
                 <label className={styles.fieldLabel}>Project Link / File</label>
                 <input
-                  className={styles.fieldInput}
+                  className={`${styles.fieldInput} ${formErrors.project_url ? styles.fieldInputErr : ''}`}
                   type="url"
                   placeholder="https://… or upload a file below"
                   value={editItem.project_url ?? ''}
                   onChange={e => setEditItem(p => ({ ...p, project_url: e.target.value }))}
                 />
+                {formErrors.project_url && <span className={styles.fieldErr}>{formErrors.project_url}</span>}
                 <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 10 }}>
                   <button
                     type="button"
@@ -616,7 +634,7 @@ function ContactSubmissions() {
 }
 
 /* ── Site Text Editor ── */
-function SiteTextEditor() {
+function SiteTextEditor({ showToast }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [savedKeys, setSavedKeys] = useState({})
@@ -636,6 +654,7 @@ function SiteTextEditor() {
     await updateSiteTextRow(row.id, { value_en: row.value_en, value_ar: row.value_ar })
     setSavedKeys(prev => ({ ...prev, [row.id]: true }))
     setTimeout(() => setSavedKeys(prev => ({ ...prev, [row.id]: false })), 2000)
+    showToast?.('Saved', `"${row.key}" updated.`)
   }
 
   const grouped = rows.reduce((acc, row) => {
@@ -719,12 +738,12 @@ function DashboardOverview({ onNav, counts }) {
           <div className={styles.statL}>Published</div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statN}>{counts.draft}</div>
-          <div className={styles.statL}>Drafts</div>
+          <div className={styles.statN}>{counts.clients}</div>
+          <div className={styles.statL}>Client Logos</div>
         </div>
         <div className={styles.statCard}>
-          <div className={styles.statN}>{counts.text}</div>
-          <div className={styles.statL}>Text Keys</div>
+          <div className={styles.statN}>{counts.inbox}</div>
+          <div className={styles.statL}>New Submissions</div>
         </div>
       </div>
 
@@ -732,18 +751,57 @@ function DashboardOverview({ onNav, counts }) {
         <button className={styles.quickCard} onClick={() => onNav('portfolio')}>
           <div className={styles.quickCardIcon}>⊞</div>
           <div className={styles.quickCardTitle}>Add Portfolio Item</div>
-          <div className={styles.quickCardSub}>Upload a new project</div>
+          <div className={styles.quickCardSub}>Upload a new project to the bento grid</div>
+        </button>
+        <button className={styles.quickCard} onClick={() => onNav('clients')}>
+          <div className={styles.quickCardIcon}>◉</div>
+          <div className={styles.quickCardTitle}>Manage Clients</div>
+          <div className={styles.quickCardSub}>Add or reorder the clients bar</div>
+        </button>
+        <button className={styles.quickCard} onClick={() => onNav('contact')}>
+          <div className={styles.quickCardIcon}>☏</div>
+          <div className={styles.quickCardTitle}>Update Contact Info</div>
+          <div className={styles.quickCardSub}>Edit email, phone and location</div>
         </button>
         <button className={styles.quickCard} onClick={() => onNav('text')}>
           <div className={styles.quickCardIcon}>✎</div>
           <div className={styles.quickCardTitle}>Edit Site Text</div>
           <div className={styles.quickCardSub}>Update bilingual copy</div>
         </button>
-        <button className={styles.quickCard} onClick={() => onNav('portfolio')}>
-          <div className={styles.quickCardIcon}>⟳</div>
-          <div className={styles.quickCardTitle}>Reorder Portfolio</div>
-          <div className={styles.quickCardSub}>Drag to rearrange items</div>
+        <button className={styles.quickCard} onClick={() => onNav('footer')}>
+          <div className={styles.quickCardIcon}>▭</div>
+          <div className={styles.quickCardTitle}>Footer</div>
+          <div className={styles.quickCardSub}>About text and copyright line</div>
         </button>
+        <button className={styles.quickCard} onClick={() => onNav('inbox')}>
+          <div className={styles.quickCardIcon}>✉</div>
+          <div className={styles.quickCardTitle}>View Submissions</div>
+          <div className={styles.quickCardSub}>{counts.inbox} unread message{counts.inbox !== 1 ? 's' : ''}</div>
+        </button>
+      </div>
+
+      <div className={styles.activity}>
+        <div className={styles.activityHd}>Quick Access</div>
+        <div className={styles.activityItem}>
+          <div className={styles.activityDot} style={{ background: '#01A6A6' }} />
+          <div className={styles.activityText}><strong>Portfolio</strong> — {counts.portfolio} items · {counts.published} published · {counts.draft} draft</div>
+          <button className={styles.activityAction} onClick={() => onNav('portfolio')}>Manage →</button>
+        </div>
+        <div className={styles.activityItem}>
+          <div className={styles.activityDot} style={{ background: '#E7432B' }} />
+          <div className={styles.activityText}><strong>Clients Bar</strong> — {counts.clients} client logo{counts.clients !== 1 ? 's' : ''} displayed on site</div>
+          <button className={styles.activityAction} onClick={() => onNav('clients')}>Manage →</button>
+        </div>
+        <div className={styles.activityItem}>
+          <div className={styles.activityDot} style={{ background: '#773E84' }} />
+          <div className={styles.activityText}><strong>Contact Submissions</strong> — {counts.inbox} message{counts.inbox !== 1 ? 's' : ''} in inbox</div>
+          <button className={styles.activityAction} onClick={() => onNav('inbox')}>View →</button>
+        </div>
+        <div className={styles.activityItem}>
+          <div className={styles.activityDot} style={{ background: '#0058A1' }} />
+          <div className={styles.activityText}><strong>Site Text</strong> — {counts.text} bilingual text keys managed</div>
+          <button className={styles.activityAction} onClick={() => onNav('text')}>Edit →</button>
+        </div>
       </div>
     </div>
   )
@@ -760,7 +818,7 @@ const EVENT_COLORS = [
 ]
 const EMPTY_EVENT = { title: '', description: '', event_date: '', start_time: '', end_time: '', color: '#E7432B', type: 'general' }
 
-function CalendarPage() {
+function CalendarPage({ showToast }) {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
@@ -802,13 +860,22 @@ function CalendarPage() {
   }
 
   async function handleSave() {
-    if (!form.title.trim() || !form.event_date) { setError('Title and date are required.'); return }
+    if (!form.title.trim()) { setError('Title is required.'); return }
+    if (!form.event_date) { setError('Date is required.'); return }
+    const today = new Date(); today.setHours(0, 0, 0, 0)
+    if (new Date(form.event_date + 'T00:00:00') < today) { setError('Event date cannot be in the past.'); return }
+    if (form.start_time && form.end_time && form.end_time <= form.start_time) { setError('End time must be after start time.'); return }
     setSaving(true)
     setError(null)
     try {
       const payload = { title: form.title.trim(), description: form.description.trim() || null, event_date: form.event_date, start_time: form.start_time || null, end_time: form.end_time || null, color: form.color, type: form.type }
-      if (modal.mode === 'add') await createCalendarEvent(payload)
-      else await updateCalendarEvent(modal.id, payload)
+      if (modal.mode === 'add') {
+        await createCalendarEvent(payload)
+        showToast?.('Event added', `"${payload.title}" has been saved to the calendar.`)
+      } else {
+        await updateCalendarEvent(modal.id, payload)
+        showToast?.('Event updated', 'Changes saved successfully.')
+      }
       setModal(null)
       await load()
     } catch (e) { setError(e.message) }
@@ -817,7 +884,7 @@ function CalendarPage() {
 
   async function handleDelete(id) {
     setSaving(true)
-    try { await deleteCalendarEvent(id); setDeleteConfirm(null); setModal(null); await load() }
+    try { await deleteCalendarEvent(id); setDeleteConfirm(null); setModal(null); await load(); showToast?.('Event deleted', 'The event has been removed.') }
     catch (e) { setError(e.message) }
     finally { setSaving(false) }
   }
@@ -913,7 +980,7 @@ function CalendarPage() {
               <div className={styles.mfgRow}>
                 <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Date *</label>
-                  <input className={styles.fieldInput} type="date" value={form.event_date} onChange={e => f('event_date', e.target.value)} />
+                  <input className={styles.fieldInput} type="date" value={form.event_date} min={todayStr} onChange={e => f('event_date', e.target.value)} />
                 </div>
                 <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Type</label>
@@ -979,15 +1046,653 @@ function CalendarPage() {
   )
 }
 
+/* ── Clients Manager ── */
+function ClientsManager({ showToast }) {
+  const [clients, setClients] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [editClient, setEditClient] = useState(null)
+  const [isNew, setIsNew] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [uploadError, setUploadError] = useState(null)
+  const [saveError, setSaveError] = useState(null)
+  const [formErrors, setFormErrors] = useState({})
+  const [previewSrc, setPreviewSrc] = useState(null)
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const dragIdx = useRef(null)
+  const fileRef = useRef(null)
+
+  const EMPTY_CLIENT = { name: '', logo_url: '', display_order: 0, is_published: true }
+
+  async function load() {
+    setLoading(true)
+    const data = await fetchAllClients()
+    setClients(data)
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  async function togglePublish(client) {
+    const updated = !client.is_published
+    setClients(prev => prev.map(c => c.id === client.id ? { ...c, is_published: updated } : c))
+    await updateClient(client.id, { is_published: updated })
+  }
+
+  function onDragStart(idx) { dragIdx.current = idx }
+  function onDragOver(e, idx) {
+    e.preventDefault()
+    if (dragIdx.current === idx) return
+    setClients(prev => {
+      const next = [...prev]
+      const [moved] = next.splice(dragIdx.current, 1)
+      next.splice(idx, 0, moved)
+      dragIdx.current = idx
+      return next
+    })
+  }
+  async function onDrop() {
+    dragIdx.current = null
+    await updateClientsOrder(clients)
+  }
+
+  function openNew() {
+    setEditClient({ ...EMPTY_CLIENT, display_order: clients.length })
+    setIsNew(true)
+    setFormErrors({})
+    setUploadError(null)
+    setPreviewSrc(null)
+  }
+  function openEdit(client) {
+    setEditClient({ ...client })
+    setIsNew(false)
+    setFormErrors({})
+    setUploadError(null)
+    setPreviewSrc(client.logo_url ? getClientLogoUrl(client.logo_url) : null)
+  }
+  function closeEdit() {
+    setEditClient(null)
+    setFormErrors({})
+    setUploadError(null)
+    setPreviewSrc(null)
+  }
+
+  async function handleLogoUpload(file) {
+    if (!file) return
+    setUploadError(null)
+    const reader = new FileReader()
+    reader.onload = e => setPreviewSrc(e.target.result)
+    reader.readAsDataURL(file)
+    setUploading(true)
+    try {
+      const filename = await uploadClientLogo(file)
+      setEditClient(prev => ({ ...prev, logo_url: filename }))
+    } catch (err) {
+      setUploadError(err.message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  function validate() {
+    const e = {}
+    if (!editClient.name?.trim()) e.name = 'Client name is required'
+    else if (editClient.name.trim().length > 80) e.name = 'Name must be 80 characters or fewer'
+    setFormErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  async function handleSave() {
+    if (!validate()) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      if (isNew) {
+        const { id: _id, ...rest } = editClient
+        await createClient({ ...rest, display_order: clients.length })
+        showToast?.('Client added', `"${editClient.name}" is now in the clients bar.`)
+      } else {
+        const { id, ...rest } = editClient
+        await updateClient(id, rest)
+        showToast?.('Client updated', 'Changes saved successfully.')
+      }
+      closeEdit()
+      load()
+    } catch (err) {
+      setSaveError(err.message ?? 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleDelete(client) {
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await deleteClient(client.id)
+      showToast?.('Client removed', `"${client.name}" has been deleted.`)
+      setDeleteConfirm(null)
+      load()
+    } catch (err) {
+      setSaveError(err.message ?? 'Delete failed')
+      setDeleteConfirm(null)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Website Content</div>
+          <h1 className={styles.pageTitle}>Clients Bar</h1>
+        </div>
+        <button className={styles.btnAdd} onClick={openNew}>+ Add Client</button>
+      </div>
+
+      <div className={styles.tableWrap}>
+        <table className={styles.table} style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 36 }} />
+            <col style={{ width: 56 }} />
+            <col />
+            <col style={{ width: 110 }} />
+            <col style={{ width: 140 }} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th>Client Name</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {clients.map((client, idx) => (
+              <tr
+                key={client.id}
+                draggable
+                onDragStart={() => onDragStart(idx)}
+                onDragOver={e => onDragOver(e, idx)}
+                onDrop={onDrop}
+                className={styles.draggableRow}
+              >
+                <td className={styles.dragHandle}>⠿</td>
+                <td>
+                  {client.logo_url
+                    ? <img src={getClientLogoUrl(client.logo_url)} alt="" className={styles.thumb} />
+                    : <div className={styles.thumbEmpty} />}
+                </td>
+                <td className={styles.tdTitle}>{client.name}</td>
+                <td>
+                  <button
+                    className={`${styles.toggle} ${client.is_published ? styles.toggleOn : styles.toggleOff}`}
+                    onClick={() => togglePublish(client)}
+                  >
+                    {client.is_published ? '● Live' : '○ Draft'}
+                  </button>
+                </td>
+                <td>
+                  <div className={styles.tdActions}>
+                    <button className={`${styles.btnSm} ${styles.btnEdit}`} onClick={() => openEdit(client)}>Edit</button>
+                    <button className={`${styles.btnSm} ${styles.btnDel}`} onClick={() => setDeleteConfirm(client)}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {clients.length === 0 && <div className={styles.empty}>No clients yet. Add one above.</div>}
+      </div>
+
+      {/* Edit / Add modal */}
+      {editClient && (
+        <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && closeEdit()}>
+          <div className={styles.modal}>
+            <div className={styles.modalHd}>
+              <span className={styles.modalTtl}>{isNew ? 'New Client' : 'Edit Client'}</span>
+              <button className={styles.modalClose} onClick={closeEdit}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Client Name *</label>
+                <input
+                  className={`${styles.fieldInput} ${formErrors.name ? styles.fieldInputErr : ''}`}
+                  type="text"
+                  placeholder="e.g. Bapco Energies"
+                  value={editClient.name}
+                  onChange={e => setEditClient(p => ({ ...p, name: e.target.value }))}
+                />
+                {formErrors.name && <span className={styles.fieldErr}>{formErrors.name}</span>}
+              </div>
+
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Logo (optional)</label>
+                <div
+                  className={`${styles.uploadArea} ${uploadError ? styles.uploadAreaErr : ''}`}
+                  onClick={() => fileRef.current?.click()}
+                >
+                  {previewSrc
+                    ? <img src={previewSrc} alt="preview" style={{ maxHeight: 60, maxWidth: '100%', objectFit: 'contain' }} />
+                    : <>
+                        <div style={{ fontSize: 22, opacity: 0.3 }}>⊕</div>
+                        <span className={styles.uploadAreaText}>{uploading ? 'Uploading…' : 'Upload client logo'}</span>
+                        <span className={styles.uploadAreaHint}>SVG or PNG preferred</span>
+                      </>
+                  }
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={e => handleLogoUpload(e.target.files[0])}
+                  />
+                </div>
+                {uploadError && <span className={styles.fieldErr}>{uploadError}</span>}
+              </div>
+
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Display Order</label>
+                  <input
+                    className={styles.fieldInput}
+                    type="number"
+                    value={editClient.display_order}
+                    onChange={e => setEditClient(p => ({ ...p, display_order: Number(e.target.value) }))}
+                  />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Visibility</label>
+                  <select
+                    className={styles.fieldInput}
+                    value={editClient.is_published ? 'live' : 'draft'}
+                    onChange={e => setEditClient(p => ({ ...p, is_published: e.target.value === 'live' }))}
+                  >
+                    <option value="live">Live</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              {saveError && <span className={styles.fieldErr} style={{ marginRight: 'auto' }}>{saveError}</span>}
+              <button className={styles.btnSecondary} onClick={closeEdit}>Cancel</button>
+              <button className={styles.btnAdd} onClick={handleSave} disabled={saving || uploading}>
+                {saving ? 'Saving…' : isNew ? 'Add Client' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirm */}
+      {deleteConfirm && (
+        <div className={styles.modalOverlay} onClick={() => setDeleteConfirm(null)}>
+          <div className={styles.modal} style={{ width: 400 }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHd}>
+              <h2 className={styles.modalTtl}>Delete Client?</h2>
+              <button className={styles.modalClose} onClick={() => setDeleteConfirm(null)}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              <p style={{ color: '#888', fontSize: 13, lineHeight: 1.6 }}>
+                "{deleteConfirm.name}" will be permanently removed from the clients bar.
+              </p>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnSecondary} onClick={() => setDeleteConfirm(null)}>Cancel</button>
+              <button className={`${styles.btnSm} ${styles.btnDel}`} style={{ padding: '10px 20px' }} onClick={() => handleDelete(deleteConfirm)} disabled={saving}>
+                {saving ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ── Contact Info Editor ── */
+function ContactInfoEditor({ showToast }) {
+  const [info, setInfo] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const [fieldErrors, setFieldErrors] = useState({})
+
+  async function load() {
+    setLoading(true)
+    const data = await fetchContactInfo()
+    setInfo(data ?? {
+      email: '', phone_primary: '', phone_secondary: '', whatsapp: '',
+      address_en: '', address_ar: '', cr_number: '',
+      section_title_en: '', section_title_ar: '',
+      description_en: '', description_ar: '',
+    })
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  function set(field, value) {
+    setInfo(prev => ({ ...prev, [field]: value }))
+    setSaved(false)
+    setFieldErrors(prev => ({ ...prev, [field]: null }))
+  }
+
+  function validate() {
+    const e = {}
+    if (info.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(info.email.trim())) e.email = 'Invalid email address'
+    const phoneRe = /^[+\d][\d\s\-().]{6,}$/
+    if (info.phone_primary && !phoneRe.test(info.phone_primary.trim())) e.phone_primary = 'Invalid phone number'
+    if (info.phone_secondary && !phoneRe.test(info.phone_secondary.trim())) e.phone_secondary = 'Invalid phone number'
+    if (info.whatsapp && !phoneRe.test(info.whatsapp.trim())) e.whatsapp = 'Invalid WhatsApp number'
+    setFieldErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  async function handleSave() {
+    if (!validate()) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await upsertContactInfo(info)
+      setSaved(true)
+      showToast?.('Saved', 'Contact info updated successfully.')
+      load()
+    } catch (err) {
+      setSaveError(err.message ?? 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Pages</div>
+          <h1 className={styles.pageTitle}>Contact Info</h1>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+          <button className={styles.btnAdd} onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save Changes'}
+          </button>
+          {saveError && <span className={styles.fieldErr}>{saveError}</span>}
+        </div>
+      </div>
+
+      <div className={styles.tableWrap} style={{ padding: 28 }}>
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Email Address</label>
+            <input
+              className={`${styles.fieldInput} ${fieldErrors.email ? styles.fieldInputErr : ''}`}
+              type="email"
+              placeholder="hello@topright.bh"
+              value={info.email ?? ''}
+              onChange={e => set('email', e.target.value)}
+            />
+            {fieldErrors.email && <span className={styles.fieldErr}>{fieldErrors.email}</span>}
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Phone</label>
+            <input
+              className={`${styles.fieldInput} ${fieldErrors.phone_primary ? styles.fieldInputErr : ''}`}
+              type="text"
+              placeholder="(+973) 36622100 / 17566726"
+              value={info.phone_primary ?? ''}
+              onChange={e => set('phone_primary', e.target.value)}
+            />
+            {fieldErrors.phone_primary && <span className={styles.fieldErr}>{fieldErrors.phone_primary}</span>}
+          </div>
+        </div>
+
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>WhatsApp Number</label>
+            <input
+              className={`${styles.fieldInput} ${fieldErrors.whatsapp ? styles.fieldInputErr : ''}`}
+              type="text"
+              placeholder="(+973) 36622100"
+              value={info.whatsapp ?? ''}
+              onChange={e => set('whatsapp', e.target.value)}
+            />
+            {fieldErrors.whatsapp && <span className={styles.fieldErr}>{fieldErrors.whatsapp}</span>}
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Location</label>
+            <input
+              className={styles.fieldInput}
+              type="text"
+              placeholder="Bahrain · CR: 46817-1"
+              value={[info.address_en, info.cr_number ? `CR: ${info.cr_number}` : ''].filter(Boolean).join(' · ')}
+              onChange={e => set('address_en', e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className={styles.mfg}>
+          <label className={styles.fieldLabel}>Section Title (EN)</label>
+          <input
+            className={styles.fieldInput}
+            type="text"
+            placeholder="Let's work together"
+            value={info.section_title_en ?? ''}
+            onChange={e => set('section_title_en', e.target.value)}
+          />
+        </div>
+
+        <div className={styles.mfg}>
+          <label className={styles.fieldLabel}>Section Title (AR)</label>
+          <input
+            className={styles.fieldInput}
+            type="text"
+            dir="rtl"
+            placeholder="لنعمل معًا"
+            value={info.section_title_ar ?? ''}
+            onChange={e => set('section_title_ar', e.target.value)}
+          />
+        </div>
+
+        <div className={styles.mfg}>
+          <label className={styles.fieldLabel}>Description (EN)</label>
+          <textarea
+            className={styles.fieldInput}
+            rows={3}
+            placeholder="Tell us about your project and we will get back to you within 24 hours…"
+            value={info.description_en ?? ''}
+            onChange={e => set('description_en', e.target.value)}
+          />
+        </div>
+
+        <div className={styles.mfg}>
+          <label className={styles.fieldLabel}>Description (AR)</label>
+          <textarea
+            className={styles.fieldInput}
+            rows={3}
+            dir="rtl"
+            placeholder="أخبرنا عن مشروعك وسنعود إليك خلال ٢٤ ساعة…"
+            value={info.description_ar ?? ''}
+            onChange={e => set('description_ar', e.target.value)}
+          />
+        </div>
+
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Phone (Secondary)</label>
+            <input
+              className={`${styles.fieldInput} ${fieldErrors.phone_secondary ? styles.fieldInputErr : ''}`}
+              type="text"
+              placeholder="(+973) 17566726"
+              value={info.phone_secondary ?? ''}
+              onChange={e => set('phone_secondary', e.target.value)}
+            />
+            {fieldErrors.phone_secondary && <span className={styles.fieldErr}>{fieldErrors.phone_secondary}</span>}
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>CR Number</label>
+            <input
+              className={styles.fieldInput}
+              type="text"
+              placeholder="46817-1"
+              value={info.cr_number ?? ''}
+              onChange={e => set('cr_number', e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className={styles.mfg}>
+          <label className={styles.fieldLabel}>Address (AR)</label>
+          <input
+            className={styles.fieldInput}
+            type="text"
+            dir="rtl"
+            placeholder="البحرين"
+            value={info.address_ar ?? ''}
+            onChange={e => set('address_ar', e.target.value)}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Footer Editor ── */
+function FooterEditor({ showToast }) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const [fieldErrors, setFieldErrors] = useState({})
+
+  async function load() {
+    setLoading(true)
+    const d = await fetchFooter()
+    setData(d ?? { description_en: '', description_ar: '', copyright_text: '' })
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  function set(field, value) {
+    setData(prev => ({ ...prev, [field]: value }))
+    setSaved(false)
+    setFieldErrors(prev => ({ ...prev, [field]: null }))
+  }
+
+  function validate() {
+    const e = {}
+    if (!data.description_en?.trim() && !data.description_ar?.trim()) e.description_en = 'At least one description (EN or AR) is required'
+    if (!data.copyright_text?.trim()) e.copyright_text = 'Copyright line is required'
+    setFieldErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  async function handleSave() {
+    if (!validate()) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await upsertFooter(data)
+      setSaved(true)
+      showToast?.('Saved', 'Footer updated successfully.')
+      load()
+    } catch (err) {
+      setSaveError(err.message ?? 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Pages</div>
+          <h1 className={styles.pageTitle}>Footer</h1>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
+          <button className={styles.btnAdd} onClick={handleSave} disabled={saving}>
+            {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save Changes'}
+          </button>
+          {saveError && <span className={styles.fieldErr}>{saveError}</span>}
+        </div>
+      </div>
+
+      <div className={styles.tableWrap} style={{ padding: 28 }}>
+        <div className={styles.mfg}>
+          <label className={styles.fieldLabel}>About Text (EN)</label>
+          <textarea
+            className={`${styles.fieldInput} ${fieldErrors.description_en ? styles.fieldInputErr : ''}`}
+            rows={3}
+            placeholder="A Bahraini creative studio…"
+            value={data.description_en ?? ''}
+            onChange={e => set('description_en', e.target.value)}
+          />
+          {fieldErrors.description_en && <span className={styles.fieldErr}>{fieldErrors.description_en}</span>}
+        </div>
+        <div className={styles.mfg}>
+          <label className={styles.fieldLabel}>About Text (AR)</label>
+          <textarea
+            className={styles.fieldInput}
+            rows={3}
+            dir="rtl"
+            placeholder="استوديو إبداعي بحريني…"
+            value={data.description_ar ?? ''}
+            onChange={e => set('description_ar', e.target.value)}
+          />
+        </div>
+        <div className={styles.mfg}>
+          <label className={styles.fieldLabel}>Copyright Line *</label>
+          <input
+            className={`${styles.fieldInput} ${fieldErrors.copyright_text ? styles.fieldInputErr : ''}`}
+            type="text"
+            placeholder="© 2025 TopRight Design & Support Services · Bahrain · CR: 46817-1"
+            value={data.copyright_text ?? ''}
+            onChange={e => set('copyright_text', e.target.value)}
+          />
+          {fieldErrors.copyright_text && <span className={styles.fieldErr}>{fieldErrors.copyright_text}</span>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Toast ── */
+function Toast({ toast }) {
+  if (!toast) return null
+  return (
+    <div className={`${styles.toast} ${toast.type === 'success' ? styles.toastSuccess : ''}`}>
+      <div className={styles.toastTitle}>{toast.title}</div>
+      <div className={styles.toastMsg}>{toast.msg}</div>
+    </div>
+  )
+}
+
 /* ── Main Dashboard shell ── */
 export default function Dashboard() {
   const [section, setSection] = useState('dashboard')
-  const [counts, setCounts] = useState({ portfolio: 0, published: 0, draft: 0, text: 0, inbox: 0 })
+  const [counts, setCounts] = useState({ portfolio: 0, published: 0, draft: 0, text: 0, inbox: 0, clients: 0 })
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [toast, setToast] = useState(null)
+  const toastTimer = useRef(null)
 
   useEffect(() => {
     fetchDashboardCounts().then(setCounts)
   }, [])
+
+  function showToast(title, msg, type = 'success') {
+    clearTimeout(toastTimer.current)
+    setToast({ title, msg, type })
+    toastTimer.current = setTimeout(() => setToast(null), 3200)
+  }
 
   async function handleLogout() {
     await signOut()
@@ -995,8 +1700,11 @@ export default function Dashboard() {
 
   const navItems = [
     { key: 'dashboard', icon: '◈', label: 'Dashboard',    group: 'Overview' },
-    { key: 'portfolio', icon: '⊞', label: 'Portfolio',    group: 'Content', count: counts.portfolio },
-    { key: 'text',      icon: '✎', label: 'Site Text',    group: 'Content' },
+    { key: 'portfolio', icon: '⊞', label: 'Portfolio',    group: 'Website Content', count: counts.portfolio },
+    { key: 'clients',   icon: '◉', label: 'Clients Bar',  group: 'Website Content', count: counts.clients },
+    { key: 'text',      icon: '✎', label: 'Site Text',    group: 'Website Content' },
+    { key: 'contact',   icon: '☏', label: 'Contact Info', group: 'Pages' },
+    { key: 'footer',    icon: '▭', label: 'Footer',       group: 'Pages' },
     { key: 'calendar',  icon: '⬚', label: 'Calendar',     group: 'Schedule' },
     { key: 'inbox',     icon: '✉', label: 'Submissions',  group: 'Inbox',   count: counts.inbox },
   ]
@@ -1016,6 +1724,8 @@ export default function Dashboard() {
           <span className={styles.headerPortalLabel}>Admin Portal</span>
         </div>
         <div className={styles.headerR}>
+          <a href="/" target="_blank" rel="noopener" className={styles.viewSiteBtn}>↗ View Site</a>
+          <div className={styles.adminAvatar}>A</div>
           <button className={styles.logoutBtn} onClick={handleLogout}>Sign Out</button>
         </div>
       </header>
@@ -1045,12 +1755,17 @@ export default function Dashboard() {
 
         <main className={styles.main}>
           {section === 'dashboard' && <DashboardOverview onNav={setSection} counts={counts} />}
-          {section === 'portfolio' && <PortfolioManager onNav={setSection} />}
-          {section === 'text' && <SiteTextEditor />}
-          {section === 'calendar' && <CalendarPage />}
-          {section === 'inbox' && <ContactSubmissions />}
+          {section === 'portfolio' && <PortfolioManager onNav={setSection} showToast={showToast} />}
+          {section === 'clients'   && <ClientsManager showToast={showToast} />}
+          {section === 'text'      && <SiteTextEditor showToast={showToast} />}
+          {section === 'contact'   && <ContactInfoEditor showToast={showToast} />}
+          {section === 'footer'    && <FooterEditor showToast={showToast} />}
+          {section === 'calendar'  && <CalendarPage showToast={showToast} />}
+          {section === 'inbox'     && <ContactSubmissions />}
         </main>
       </div>
+
+      <Toast toast={toast} />
     </div>
   )
 }

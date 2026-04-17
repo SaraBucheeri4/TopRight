@@ -118,6 +118,7 @@
   white-space: nowrap;
 }
 .clDiv { width: 1px; height: 14px; background: #ccc; flex-shrink: 0; }
+.clLogo { height: 22px; max-width: 80px; object-fit: contain; opacity: 0.5; padding: 0 16px; }
 
 /* ── PORTFOLIO ── */
 .port { background: #1E1E1E; padding: 72px 0; }

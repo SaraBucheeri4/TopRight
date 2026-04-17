@@ -4,7 +4,9 @@ import styles from './Home.module.css'
 import { useLang } from '../../LangContext'
 import { fetchPublishedPortfolioItems, getPublicUrl } from '../../services/portfolioService'
 import { submitContactForm } from '../../services/contactService'
-import { WA_NUMBER, CONTACT_DETAILS } from '../../config/constants'
+import { WA_NUMBER } from '../../config/constants'
+import { fetchPublishedClients, getClientLogoUrl } from '../../services/clientsService'
+import { fetchContactInfo } from '../../services/contactInfoService'
 
 const CAT_COLORS = {
   newsletter:   { bg: 'rgba(0,88,161,.15)',   color: '#5B9BD5' },
@@ -15,8 +17,6 @@ const CAT_COLORS = {
   corporate:    { bg: 'rgba(0,88,161,.15)',   color: '#5B9BD5' },
 }
 
-const clients = ['GPIC', 'Bapco Energies', 'Ministry of Interior',
-  'Sharjah Heritage Institute', 'GCC Secretariat', 'INJAZ Bahrain', 'Bahrain Television']
 
 const tabs = [
   { key: 'All',          en: 'All',          ar: 'الكل' },
@@ -92,6 +92,8 @@ const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior:
 export default function Home() {
   const [activeTab, setActiveTab] = useState('All')
   const [portfolioCards, setPortfolioCards] = useState([])
+  const [clients, setClients] = useState([])
+  const [contactInfo, setContactInfo] = useState(null)
   const [form, setForm] = useState({ name: '', org: '', email: '', type: '', message: '' })
   const [formErrors, setFormErrors] = useState({})
   const [sent, setSent] = useState(false)
@@ -102,6 +104,8 @@ export default function Home() {
   const t = (obj) => isAr ? obj.ar : obj.en
 
   useEffect(() => {
+    fetchPublishedClients().then(setClients)
+    fetchContactInfo().then(setContactInfo)
     fetchPublishedPortfolioItems().then(data => {
       setPortfolioCards(data.map(item => ({
         cat: item.category,
@@ -219,15 +223,20 @@ export default function Home() {
       <Marquee />
 
       {/* CLIENTS */}
-      <div className={styles.clients}>
-        <span className={styles.clLbl}>{isAr ? 'يثق بنا' : 'Trusted by'}</span>
-        {clients.map((c, i) => (
-          <span key={c} className={styles.clGroup}>
-            {i > 0 && <span className={styles.clDiv} />}
-            <span className={styles.clN}>{c}</span>
-          </span>
-        ))}
-      </div>
+      {clients.length > 0 && (
+        <div className={styles.clients}>
+          <span className={styles.clLbl}>{isAr ? 'يثق بنا' : 'Trusted by'}</span>
+          {clients.map((c, i) => (
+            <span key={c.id} className={styles.clGroup}>
+              {i > 0 && <span className={styles.clDiv} />}
+              {c.logo_url
+                ? <img src={getClientLogoUrl(c.logo_url)} alt={c.name} className={styles.clLogo} />
+                : <span className={styles.clN}>{c.name}</span>
+              }
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* PORTFOLIO */}
       <section id="work" className={styles.port}>
@@ -385,15 +394,33 @@ export default function Home() {
           <h2>{isAr ? <>لنعمل<br />معًا</> : <>Let's work<br />together</>}</h2>
           <p>{isAr ? 'أخبرنا عن مشروعك وسنردّ عليك خلال ٢٤ ساعة.' : 'Tell us about your project and we will get back to you within 24 hours.'}</p>
           <div className={styles.contactItems}>
-            {CONTACT_DETAILS.map(item => (
-              <div key={item.labelEn} className={styles.contactItem}>
-                <div className={styles.contactLabel}>{isAr ? item.labelAr : item.labelEn}</div>
-                {item.href
-                  ? <a href={item.href} target={item.href.startsWith('http') ? '_blank' : undefined} rel="noopener" className={styles.contactVal}>{item.val}</a>
-                  : <div className={styles.contactVal}>{item.val}</div>
-                }
+            {contactInfo?.email && (
+              <div className={styles.contactItem}>
+                <div className={styles.contactLabel}>{isAr ? 'البريد الإلكتروني' : 'Email'}</div>
+                <a href={`mailto:${contactInfo.email}`} className={styles.contactVal}>{contactInfo.email}</a>
               </div>
-            ))}
+            )}
+            {contactInfo?.phone_primary && (
+              <div className={styles.contactItem}>
+                <div className={styles.contactLabel}>{isAr ? 'الهاتف' : 'Phone'}</div>
+                <div className={styles.contactVal}>{contactInfo.phone_primary}</div>
+              </div>
+            )}
+            {contactInfo?.whatsapp && (
+              <div className={styles.contactItem}>
+                <div className={styles.contactLabel}>{isAr ? 'واتساب' : 'WhatsApp'}</div>
+                <a href={`https://wa.me/${contactInfo.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener" className={styles.contactVal}>{contactInfo.whatsapp}</a>
+              </div>
+            )}
+            {(contactInfo?.address_en || contactInfo?.address_ar) && (
+              <div className={styles.contactItem}>
+                <div className={styles.contactLabel}>{isAr ? 'الموقع' : 'Location'}</div>
+                <div className={styles.contactVal}>
+                  {isAr ? contactInfo.address_ar : contactInfo.address_en}
+                  {contactInfo.cr_number ? ` · CR: ${contactInfo.cr_number}` : ''}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

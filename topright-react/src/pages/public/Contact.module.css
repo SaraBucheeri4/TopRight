@@ -31,6 +31,7 @@ a.infoVal:hover { color: #E7432B; }
 
 .clients { display: flex; flex-direction: column; gap: 10px; }
 .clientsLbl { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: #999; }
+.clientLogo { height: 24px; max-width: 80px; object-fit: contain; opacity: 0.6; margin: 3px 8px 0 0; display: inline-block; vertical-align: middle; }
 .clientTag {
   display: inline-block;
   font-size: 9px;

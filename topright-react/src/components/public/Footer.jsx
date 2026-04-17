@@ -1,9 +1,21 @@
+import { useState, useEffect } from "react";
 import { useLang } from "../../LangContext";
 import styles from "./Footer.module.css";
+import { fetchFooter } from "../../services/footerService";
 
 export default function Footer() {
   const { lang } = useLang();
   const isAr = lang === "ar";
+  const [footer, setFooter] = useState(null);
+
+  useEffect(() => { fetchFooter().then(setFooter) }, []);
+
+  const desc = footer
+    ? (isAr ? footer.description_ar : footer.description_en)
+    : (isAr ? "استوديو إبداعي بحريني متخصص في الرسم التوضيحي ثنائي اللغة وتصميم المطبوعات وتطوير الهوية، يخدم مؤسسات منطقة الخليج منذ عام ٢٠٠١." : "A Bahraini creative studio specialising in bilingual illustration, publication design and brand development. Partnering organisations across the GCC since 2001.")
+
+  const copyright = footer?.copyright_text
+    ?? (isAr ? "© ٢٠٢٥ توب رايت لخدمات التصميم والدعم · البحرين · CR: 46817-1" : "© 2025 TopRight Design & Support Services · Bahrain · CR: 46817-1")
 
   return (
     <footer className={styles.footer}>
@@ -13,9 +25,7 @@ export default function Footer() {
           <p className={styles.tagline}>
             {isAr ? "خدمات التصميم والدعم · البحرين · CR: 46817-1" : "Design & Support Services · Bahrain · CR: 46817-1"}
           </p>
-          <p className={styles.desc}>
-            {isAr ? "استوديو إبداعي بحريني متخصص في الرسم التوضيحي ثنائي اللغة وتصميم المطبوعات وتطوير الهوية، يخدم مؤسسات منطقة الخليج منذ عام ٢٠٠١." : "A Bahraini creative studio specialising in bilingual illustration, publication design and brand development. Partnering organisations across the GCC since 2001."}
-          </p>
+          <p className={styles.desc}>{desc}</p>
         </div>
 
         <div className={styles.col}>
@@ -47,9 +57,7 @@ export default function Footer() {
       </div>
 
       <div className={styles.bottom}>
-        <span className={styles.copy}>
-          {isAr ? "© ٢٠٢٥ توب رايت لخدمات التصميم والدعم · البحرين · CR: 46817-1" : "© 2025 TopRight Design & Support Services · Bahrain · CR: 46817-1"}
-        </span>
+        <span className={styles.copy}>{copyright}</span>
         <div className={styles.social}>
           <a href="#" className={styles.sb}>in</a>
           <a href="#" className={styles.sb}>ig</a>
