@@ -1,162 +1,15 @@
+import { useState, useEffect } from "react";
 import styles from "./Services.module.css";
 import { useLang } from "../../LangContext";
+import { fetchPublishedServices } from "../../services/servicesService";
 
-const services = [
-  {
-    n: "01",
-    tag: "Publications",
-    tagAr: "المطبوعات",
-    color: "#E7432B",
-    title: "Publication Design",
-    titleAr: "تصميم المطبوعات",
-    desc: "Books, newsletters, annual reports and HSE manuals — printed and digital, fully bilingual in Arabic and English from concept through to print. We handle writing, editing, layout and production.",
-    descAr:
-      "الكتب والنشرات والتقارير السنوية وأدلة السلامة المهنية — مطبوعة ورقمية، ثنائية اللغة بالكامل من الفكرة حتى الطباعة. نتولى الكتابة والتحرير والتخطيط والإنتاج.",
-    items: [
-      "Annual Reports",
-      "Corporate Newsletters",
-      "HSE Manuals & Booklets",
-      "Company Profiles",
-      "Magazines & Journals",
-    ],
-    itemsAr: [
-      "التقارير السنوية",
-      "النشرات المؤسسية",
-      "أدلة وكتيبات السلامة المهنية",
-      "ملفات تعريف الشركات",
-      "المجلات والدوريات",
-    ],
-  },
-  {
-    n: "02",
-    tag: "Illustration",
-    tagAr: "الرسوم التوضيحية",
-    color: "#01A6A6",
-    title: "Editorial Art & Illustration",
-    titleAr: "الفن التحريري والرسوم التوضيحية",
-    desc: "Storybooks and activity books for children and young adults — full character development, graphic art and complete layout from start to finish. Bilingual and culturally rooted in the Gulf.",
-    descAr:
-      "كتب القصص والكتب التعليمية للأطفال والشباب — تطوير شخصيات متكامل وفن رسومي وتخطيط كامل من البداية إلى النهاية. ثنائية اللغة ومتجذرة ثقافيًا في الخليج.",
-    items: [
-      "Children's Story Books",
-      "Activity & Educational Books",
-      "Character Development",
-      "Cover Art",
-      "Infographic Illustration",
-    ],
-    itemsAr: [
-      "كتب القصص للأطفال",
-      "الكتب التعليمية والتفاعلية",
-      "تطوير الشخصيات",
-      "فن الأغلفة",
-      "الرسوم التوضيحية الإنفوغرافية",
-    ],
-  },
-  {
-    n: "03",
-    tag: "Animation",
-    tagAr: "الرسوم المتحركة",
-    color: "#1a1a1a",
-    title: "Animation & Motion",
-    titleAr: "الرسوم المتحركة والحركة",
-    desc: "Character development to full animation. Digital publications with embedded animations — HTML5 eBooks, digital editions and interactive content that can be shared across devices.",
-    descAr:
-      "من تطوير الشخصيات إلى الرسوم المتحركة الكاملة. منشورات رقمية تتضمن رسومًا متحركة — كتب HTML5 وطبعات رقمية ومحتوى تفاعلي قابل للمشاركة على جميع الأجهزة.",
-    items: [
-      "Character Animation",
-      "Explainer Videos",
-      "HTML5 Animated eBooks",
-      "Motion Graphics",
-      "Digital Interactive Content",
-    ],
-    itemsAr: [
-      "رسوم شخصيات متحركة",
-      "فيديوهات شرح",
-      "كتب HTML5 متحركة",
-      "الرسوم الجرافيكية المتحركة",
-      "المحتوى الرقمي التفاعلي",
-    ],
-  },
-  {
-    n: "04",
-    tag: "Corporate",
-    tagAr: "المؤسسي",
-    color: "#0058A1",
-    title: "Corporate & Guideline Books",
-    titleAr: "الكتب المؤسسية والإرشادية",
-    desc: "Corporate communication books, brand guidelines and process manuals — structured, clear and brand-consistent throughout every spread. Bilingual where required.",
-    descAr:
-      "كتب التواصل المؤسسي وإرشادات العلامة التجارية وأدلة العمليات — منظمة وواضحة ومتسقة مع الهوية المؤسسية في كل صفحة. ثنائية اللغة عند الحاجة.",
-    items: [
-      "Brand Guidelines",
-      "Policy & Procedure Manuals",
-      "Employee Handbooks",
-      "Training Materials",
-      "Process Documentation",
-    ],
-    itemsAr: [
-      "إرشادات العلامة التجارية",
-      "أدلة السياسات والإجراءات",
-      "أدلة الموظفين",
-      "مواد التدريب",
-      "توثيق العمليات",
-    ],
-  },
-  {
-    n: "05",
-    tag: "Digital",
-    tagAr: "الرقمي",
-    color: "#000",
-    title: "Digital Publications",
-    titleAr: "المنشورات الرقمية",
-    desc: "Interactive eBooks, HTML5 mini-websites and digital editions with embedded animations — modern, accessible and shareable on every device. Perfect for organisations going paperless.",
-    descAr:
-      "كتب إلكترونية تفاعلية ومواقع HTML5 مصغرة وطبعات رقمية تتضمن رسومًا متحركة — حديثة وسهلة الوصول وقابلة للمشاركة على جميع الأجهزة. مثالية للمؤسسات التي تتجه نحو العمل الرقمي.",
-    items: [
-      "Interactive eBooks (PDF & HTML5)",
-      "Digital Annual Reports",
-      "Online Magazines",
-      "Embedded Video & Animation",
-      "Accessible Digital Formats",
-    ],
-    itemsAr: [
-      "كتب إلكترونية تفاعلية (PDF وHTML5)",
-      "تقارير سنوية رقمية",
-      "مجلات إلكترونية",
-      "فيديو ورسوم متحركة مدمجة",
-      "صيغ رقمية سهلة الوصول",
-    ],
-  },
-  {
-    n: "06",
-    tag: "Coaching",
-    tagAr: "التدريب",
-    color: "#773E84",
-    title: "Coaching & Workshops",
-    titleAr: "التدريب وورش العمل",
-    desc: "Creative writing, storytelling and brand development workshops for individuals, teams and organisations — in Bahrain and online. Tailored programmes for all levels.",
-    descAr:
-      "ورش عمل في الكتابة الإبداعية والسرد القصصي وتطوير العلامة التجارية للأفراد والفرق والمؤسسات — في البحرين وعبر الإنترنت. برامج مصممة لجميع المستويات.",
-    items: [
-      "Creative Writing Workshops",
-      "Storytelling for Business",
-      "Brand Voice Development",
-      "Bilingual Writing Skills",
-      "One-to-one Coaching",
-    ],
-    itemsAr: [
-      "ورش الكتابة الإبداعية",
-      "السرد القصصي للأعمال",
-      "تطوير صوت العلامة التجارية",
-      "مهارات الكتابة ثنائية اللغة",
-      "التدريب الفردي",
-    ],
-  },
-];
 
 export default function Services() {
   const { lang } = useLang();
   const isAr = lang === "ar";
+  const [services, setServices] = useState([]);
+
+  useEffect(() => { fetchPublishedServices().then(setServices) }, []);
 
   const processSteps = [
     {
@@ -218,43 +71,25 @@ export default function Services() {
       </section>
 
       <section className={styles.grid}>
-        {services.map((s) => (
-          <div
-            key={s.n}
-            className={styles.card}
-            style={{ "--accent": s.color }}
-          >
-            <div className={styles.cardTop}>
-              <span className={styles.n}>{s.n}</span>
-              <span
-                className={styles.tag}
-                style={{ borderColor: s.color, color: s.color }}
-              >
-                {isAr ? s.tagAr : s.tag}
-              </span>
+        {services.map((s, i) => {
+          const color = s.card_color || "#E7432B";
+          const num = String(i + 1).padStart(2, "0");
+          return (
+            <div key={s.id} className={styles.card} style={{ "--accent": color }}>
+              <div className={styles.cardTop}>
+                <span className={styles.n}>{num}</span>
+                <span className={styles.tag} style={{ borderColor: color, color }}>
+                  {s.tag_label}
+                </span>
+              </div>
+              <h3 className={styles.title}>{isAr ? s.title_ar : s.title_en}</h3>
+              <p className={styles.desc}>{isAr ? s.description_ar : s.description_en}</p>
+              <a href="/contact" className={styles.cta} style={{ color, borderColor: color }}>
+                {isAr ? "ابدأ مشروعك ←" : "Start a project →"}
+              </a>
             </div>
-            <h3 className={styles.title}>{isAr ? s.titleAr : s.title}</h3>
-            <p className={styles.desc}>{isAr ? s.descAr : s.desc}</p>
-            <ul className={styles.list}>
-              {(isAr ? s.itemsAr : s.items).map((item) => (
-                <li key={item}>
-                  <span
-                    className={styles.bullet}
-                    style={{ background: s.color }}
-                  />
-                  {item}
-                </li>
-              ))}
-            </ul>
-            <a
-              href="/contact"
-              className={styles.cta}
-              style={{ color: s.color, borderColor: s.color }}
-            >
-              {isAr ? "ابدأ مشروعك ←" : "Start a project →"}
-            </a>
-          </div>
-        ))}
+          );
+        })}
       </section>
 
       {/* PROCESS */}

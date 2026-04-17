@@ -31,6 +31,20 @@ import {
 } from '../../services/clientsService'
 import { fetchContactInfo, upsertContactInfo } from '../../services/contactInfoService'
 import { fetchFooter, upsertFooter } from '../../services/footerService'
+import {
+  fetchAllServices,
+  createService,
+  updateService,
+  deleteService,
+  updateServicesOrder,
+} from '../../services/servicesService'
+import {
+  fetchAllTestimonials,
+  createTestimonial,
+  updateTestimonial,
+  deleteTestimonial,
+  updateTestimonialsOrder,
+} from '../../services/testimonialsService'
 
 const CATEGORIES = PORTFOLIO_CATEGORIES
 
@@ -1354,6 +1368,649 @@ function ClientsManager({ showToast }) {
   )
 }
 
+const SERVICE_COLORS = [
+  { label: 'Orange', value: '#E7432B' },
+  { label: 'Black',  value: '#000000' },
+  { label: 'Teal',   value: '#01A6A6' },
+  { label: 'Blue',   value: '#0058A1' },
+  { label: 'Purple', value: '#773E84' },
+  { label: 'Charcoal', value: '#1a1a1a' },
+]
+
+const AVATAR_COLORS = [
+  { label: 'Orange', value: '#E7432B' },
+  { label: 'Teal',   value: '#01A6A6' },
+  { label: 'Blue',   value: '#0058A1' },
+  { label: 'Purple', value: '#773E84' },
+]
+
+const EMPTY_SERVICE = {
+  title_en: '', title_ar: '', description_en: '', description_ar: '',
+  card_color: '#E7432B', tag_label: '', display_order: 0, is_published: true,
+}
+
+const EMPTY_TESTIMONIAL = {
+  quote_en: '', quote_ar: '', name: '', company: '',
+  avatar_color: '#E7432B', display_order: 0, is_published: true,
+}
+
+/* ── Services Manager ── */
+function ServicesManager({ showToast }) {
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [editItem, setEditItem] = useState(null)
+  const [isNew, setIsNew] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const [formErrors, setFormErrors] = useState({})
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const dragIdx = useRef(null)
+
+  async function load() {
+    setLoading(true)
+    const data = await fetchAllServices()
+    setItems(data)
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  async function togglePublish(item) {
+    const updated = !item.is_published
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_published: updated } : i))
+    await updateService(item.id, { is_published: updated })
+  }
+
+  function onDragStart(idx) { dragIdx.current = idx }
+  function onDragOver(e, idx) {
+    e.preventDefault()
+    if (dragIdx.current === idx) return
+    setItems(prev => {
+      const next = [...prev]
+      const [moved] = next.splice(dragIdx.current, 1)
+      next.splice(idx, 0, moved)
+      dragIdx.current = idx
+      return next
+    })
+  }
+  async function onDrop() {
+    dragIdx.current = null
+    await updateServicesOrder(items)
+  }
+
+  function openNew() {
+    setEditItem({ ...EMPTY_SERVICE, display_order: items.length })
+    setIsNew(true)
+    setFormErrors({})
+    setSaveError(null)
+  }
+  function openEdit(item) {
+    setEditItem({ ...item })
+    setIsNew(false)
+    setFormErrors({})
+    setSaveError(null)
+  }
+  function closeEdit() {
+    setEditItem(null)
+    setFormErrors({})
+    setSaveError(null)
+  }
+
+  function validate() {
+    const e = {}
+    if (!editItem.title_en?.trim()) e.title_en = 'Service name (EN) is required'
+    setFormErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  async function handleSave() {
+    if (!validate()) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      if (isNew) {
+        const { id: _id, ...rest } = editItem
+        await createService({ ...rest, display_order: items.length })
+        showToast?.('Service added', `"${editItem.title_en}" added successfully.`)
+      } else {
+        const { id, ...rest } = editItem
+        await updateService(id, rest)
+        showToast?.('Service updated', 'Changes saved successfully.')
+      }
+      closeEdit()
+      load()
+    } catch (err) {
+      setSaveError(err.message ?? 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleDelete(item) {
+    setSaving(true)
+    try {
+      await deleteService(item.id)
+      showToast?.('Service removed', `"${item.title_en}" has been deleted.`)
+      setDeleteConfirm(null)
+      load()
+    } catch (err) {
+      setSaveError(err.message ?? 'Delete failed')
+      setDeleteConfirm(null)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Website Content</div>
+          <h1 className={styles.pageTitle}>Services</h1>
+        </div>
+        <button className={styles.btnAdd} onClick={openNew}>+ Add Service</button>
+      </div>
+
+      <div className={styles.tableWrap}>
+        <table className={styles.table} style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 36 }} />
+            <col style={{ width: 32 }} />
+            <col />
+            <col style={{ width: 100 }} />
+            <col style={{ width: 110 }} />
+            <col style={{ width: 140 }} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th></th>
+              <th>#</th>
+              <th>Service Name</th>
+              <th>Colour</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, idx) => (
+              <tr
+                key={item.id}
+                draggable
+                onDragStart={() => onDragStart(idx)}
+                onDragOver={e => onDragOver(e, idx)}
+                onDrop={onDrop}
+                className={styles.draggableRow}
+              >
+                <td className={styles.dragHandle}>⠿</td>
+                <td style={{ color: '#666', fontSize: 11 }}>{String(idx + 1).padStart(2, '0')}</td>
+                <td className={styles.tdTitle}>{item.title_en}</td>
+                <td>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{
+                      display: 'inline-block', width: 14, height: 14,
+                      background: item.card_color,
+                      border: item.card_color === '#000000' || item.card_color === '#1a1a1a' ? '1px solid #555' : 'none',
+                      flexShrink: 0,
+                    }} />
+                    <span style={{ fontSize: 11, color: '#888' }}>
+                      {SERVICE_COLORS.find(c => c.value === item.card_color)?.label ?? item.card_color}
+                    </span>
+                  </span>
+                </td>
+                <td>
+                  <button
+                    className={`${styles.toggle} ${item.is_published ? styles.toggleOn : styles.toggleOff}`}
+                    onClick={() => togglePublish(item)}
+                  >
+                    {item.is_published ? '● Live' : '○ Draft'}
+                  </button>
+                </td>
+                <td>
+                  <div className={styles.tdActions}>
+                    <button className={`${styles.btnSm} ${styles.btnEdit}`} onClick={() => openEdit(item)}>Edit</button>
+                    <button className={`${styles.btnSm} ${styles.btnDel}`} onClick={() => setDeleteConfirm(item)}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {items.length === 0 && <div className={styles.empty}>No services yet. Add one above.</div>}
+      </div>
+
+      {editItem && (
+        <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && closeEdit()}>
+          <div className={styles.modal}>
+            <div className={styles.modalHd}>
+              <span className={styles.modalTtl}>{isNew ? 'Add Service' : 'Edit Service'}</span>
+              <button className={styles.modalClose} onClick={closeEdit}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Service Name (EN) *</label>
+                  <input
+                    className={`${styles.fieldInput} ${formErrors.title_en ? styles.fieldInputErr : ''}`}
+                    type="text"
+                    placeholder="e.g. Publication Design"
+                    value={editItem.title_en}
+                    onChange={e => setEditItem(p => ({ ...p, title_en: e.target.value }))}
+                  />
+                  {formErrors.title_en && <span className={styles.fieldErr}>{formErrors.title_en}</span>}
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Service Name (AR)</label>
+                  <input
+                    className={styles.fieldInput}
+                    type="text"
+                    dir="rtl"
+                    placeholder="بالعربي"
+                    value={editItem.name_ar}
+                    onChange={e => setEditItem(p => ({ ...p, name_ar: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Card Color</label>
+                <select
+                  className={styles.fieldInput}
+                  value={editItem.card_color}
+                  onChange={e => setEditItem(p => ({ ...p, card_color: e.target.value }))}
+                >
+                  {SERVICE_COLORS.map(c => (
+                    <option key={c.value} value={c.value}>{c.label} ({c.value})</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Tag Label</label>
+                  <input
+                    className={styles.fieldInput}
+                    type="text"
+                    placeholder="e.g. PUBLICATIONS"
+                    value={editItem.tag_label}
+                    onChange={e => setEditItem(p => ({ ...p, tag_label: e.target.value }))}
+                  />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Order Number</label>
+                  <input
+                    className={styles.fieldInput}
+                    type="number"
+                    min={1}
+                    placeholder="1–6"
+                    value={editItem.display_order}
+                    onChange={e => setEditItem(p => ({ ...p, display_order: Number(e.target.value) }))}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Description (EN)</label>
+                <textarea
+                  className={styles.fieldInput}
+                  style={{ height: 80, resize: 'none' }}
+                  placeholder="Service description…"
+                  value={editItem.description_en}
+                  onChange={e => setEditItem(p => ({ ...p, description_en: e.target.value }))}
+                />
+              </div>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Description (AR)</label>
+                <textarea
+                  className={styles.fieldInput}
+                  style={{ height: 80, resize: 'none' }}
+                  dir="rtl"
+                  placeholder="وصف الخدمة…"
+                  value={editItem.description_ar}
+                  onChange={e => setEditItem(p => ({ ...p, description_ar: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              {saveError && <span className={styles.fieldErr} style={{ marginRight: 'auto' }}>{saveError}</span>}
+              <button className={styles.btnSecondary} onClick={closeEdit}>Cancel</button>
+              <button className={styles.btnAdd} onClick={handleSave} disabled={saving}>
+                {saving ? 'Saving…' : isNew ? 'Add Service' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirm && (
+        <div className={styles.modalOverlay} onClick={() => setDeleteConfirm(null)}>
+          <div className={styles.modal} style={{ width: 400 }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHd}>
+              <h2 className={styles.modalTtl}>Delete Service?</h2>
+              <button className={styles.modalClose} onClick={() => setDeleteConfirm(null)}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              <p style={{ color: '#888', fontSize: 13, lineHeight: 1.6 }}>
+                "{deleteConfirm.title_en}" will be permanently removed.
+              </p>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnSecondary} onClick={() => setDeleteConfirm(null)}>Cancel</button>
+              <button className={`${styles.btnSm} ${styles.btnDel}`} style={{ padding: '10px 20px' }} onClick={() => handleDelete(deleteConfirm)} disabled={saving}>
+                {saving ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ── Testimonials Manager ── */
+function TestimonialsManager({ showToast }) {
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [editItem, setEditItem] = useState(null)
+  const [isNew, setIsNew] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const [formErrors, setFormErrors] = useState({})
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const dragIdx = useRef(null)
+
+  async function load() {
+    setLoading(true)
+    const data = await fetchAllTestimonials()
+    setItems(data)
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  async function togglePublish(item) {
+    const updated = !item.is_published
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_published: updated } : i))
+    await updateTestimonial(item.id, { is_published: updated })
+  }
+
+  function onDragStart(idx) { dragIdx.current = idx }
+  function onDragOver(e, idx) {
+    e.preventDefault()
+    if (dragIdx.current === idx) return
+    setItems(prev => {
+      const next = [...prev]
+      const [moved] = next.splice(dragIdx.current, 1)
+      next.splice(idx, 0, moved)
+      dragIdx.current = idx
+      return next
+    })
+  }
+  async function onDrop() {
+    dragIdx.current = null
+    await updateTestimonialsOrder(items)
+  }
+
+  function openNew() {
+    setEditItem({ ...EMPTY_TESTIMONIAL, display_order: items.length })
+    setIsNew(true)
+    setFormErrors({})
+    setSaveError(null)
+  }
+  function openEdit(item) {
+    setEditItem({ ...item })
+    setIsNew(false)
+    setFormErrors({})
+    setSaveError(null)
+  }
+  function closeEdit() {
+    setEditItem(null)
+    setFormErrors({})
+    setSaveError(null)
+  }
+
+  function validate() {
+    const e = {}
+    if (!editItem.quote_en?.trim()) e.quote_en = 'Quote (EN) is required'
+    if (!editItem.person_name?.trim()) e.person_name = 'Person name / role is required'
+    setFormErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  async function handleSave() {
+    if (!validate()) return
+    setSaving(true)
+    setSaveError(null)
+    try {
+      if (isNew) {
+        const { id: _id, ...rest } = editItem
+        await createTestimonial({ ...rest, display_order: items.length })
+        showToast?.('Testimonial added', 'New quote added successfully.')
+      } else {
+        const { id, ...rest } = editItem
+        await updateTestimonial(id, rest)
+        showToast?.('Testimonial updated', 'Changes saved successfully.')
+      }
+      closeEdit()
+      load()
+    } catch (err) {
+      setSaveError(err.message ?? 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function handleDelete(item) {
+    setSaving(true)
+    try {
+      await deleteTestimonial(item.id)
+      showToast?.('Testimonial removed', 'Quote has been deleted.')
+      setDeleteConfirm(null)
+      load()
+    } catch (err) {
+      setSaveError(err.message ?? 'Delete failed')
+      setDeleteConfirm(null)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Website Content</div>
+          <h1 className={styles.pageTitle}>Testimonials</h1>
+        </div>
+        <button className={styles.btnAdd} onClick={openNew}>+ Add Testimonial</button>
+      </div>
+
+      <div className={styles.tableWrap}>
+        <table className={styles.table} style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 36 }} />
+            <col style={{ width: 28 }} />
+            <col />
+            <col style={{ width: 160 }} />
+            <col style={{ width: 130 }} />
+            <col style={{ width: 110 }} />
+            <col style={{ width: 140 }} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th></th>
+              <th></th>
+              <th>Quote (excerpt)</th>
+              <th>Name / Role</th>
+              <th>Company</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item, idx) => (
+              <tr
+                key={item.id}
+                draggable
+                onDragStart={() => onDragStart(idx)}
+                onDragOver={e => onDragOver(e, idx)}
+                onDrop={onDrop}
+                className={styles.draggableRow}
+              >
+                <td className={styles.dragHandle}>⠿</td>
+                <td>
+                  <span style={{
+                    display: 'inline-block', width: 26, height: 26,
+                    background: item.avatar_color ?? '#E7432B',
+                    borderRadius: '50%',
+                    fontSize: 11, fontWeight: 700, color: '#fff',
+                    textAlign: 'center', lineHeight: '26px',
+                  }}>
+                    {item.person_name?.[0]?.toUpperCase() ?? '?'}
+                  </span>
+                </td>
+                <td style={{ fontSize: 11, color: '#888', fontStyle: 'italic', whiteSpace: 'normal', lineHeight: 1.5 }}>
+                  "{item.quote_en?.slice(0, 60)}{item.quote_en?.length > 60 ? '…' : ''}"
+                </td>
+                <td className={styles.tdTitle} style={{ fontSize: 11 }}>{item.person_name}</td>
+                <td style={{ fontSize: 11, color: '#888' }}>{item.company}</td>
+                <td>
+                  <button
+                    className={`${styles.toggle} ${item.is_published ? styles.toggleOn : styles.toggleOff}`}
+                    onClick={() => togglePublish(item)}
+                  >
+                    {item.is_published ? '● Live' : '○ Draft'}
+                  </button>
+                </td>
+                <td>
+                  <div className={styles.tdActions}>
+                    <button className={`${styles.btnSm} ${styles.btnEdit}`} onClick={() => openEdit(item)}>Edit</button>
+                    <button className={`${styles.btnSm} ${styles.btnDel}`} onClick={() => setDeleteConfirm(item)}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {items.length === 0 && <div className={styles.empty}>No testimonials yet. Add one above.</div>}
+      </div>
+
+      {editItem && (
+        <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && closeEdit()}>
+          <div className={styles.modal}>
+            <div className={styles.modalHd}>
+              <span className={styles.modalTtl}>{isNew ? 'Add Testimonial' : 'Edit Testimonial'}</span>
+              <button className={styles.modalClose} onClick={closeEdit}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Quote (EN) *</label>
+                <textarea
+                  className={`${styles.fieldInput} ${formErrors.quote_en ? styles.fieldInputErr : ''}`}
+                  style={{ height: 90, resize: 'none' }}
+                  placeholder="Client quote in English…"
+                  value={editItem.quote_en}
+                  onChange={e => setEditItem(p => ({ ...p, quote_en: e.target.value }))}
+                />
+                {formErrors.quote_en && <span className={styles.fieldErr}>{formErrors.quote_en}</span>}
+              </div>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Quote (AR)</label>
+                <textarea
+                  className={styles.fieldInput}
+                  style={{ height: 90, resize: 'none' }}
+                  dir="rtl"
+                  placeholder="اقتباس العميل بالعربية…"
+                  value={editItem.quote_ar}
+                  onChange={e => setEditItem(p => ({ ...p, quote_ar: e.target.value }))}
+                />
+              </div>
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Person Name / Role *</label>
+                  <input
+                    className={`${styles.fieldInput} ${formErrors.person_name ? styles.fieldInputErr : ''}`}
+                    type="text"
+                    placeholder="e.g. HSE Manager"
+                    value={editItem.person_name}
+                    onChange={e => setEditItem(p => ({ ...p, person_name: e.target.value }))}
+                  />
+                  {formErrors.person_name && <span className={styles.fieldErr}>{formErrors.person_name}</span>}
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Company</label>
+                  <input
+                    className={styles.fieldInput}
+                    type="text"
+                    placeholder="e.g. Bapco Energies"
+                    value={editItem.company}
+                    onChange={e => setEditItem(p => ({ ...p, company: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Avatar Color</label>
+                  <select
+                    className={styles.fieldInput}
+                    value={editItem.avatar_color}
+                    onChange={e => setEditItem(p => ({ ...p, avatar_color: e.target.value }))}
+                  >
+                    {AVATAR_COLORS.map(c => (
+                      <option key={c.value} value={c.value}>{c.label} ({c.value})</option>
+                    ))}
+                  </select>
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Visibility</label>
+                  <select
+                    className={styles.fieldInput}
+                    value={editItem.is_published ? 'live' : 'draft'}
+                    onChange={e => setEditItem(p => ({ ...p, is_published: e.target.value === 'live' }))}
+                  >
+                    <option value="live">Live</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              {saveError && <span className={styles.fieldErr} style={{ marginRight: 'auto' }}>{saveError}</span>}
+              <button className={styles.btnSecondary} onClick={closeEdit}>Cancel</button>
+              <button className={styles.btnAdd} onClick={handleSave} disabled={saving}>
+                {saving ? 'Saving…' : isNew ? 'Add Testimonial' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirm && (
+        <div className={styles.modalOverlay} onClick={() => setDeleteConfirm(null)}>
+          <div className={styles.modal} style={{ width: 400 }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHd}>
+              <h2 className={styles.modalTtl}>Delete Testimonial?</h2>
+              <button className={styles.modalClose} onClick={() => setDeleteConfirm(null)}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              <p style={{ color: '#888', fontSize: 13, lineHeight: 1.6 }}>
+                This quote will be permanently removed from the site.
+              </p>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnSecondary} onClick={() => setDeleteConfirm(null)}>Cancel</button>
+              <button className={`${styles.btnSm} ${styles.btnDel}`} style={{ padding: '10px 20px' }} onClick={() => handleDelete(deleteConfirm)} disabled={saving}>
+                {saving ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ── Contact Info Editor ── */
 function ContactInfoEditor({ showToast }) {
   const [info, setInfo] = useState(null)
@@ -1679,7 +2336,7 @@ function Toast({ toast }) {
 /* ── Main Dashboard shell ── */
 export default function Dashboard() {
   const [section, setSection] = useState('dashboard')
-  const [counts, setCounts] = useState({ portfolio: 0, published: 0, draft: 0, text: 0, inbox: 0, clients: 0 })
+  const [counts, setCounts] = useState({ portfolio: 0, published: 0, draft: 0, text: 0, inbox: 0, clients: 0, services: 0, testimonials: 0 })
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [toast, setToast] = useState(null)
   const toastTimer = useRef(null)
@@ -1700,9 +2357,11 @@ export default function Dashboard() {
 
   const navItems = [
     { key: 'dashboard', icon: '◈', label: 'Dashboard',    group: 'Overview' },
-    { key: 'portfolio', icon: '⊞', label: 'Portfolio',    group: 'Website Content', count: counts.portfolio },
-    { key: 'clients',   icon: '◉', label: 'Clients Bar',  group: 'Website Content', count: counts.clients },
-    { key: 'text',      icon: '✎', label: 'Site Text',    group: 'Website Content' },
+    { key: 'portfolio',     icon: '⊞', label: 'Portfolio',     group: 'Website Content', count: counts.portfolio },
+    { key: 'clients',      icon: '◉', label: 'Clients Bar',   group: 'Website Content', count: counts.clients },
+    { key: 'services',     icon: '◧', label: 'Services',      group: 'Website Content', count: counts.services },
+    { key: 'testimonials', icon: '❝', label: 'Testimonials',  group: 'Website Content', count: counts.testimonials },
+    { key: 'text',         icon: '✎', label: 'Site Text',     group: 'Website Content' },
     { key: 'contact',   icon: '☏', label: 'Contact Info', group: 'Pages' },
     { key: 'footer',    icon: '▭', label: 'Footer',       group: 'Pages' },
     { key: 'calendar',  icon: '⬚', label: 'Calendar',     group: 'Schedule' },
@@ -1755,8 +2414,10 @@ export default function Dashboard() {
 
         <main className={styles.main}>
           {section === 'dashboard' && <DashboardOverview onNav={setSection} counts={counts} />}
-          {section === 'portfolio' && <PortfolioManager onNav={setSection} showToast={showToast} />}
-          {section === 'clients'   && <ClientsManager showToast={showToast} />}
+          {section === 'portfolio'     && <PortfolioManager onNav={setSection} showToast={showToast} />}
+          {section === 'clients'      && <ClientsManager showToast={showToast} />}
+          {section === 'services'     && <ServicesManager showToast={showToast} />}
+          {section === 'testimonials' && <TestimonialsManager showToast={showToast} />}
           {section === 'text'      && <SiteTextEditor showToast={showToast} />}
           {section === 'contact'   && <ContactInfoEditor showToast={showToast} />}
           {section === 'footer'    && <FooterEditor showToast={showToast} />}

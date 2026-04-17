@@ -7,6 +7,8 @@ import { submitContactForm } from '../../services/contactService'
 import { WA_NUMBER } from '../../config/constants'
 import { fetchPublishedClients, getClientLogoUrl } from '../../services/clientsService'
 import { fetchContactInfo } from '../../services/contactInfoService'
+import { fetchPublishedServices } from '../../services/servicesService'
+import { fetchPublishedTestimonials } from '../../services/testimonialsService'
 
 const CAT_COLORS = {
   newsletter:   { bg: 'rgba(0,88,161,.15)',   color: '#5B9BD5' },
@@ -54,20 +56,6 @@ const whyItems = [
   },
 ]
 
-const testimonials = [
-  {
-    quote: { en: '"TopRight understood our brand and delivered the publication exactly as we envisioned — fully bilingual, on time, without needing constant guidance. A studio we trust completely for our annual publications."', ar: '"فهمت توب رايت علامتنا التجارية وسلّمت المطبوع تمامًا كما تصورناه — ثنائي اللغة بالكامل، في الوقت المحدد، دون الحاجة إلى توجيه مستمر. استوديو نثق به تمامًا لمطبوعاتنا السنوية."' },
-    name: { en: 'Senior Communications Manager', ar: 'مدير الاتصالات الأول' },
-    company: 'GPIC — Gulf Petrochemical Industries Company',
-    color: '#01A6A6', initial: 'G',
-  },
-  {
-    quote: { en: '"The illustrated HSE booklets were a major success on our Safety Day. TopRight managed everything from writing and illustration through to print — one team, one contact, zero complications."', ar: '"كانت الكتيبات المصورة للسلامة المهنية نجاحًا كبيرًا في يوم السلامة لدينا. تولّت توب رايت كل شيء من الكتابة والرسوم حتى الطباعة — فريق واحد، جهة تواصل واحدة، صفر تعقيدات."' },
-    name: { en: 'HSE Manager', ar: 'مدير السلامة والصحة المهنية' },
-    company: 'Bapco Energies',
-    color: '#E7432B', initial: 'B',
-  },
-]
 
 const svgIcons = {
   '01': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="2" stroke="#01A6A6" strokeWidth="1.5"/><path d="M6 8h10M6 11h7M6 14h9" stroke="#01A6A6" strokeWidth="1.2" strokeLinecap="round"/></svg>,
@@ -78,14 +66,6 @@ const svgIcons = {
   '06': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 17L11 5l6 12" stroke="rgba(255,255,255,.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 13h8" stroke="rgba(255,255,255,.7)" strokeWidth="1.2" strokeLinecap="round"/></svg>,
 }
 
-const services = [
-  { cls: styles.svA, n: '01', tag: { en: 'Publications',  ar: 'المطبوعات' },  title: { en: 'Publication Design',          ar: 'تصميم المطبوعات' },           desc: { en: 'Books, newsletters, annual reports and HSE manuals — printed and digital, fully bilingual in Arabic and English from concept through to print.',    ar: 'الكتب والنشرات والتقارير السنوية وأدلة السلامة المهنية — مطبوعة ورقمية، ثنائية اللغة من الفكرة حتى الطباعة.' }, lnk: { en: 'Start a project →', ar: 'ابدأ مشروعك ←' } },
-  { cls: styles.svC, n: '02', tag: { en: 'Illustration',  ar: 'الرسوم التوضيحية' }, title: { en: 'Editorial Art & Illustration', ar: 'الفن التحريري والرسوم التوضيحية' }, desc: { en: 'Storybooks and activity books for children and young adults — full character development, graphic art and complete layout from start to finish.', ar: 'كتب القصص والكتب التعليمية للأطفال والشباب — تطوير شخصيات متكامل وفن رسومي وتخطيط كامل.' }, lnk: { en: 'Start a project →', ar: 'ابدأ مشروعك ←' } },
-  { cls: styles.svF, n: '03', tag: { en: 'Animation',     ar: 'الرسوم المتحركة' }, title: { en: 'Animation & Motion',           ar: 'الرسوم المتحركة والحركة' },    desc: { en: 'Character development to full animation. Digital publications with embedded animations — HTML5 eBooks, digital editions and interactive content.', ar: 'من تطوير الشخصيات إلى الرسوم المتحركة الكاملة. منشورات رقمية تتضمن رسومًا متحركة — كتب HTML5 وطبعات رقمية ومحتوى تفاعلي.' }, lnk: { en: 'Start a project →', ar: 'ابدأ مشروعك ←' } },
-  { cls: styles.svD, n: '04', tag: { en: 'Corporate',     ar: 'المؤسسي' },      title: { en: 'Corporate & Guideline Books',  ar: 'الكتب المؤسسية والإرشادية' },  desc: { en: 'Corporate communication books, brand guidelines and process manuals — structured, clear and brand-consistent throughout every spread.',           ar: 'كتب التواصل المؤسسي وإرشادات العلامة التجارية وأدلة العمليات — منظمة وواضحة ومتسقة في كل صفحة.' }, lnk: { en: 'Start a project →', ar: 'ابدأ مشروعك ←' } },
-  { cls: styles.svB, n: '05', tag: { en: 'Digital',       ar: 'الرقمي' },       title: { en: 'Digital Publications',         ar: 'المنشورات الرقمية' },          desc: { en: 'Interactive eBooks, HTML5 mini-websites and digital editions with embedded animations — modern, accessible and shareable on every device.',        ar: 'كتب إلكترونية تفاعلية ومواقع HTML5 مصغرة وطبعات رقمية — حديثة وسهلة الوصول وقابلة للمشاركة على جميع الأجهزة.' }, lnk: { en: 'Start a project →', ar: 'ابدأ مشروعك ←' } },
-  { cls: styles.svE, n: '06', tag: { en: 'Coaching',      ar: 'التدريب' },      title: { en: 'Coaching & Workshops',         ar: 'التدريب وورش العمل' },         desc: { en: 'Creative writing, storytelling and brand development workshops for individuals, teams and organisations — in Bahrain and online.',                 ar: 'ورش عمل في الكتابة الإبداعية والسرد القصصي وتطوير العلامة التجارية للأفراد والفرق والمؤسسات — في البحرين وعبر الإنترنت.' }, lnk: { en: 'Explore sessions →', ar: 'استكشف الجلسات ←' } },
-]
 
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 
@@ -93,6 +73,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState('All')
   const [portfolioCards, setPortfolioCards] = useState([])
   const [clients, setClients] = useState([])
+  const [services, setServices] = useState([])
+  const [testimonials, setTestimonials] = useState([])
   const [contactInfo, setContactInfo] = useState(null)
   const [form, setForm] = useState({ name: '', org: '', email: '', type: '', message: '' })
   const [formErrors, setFormErrors] = useState({})
@@ -106,6 +88,8 @@ export default function Home() {
   useEffect(() => {
     fetchPublishedClients().then(setClients)
     fetchContactInfo().then(setContactInfo)
+    fetchPublishedServices().then(setServices)
+    fetchPublishedTestimonials().then(setTestimonials)
     fetchPublishedPortfolioItems().then(data => {
       setPortfolioCards(data.map(item => ({
         cat: item.category,
@@ -281,16 +265,19 @@ export default function Home() {
         <span className="sec-lbl">{isAr ? 'ما نقدمه' : 'What we offer'}</span>
         <h2 className="sec-ttl" style={{ color: '#000' }}>{isAr ? <>خدمات إبداعية متكاملة،<br />من الفكرة حتى الطباعة</> : <>Full-service creative,<br />concept to print</>}</h2>
         <div className={styles.sg}>
-          {services.map((s, i) => (
-            <div key={s.n} className={`${styles.sv} ${s.cls} js-reveal`} style={{ transitionDelay: `${i * 70}ms` }}>
-              <div className={styles.svIco}>{svgIcons[s.n]}</div>
-              <div className={styles.svN}>{s.n}</div>
-              <span className={styles.svTag}>{t(s.tag)}</span>
-              <div className={styles.svTtl}>{t(s.title)}</div>
-              <p className={styles.svDesc}>{t(s.desc)}</p>
-              <a href="#contact" className={styles.svLnk}>{t(s.lnk)}</a>
-            </div>
-          ))}
+          {services.map((s, i) => {
+            const num = String(i + 1).padStart(2, '0')
+            return (
+              <div key={s.id} className={`${styles.sv} js-reveal`} style={{ background: s.card_color, transitionDelay: `${i * 70}ms` }}>
+                <div className={styles.svIco}>{svgIcons[num]}</div>
+                <div className={styles.svN}>{num}</div>
+                <span className={styles.svTag}>{s.tag_label}</span>
+                <div className={styles.svTtl}>{isAr ? s.title_ar : s.title_en}</div>
+                <p className={styles.svDesc}>{isAr ? s.description_ar : s.description_en}</p>
+                <a href="#contact" className={styles.svLnk}>{isAr ? 'ابدأ مشروعك ←' : 'Start a project →'}</a>
+              </div>
+            )
+          })}
         </div>
       </section>
 
@@ -372,13 +359,15 @@ export default function Home() {
         <h2 className="sec-ttl" style={{ color: '#000' }}>{isAr ? 'ماذا يقول عملاؤنا' : 'What our clients say'}</h2>
         <div className={styles.tg}>
           {testimonials.map((testimonial, i) => (
-            <div key={i} className={`${styles.tc} js-reveal`} style={{ transitionDelay: `${i * 100}ms` }}>
+            <div key={testimonial.id} className={`${styles.tc} js-reveal`} style={{ transitionDelay: `${i * 100}ms` }}>
               <span className={styles.tcQ}>"</span>
-              <p className={styles.tcTxt}>{t(testimonial.quote)}</p>
+              <p className={styles.tcTxt}>{isAr ? testimonial.quote_ar : testimonial.quote_en}</p>
               <div className={styles.tcRow}>
-                <div className={styles.tcDot} style={{ background: testimonial.color }}>{testimonial.initial}</div>
+                <div className={styles.tcDot} style={{ background: testimonial.avatar_color ?? '#E7432B' }}>
+                  {testimonial.name?.[0]?.toUpperCase() ?? '?'}
+                </div>
                 <div>
-                  <div className={styles.tcName}>{t(testimonial.name)}</div>
+                  <div className={styles.tcName}>{testimonial.name}</div>
                   <div className={styles.tcCo}>{testimonial.company}</div>
                 </div>
               </div>

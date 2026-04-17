@@ -1,10 +1,13 @@
 import { supabase } from '../config/supabase'
 
 export async function fetchDashboardCounts() {
-  const [{ data: p }, { data: t }, { data: c }] = await Promise.all([
+  const [{ data: p }, { data: t }, { data: c }, { data: cl }, { data: sv }, { data: ts }] = await Promise.all([
     supabase.from('portfolio_items').select('id, is_published'),
     supabase.from('site_text').select('id'),
     supabase.from('contact_submissions').select('id'),
+    supabase.from('clients').select('id'),
+    supabase.from('services').select('id'),
+    supabase.from('testimonials').select('id'),
   ])
   const portfolio = p?.length ?? 0
   const published = p?.filter(i => i.is_published).length ?? 0
@@ -14,5 +17,8 @@ export async function fetchDashboardCounts() {
     draft: portfolio - published,
     text: t?.length ?? 0,
     inbox: c?.length ?? 0,
+    clients: cl?.length ?? 0,
+    services: sv?.length ?? 0,
+    testimonials: ts?.length ?? 0,
   }
 }
