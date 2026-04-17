@@ -14,6 +14,12 @@ import { fetchSiteText, updateSiteTextRow } from '../../services/siteTextService
 import { fetchDashboardCounts } from '../../services/dashboardService'
 import { signOut } from '../../services/authService'
 import { PORTFOLIO_CATEGORIES } from '../../config/constants'
+import {
+  fetchCalendarEvents,
+  createCalendarEvent,
+  updateCalendarEvent,
+  deleteCalendarEvent,
+} from '../../services/calendarService'
 
 const CATEGORIES = PORTFOLIO_CATEGORIES
 
@@ -608,6 +614,236 @@ function DashboardOverview({ onNav, counts }) {
   )
 }
 
+/* ── Calendar Page ── */
+const EVENT_COLORS = [
+  { label: 'Red',    value: '#E7432B' },
+  { label: 'Blue',   value: '#0058A1' },
+  { label: 'Teal',   value: '#01A6A6' },
+  { label: 'Purple', value: '#773E84' },
+  { label: 'Green',  value: '#25D366' },
+  { label: 'Dark',   value: '#444' },
+]
+const EMPTY_EVENT = { title: '', description: '', event_date: '', start_time: '', end_time: '', color: '#E7432B', type: 'general' }
+
+function CalendarPage() {
+  const now = new Date()
+  const [year, setYear] = useState(now.getFullYear())
+  const [month, setMonth] = useState(now.getMonth() + 1)
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [modal, setModal] = useState(null)  // null | { mode: 'add'|'edit', event, date? }
+  const [form, setForm] = useState(EMPTY_EVENT)
+  const [saving, setSaving] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const [error, setError] = useState(null)
+
+  async function load() {
+    setLoading(true)
+    try { setEvents(await fetchCalendarEvents(year, month)) }
+    catch (e) { setError(e.message) }
+    finally { setLoading(false) }
+  }
+
+  useEffect(() => { load() }, [year, month])
+
+  function prevMonth() {
+    if (month === 1) { setYear(y => y - 1); setMonth(12) }
+    else setMonth(m => m - 1)
+  }
+  function nextMonth() {
+    if (month === 12) { setYear(y => y + 1); setMonth(1) }
+    else setMonth(m => m + 1)
+  }
+
+  function openAdd(dateStr) {
+    setForm({ ...EMPTY_EVENT, event_date: dateStr })
+    setModal({ mode: 'add' })
+    setError(null)
+  }
+  function openEdit(ev) {
+    setForm({ title: ev.title, description: ev.description ?? '', event_date: ev.event_date, start_time: ev.start_time ?? '', end_time: ev.end_time ?? '', color: ev.color ?? '#E7432B', type: ev.type ?? 'general' })
+    setModal({ mode: 'edit', id: ev.id })
+    setError(null)
+  }
+
+  async function handleSave() {
+    if (!form.title.trim() || !form.event_date) { setError('Title and date are required.'); return }
+    setSaving(true)
+    setError(null)
+    try {
+      const payload = { title: form.title.trim(), description: form.description.trim() || null, event_date: form.event_date, start_time: form.start_time || null, end_time: form.end_time || null, color: form.color, type: form.type }
+      if (modal.mode === 'add') await createCalendarEvent(payload)
+      else await updateCalendarEvent(modal.id, payload)
+      setModal(null)
+      await load()
+    } catch (e) { setError(e.message) }
+    finally { setSaving(false) }
+  }
+
+  async function handleDelete(id) {
+    setSaving(true)
+    try { await deleteCalendarEvent(id); setDeleteConfirm(null); setModal(null); await load() }
+    catch (e) { setError(e.message) }
+    finally { setSaving(false) }
+  }
+
+  // Build calendar grid
+  const firstDay = new Date(year, month - 1, 1).getDay()
+  const daysInMonth = new Date(year, month, 0).getDate()
+  const todayStr = now.toISOString().split('T')[0]
+
+  const eventsByDate = {}
+  events.forEach(ev => {
+    if (!eventsByDate[ev.event_date]) eventsByDate[ev.event_date] = []
+    eventsByDate[ev.event_date].push(ev)
+  })
+
+  const cells = []
+  for (let i = 0; i < firstDay; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December']
+  const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+
+  const f = (k, v) => setForm(p => ({ ...p, [k]: v }))
+
+  const todayDate = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Schedule</div>
+          <h1 className={styles.pageTitle}>Calendar</h1>
+        </div>
+        <button className={styles.btnAdd} onClick={() => openAdd(todayDate)}>
+          + Add Event
+        </button>
+      </div>
+
+      {/* Month nav */}
+      <div className={styles.calNav}>
+        <button className={styles.calNavBtn} onClick={prevMonth}>‹</button>
+        <span className={styles.calMonthLabel}>{monthNames[month - 1]} {year}</span>
+        <button className={styles.calNavBtn} onClick={nextMonth}>›</button>
+        <button className={styles.calTodayBtn} onClick={() => { setYear(now.getFullYear()); setMonth(now.getMonth() + 1) }}>Today</button>
+      </div>
+
+      {loading ? (
+        <div className={styles.loadingMsg}>Loading…</div>
+      ) : (
+        <div className={styles.calGrid}>
+          {dayLabels.map(d => <div key={d} className={styles.calDayLabel}>{d}</div>)}
+          {cells.map((day, i) => {
+            if (!day) return <div key={`empty-${i}`} className={styles.calCellEmpty} />
+            const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+            const dayEvents = eventsByDate[dateStr] ?? []
+            const isToday = dateStr === todayStr
+            return (
+              <div key={dateStr} className={`${styles.calCell} ${isToday ? styles.calCellToday : ''}`} onClick={() => openAdd(dateStr)}>
+                <span className={styles.calDayNum}>{day}</span>
+                <div className={styles.calEvents}>
+                  {dayEvents.map(ev => (
+                    <div key={ev.id} className={styles.calEventPill} style={{ background: ev.color ?? '#E7432B' }}
+                      onClick={e => { e.stopPropagation(); openEdit(ev) }}>
+                      {ev.start_time ? ev.start_time.slice(0,5) + ' ' : ''}{ev.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Add/Edit Modal */}
+      {modal && (
+        <div className={styles.modalOverlay} onClick={() => setModal(null)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHd}>
+              <h2 className={styles.modalTtl}>{modal.mode === 'add' ? 'Add Event' : 'Edit Event'}</h2>
+              <button className={styles.modalClose} onClick={() => setModal(null)}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              {error && <div className={styles.calError}>{error}</div>}
+
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Title *</label>
+                <input className={styles.fieldInput} value={form.title} onChange={e => f('title', e.target.value)} placeholder="Event title" />
+              </div>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Description</label>
+                <textarea className={styles.fieldInput} value={form.description} onChange={e => f('description', e.target.value)} placeholder="Optional description" rows={2} />
+              </div>
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Date *</label>
+                  <input className={styles.fieldInput} type="date" value={form.event_date} onChange={e => f('event_date', e.target.value)} />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Type</label>
+                  <input className={styles.fieldInput} value={form.type} onChange={e => f('type', e.target.value)} placeholder="e.g. Meeting, Deadline…" />
+                </div>
+              </div>
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Start Time</label>
+                  <input className={styles.fieldInput} type="time" value={form.start_time} onChange={e => f('start_time', e.target.value)} />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>End Time</label>
+                  <input className={styles.fieldInput} type="time" value={form.end_time} onChange={e => f('end_time', e.target.value)} />
+                </div>
+              </div>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Color</label>
+                <div className={styles.colorPicker}>
+                  {EVENT_COLORS.map(c => (
+                    <button key={c.value} className={`${styles.colorSwatch} ${form.color === c.value ? styles.colorSwatchActive : ''}`}
+                      style={{ background: c.value }} title={c.label}
+                      onClick={() => f('color', c.value)} type="button" />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              {modal.mode === 'edit' && (
+                <button className={`${styles.btnSm} ${styles.btnDel}`} onClick={() => setDeleteConfirm(modal.id)} disabled={saving}>Delete</button>
+              )}
+              <div style={{ flex: 1 }} />
+              <button className={styles.btnSecondary} onClick={() => setModal(null)} disabled={saving}>Cancel</button>
+              <button className={styles.btnAdd} onClick={handleSave} disabled={saving}>
+                {saving ? 'Saving…' : modal.mode === 'add' ? 'Add Event' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirm */}
+      {deleteConfirm && (
+        <div className={styles.modalOverlay} onClick={() => setDeleteConfirm(null)}>
+          <div className={styles.modal} style={{ width: 400 }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHd}>
+              <h2 className={styles.modalTtl}>Delete Event?</h2>
+              <button className={styles.modalClose} onClick={() => setDeleteConfirm(null)}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              <p style={{ color: '#888', fontSize: 13, lineHeight: 1.6 }}>This event will be permanently deleted and cannot be recovered.</p>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnSecondary} onClick={() => setDeleteConfirm(null)}>Cancel</button>
+              <button className={`${styles.btnSm} ${styles.btnDel}`} style={{ padding: '10px 20px' }} onClick={() => handleDelete(deleteConfirm)} disabled={saving}>
+                {saving ? 'Deleting…' : 'Delete Event'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ── Main Dashboard shell ── */
 export default function Dashboard() {
   const [section, setSection] = useState('dashboard')
@@ -625,6 +861,7 @@ export default function Dashboard() {
     { key: 'dashboard', icon: '◈', label: 'Dashboard',    group: 'Overview' },
     { key: 'portfolio', icon: '⊞', label: 'Portfolio',    group: 'Content', count: counts.portfolio },
     { key: 'text',      icon: '✎', label: 'Site Text',    group: 'Content' },
+    { key: 'calendar',  icon: '⬚', label: 'Calendar',     group: 'Schedule' },
     { key: 'inbox',     icon: '✉', label: 'Submissions',  group: 'Inbox',   count: counts.inbox },
   ]
 
@@ -670,6 +907,7 @@ export default function Dashboard() {
           {section === 'dashboard' && <DashboardOverview onNav={setSection} counts={counts} />}
           {section === 'portfolio' && <PortfolioManager onNav={setSection} />}
           {section === 'text' && <SiteTextEditor />}
+          {section === 'calendar' && <CalendarPage />}
           {section === 'inbox' && <ContactSubmissions />}
         </main>
       </div>

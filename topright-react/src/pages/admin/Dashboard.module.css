@@ -1023,3 +1023,133 @@
   font-size: 10px;
   color: var(--muted);
 }
+
+/* ── CALENDAR ── */
+.calNav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.calNavBtn {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  color: #fff;
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.calNavBtn:hover { border-color: #E7432B; color: #E7432B; }
+.calMonthLabel {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1px;
+  min-width: 180px;
+}
+.calTodayBtn {
+  margin-left: 8px;
+  background: none;
+  border: 1px solid #333;
+  color: #888;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.calTodayBtn:hover { border-color: #E7432B; color: #E7432B; }
+
+.calGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.calDayLabel {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #555;
+  text-align: center;
+  padding: 8px 0;
+  font-weight: 700;
+}
+.calCellEmpty {
+  background: #0d0d0d;
+  min-height: 100px;
+  border: 1px solid #1a1a1a;
+}
+.calCell {
+  background: #111;
+  border: 1px solid #1e1e1e;
+  min-height: 100px;
+  padding: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.calCell:hover { border-color: #333; background: #161616; }
+.calCellToday { border-color: #E7432B !important; background: rgba(231,67,43,0.06) !important; }
+.calDayNum {
+  font-size: 12px;
+  font-weight: 700;
+  color: #666;
+  display: block;
+  margin-bottom: 4px;
+  line-height: 1;
+}
+.calCellToday .calDayNum { color: #E7432B; }
+.calEvents { display: flex; flex-direction: column; gap: 2px; }
+.calEventPill {
+  font-size: 9px;
+  font-weight: 700;
+  color: #fff;
+  padding: 2px 6px;
+  border-radius: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  letter-spacing: 0.3px;
+}
+.calEventPill:hover { opacity: 0.85; }
+
+.loadingMsg {
+  padding: 48px 0;
+  text-align: center;
+  color: #555;
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.calError {
+  background: rgba(231,67,43,0.12);
+  border: 1px solid rgba(231,67,43,0.3);
+  color: #E7432B;
+  font-size: 11px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  letter-spacing: 0.3px;
+}
+
+/* Color picker */
+.colorPicker { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.colorSwatch {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.colorSwatch:hover { transform: scale(1.15); }
+.colorSwatchActive { border-color: #fff !important; transform: scale(1.2); }
