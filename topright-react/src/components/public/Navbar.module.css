@@ -16,7 +16,9 @@
 .logoImg { height: 54px; width: auto; }
 
 .links {
+  flex: 1;
   display: flex;
+  justify-content: center;
   gap: 36px;
 }
 
@@ -31,38 +33,17 @@
 .link:hover { color: #E7432B; }
 .active { color: #E7432B; }
 
-.events {
-  color: #E7432B;
-  border: 1px solid rgba(231,67,43,0.5);
-  padding: 7px 16px;
-  font-size: 12px;
-}
-.events:hover { background: rgba(231,67,43,0.15); color: #ff6b55; }
-
 .right { display: flex; gap: 12px; align-items: center; }
 
 .langBtn {
   background: none;
   border: 1px solid #444;
   color: #bbb;
-  font-size: 10px;
-  padding: 7px 14px;
+  font-size: 11px;
+  padding: 7px 18px;
   letter-spacing: 1px;
   font-weight: 700;
   font-family: var(--font-body);
   transition: border-color 0.2s, color 0.2s;
 }
 .langBtn:hover { border-color: #E7432B; color: #E7432B; }
-
-.startBtn {
-  background: #E7432B;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  padding: 13px 26px;
-  font-family: var(--font-body);
-  transition: background 0.2s;
-}
-.startBtn:hover { background: #c93520; }

@@ -235,6 +235,16 @@
 }
 .svTtl { font-size: 15px; font-weight: 700; margin-bottom: 10px; line-height: 1.2; color: #fff; }
 .svDesc { font-size: 10px; line-height: 1.7; margin-bottom: 16px; color: rgba(255,255,255,.7); }
+.svIco {
+  position: absolute;
+  top: 28px;
+  right: 28px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .svLnk {
   font-size: 8px;
   letter-spacing: 1.5px;
@@ -283,6 +293,7 @@
   overflow: hidden;
 }
 .logoWm { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.whyDeco { position: absolute; border-radius: 50%; border: 1px solid #2a2a2a; }
 .whyBig {
   font-size: 140px;
   font-weight: 200;
@@ -448,3 +459,215 @@
 }
 .tcName { font-size: 11px; font-weight: 700; color: #000; }
 .tcCo { font-size: 9px; color: #888; margin-top: 2px; }
+
+/* ── EVENTS & CSR ── */
+.eventsSection {
+  background: #E7432B;
+  padding: 72px 32px;
+  position: relative;
+  overflow: hidden;
+}
+.eventsTopLine {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, white, #773E84, #0058A1);
+}
+.eventsInner { max-width: 1100px; margin: 0 auto; }
+.eventsIntro {
+  font-size: 13px;
+  color: #fff;
+  line-height: 1.8;
+  max-width: 600px;
+  margin-bottom: 52px;
+}
+.eventsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+.eventCardDark {
+  background: #1E1E1E;
+  padding: 44px 40px;
+  position: relative;
+  overflow: hidden;
+}
+.eventCardAccent {
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: #fff;
+}
+.eventCardLbl {
+  font-size: 8px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 14px;
+  display: block;
+}
+.eventCardH3 {
+  font-size: 26px;
+  font-weight: 200;
+  letter-spacing: 2px;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 14px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+.eventCardP {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.75;
+  margin-bottom: 28px;
+}
+.eventInstagram {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #E7432B;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 13px 24px;
+}
+.eventInstagram:hover { background: #c93520; }
+.eventCardStats {
+  background: #1E1E1E;
+  padding: 44px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.eventCircle {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  border: 1px solid #E7432B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  position: relative;
+}
+.eventCircleInner {
+  position: absolute;
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  border: 1px solid rgba(231,67,43,0.3);
+}
+.eventCircleNum {
+  font-size: 32px;
+  font-weight: 200;
+  color: #fff;
+  font-family: var(--font-display);
+  letter-spacing: 2px;
+}
+.eventStatLbl {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #aea9a9;
+  margin-bottom: 8px;
+}
+.eventStatTxt { font-size: 11px; color: #aea9a9; line-height: 1.7; }
+
+/* ── CONTACT SECTION (inline) ── */
+.contactSection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 580px;
+}
+.contactL {
+  background: #d0d1cf;
+  padding: 72px 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.contactL h2 {
+  font-size: 48px;
+  font-weight: 200;
+  letter-spacing: 3px;
+  color: #000;
+  line-height: 1;
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+}
+.contactL p {
+  font-size: 12px;
+  color: #5F5E5A;
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+.contactItems { display: flex; flex-direction: column; gap: 16px; }
+.contactItem {}
+.contactLabel { font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: #939598; margin-bottom: 3px; }
+.contactVal { font-size: 12px; color: #000; font-weight: 500; }
+.contactR {
+  background: #d0d1cf;
+  padding: 72px 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.contactForm { display: flex; flex-direction: column; gap: 16px; }
+.formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg label { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: #666; }
+.fg input,
+.fg textarea {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #333;
+  background: transparent;
+  padding: 11px 0;
+  font-size: 12px;
+  color: #fff;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color .2s;
+}
+.fg input:focus, .fg textarea:focus { border-bottom-color: #E7432B; }
+.fg textarea { height: 90px; resize: none; }
+.err { border-bottom-color: #E7432B !important; }
+.formBtns { display: flex; gap: 9px; margin-top: 8px; }
+.submitBtn {
+  background: #E7432B;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 13px 20px;
+  flex: 1;
+  font-family: var(--font-body);
+  transition: background .2s;
+}
+.submitBtn:hover { background: #c93520; }
+.submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.waBtn {
+  background: #25D366;
+  color: #fff;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 13px 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.formSuccess {
+  background: #E7432B;
+  color: #fff;
+  padding: 12px 16px;
+  font-size: 11px;
+}

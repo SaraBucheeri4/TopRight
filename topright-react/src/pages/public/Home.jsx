@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import Marquee from '../../components/public/Marquee'
 import styles from './Home.module.css'
 import { useLang } from '../../LangContext'
 import { fetchPublishedPortfolioItems, getPublicUrl } from '../../services/portfolioService'
+import { submitContactForm } from '../../services/contactService'
+import { WA_NUMBER, CONTACT_DETAILS } from '../../config/constants'
 
 const clients = ['GPIC', 'Bapco Energies', 'Ministry of Interior',
   'Sharjah Heritage Institute', 'GCC Secretariat', 'INJAZ Bahrain', 'Bahrain Television']
@@ -59,19 +60,33 @@ const testimonials = [
   },
 ]
 
+const svgIcons = {
+  '01': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="2" stroke="#01A6A6" strokeWidth="1.5"/><path d="M6 8h10M6 11h7M6 14h9" stroke="#01A6A6" strokeWidth="1.2" strokeLinecap="round"/></svg>,
+  '02': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="5" stroke="rgba(255,255,255,.7)" strokeWidth="1.5"/><path d="M4 20c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="rgba(255,255,255,.7)" strokeWidth="1.5" strokeLinecap="round"/></svg>,
+  '03': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v4M11 15v4M3 11h4M15 11h4" stroke="rgba(255,255,255,.7)" strokeWidth="1.5" strokeLinecap="round"/><circle cx="11" cy="11" r="4" stroke="rgba(255,255,255,.7)" strokeWidth="1.5"/></svg>,
+  '04': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="14" rx="2" stroke="rgba(255,255,255,.7)" strokeWidth="1.5"/><path d="M7 9h8M7 13h5" stroke="rgba(255,255,255,.7)" strokeWidth="1.2" strokeLinecap="round"/></svg>,
+  '05': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="2" stroke="#01A6A6" strokeWidth="1.5"/><path d="M7 7l4 4-4 4M13 15h3" stroke="#01A6A6" strokeWidth="1.2" strokeLinecap="round"/></svg>,
+  '06': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 17L11 5l6 12" stroke="rgba(255,255,255,.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 13h8" stroke="rgba(255,255,255,.7)" strokeWidth="1.2" strokeLinecap="round"/></svg>,
+}
+
 const services = [
-  { cls: styles.svA, n: '01', tag: { en: 'Publications',  ar: 'المطبوعات' },  title: { en: 'Publication Design',          ar: 'تصميم المطبوعات' },           desc: { en: 'Books, newsletters, annual reports and HSE manuals — printed and digital, fully bilingual in Arabic and English from concept through to print.',    ar: 'الكتب والنشرات والتقارير السنوية وأدلة السلامة المهنية — مطبوعة ورقمية، ثنائية اللغة من الفكرة حتى الطباعة.' } },
-  { cls: styles.svC, n: '02', tag: { en: 'Illustration',  ar: 'الرسوم التوضيحية' }, title: { en: 'Editorial Art & Illustration', ar: 'الفن التحريري والرسوم التوضيحية' }, desc: { en: 'Storybooks and activity books for children and young adults — full character development, graphic art and complete layout from start to finish.', ar: 'كتب القصص والكتب التعليمية للأطفال والشباب — تطوير شخصيات متكامل وفن رسومي وتخطيط كامل.' } },
-  { cls: styles.svF, n: '03', tag: { en: 'Animation',     ar: 'الرسوم المتحركة' }, title: { en: 'Animation & Motion',           ar: 'الرسوم المتحركة والحركة' },    desc: { en: 'Character development to full animation. Digital publications with embedded animations — HTML5 eBooks, digital editions and interactive content.', ar: 'من تطوير الشخصيات إلى الرسوم المتحركة الكاملة. منشورات رقمية تتضمن رسومًا متحركة — كتب HTML5 وطبعات رقمية ومحتوى تفاعلي.' } },
-  { cls: styles.svD, n: '04', tag: { en: 'Corporate',     ar: 'المؤسسي' },      title: { en: 'Corporate & Guideline Books',  ar: 'الكتب المؤسسية والإرشادية' },  desc: { en: 'Corporate communication books, brand guidelines and process manuals — structured, clear and brand-consistent throughout every spread.',           ar: 'كتب التواصل المؤسسي وإرشادات العلامة التجارية وأدلة العمليات — منظمة وواضحة ومتسقة في كل صفحة.' } },
-  { cls: styles.svB, n: '05', tag: { en: 'Digital',       ar: 'الرقمي' },       title: { en: 'Digital Publications',         ar: 'المنشورات الرقمية' },          desc: { en: 'Interactive eBooks, HTML5 mini-websites and digital editions with embedded animations — modern, accessible and shareable on every device.',        ar: 'كتب إلكترونية تفاعلية ومواقع HTML5 مصغرة وطبعات رقمية — حديثة وسهلة الوصول وقابلة للمشاركة على جميع الأجهزة.' } },
-  { cls: styles.svE, n: '06', tag: { en: 'Coaching',      ar: 'التدريب' },      title: { en: 'Coaching & Workshops',         ar: 'التدريب وورش العمل' },         desc: { en: 'Creative writing, storytelling and brand development workshops for individuals, teams and organisations — in Bahrain and online.',                 ar: 'ورش عمل في الكتابة الإبداعية والسرد القصصي وتطوير العلامة التجارية للأفراد والفرق والمؤسسات — في البحرين وعبر الإنترنت.' } },
+  { cls: styles.svA, n: '01', tag: { en: 'Publications',  ar: 'المطبوعات' },  title: { en: 'Publication Design',          ar: 'تصميم المطبوعات' },           desc: { en: 'Books, newsletters, annual reports and HSE manuals — printed and digital, fully bilingual in Arabic and English from concept through to print.',    ar: 'الكتب والنشرات والتقارير السنوية وأدلة السلامة المهنية — مطبوعة ورقمية، ثنائية اللغة من الفكرة حتى الطباعة.' }, lnk: { en: 'Start a project →', ar: 'ابدأ مشروعك ←' } },
+  { cls: styles.svC, n: '02', tag: { en: 'Illustration',  ar: 'الرسوم التوضيحية' }, title: { en: 'Editorial Art & Illustration', ar: 'الفن التحريري والرسوم التوضيحية' }, desc: { en: 'Storybooks and activity books for children and young adults — full character development, graphic art and complete layout from start to finish.', ar: 'كتب القصص والكتب التعليمية للأطفال والشباب — تطوير شخصيات متكامل وفن رسومي وتخطيط كامل.' }, lnk: { en: 'Start a project →', ar: 'ابدأ مشروعك ←' } },
+  { cls: styles.svF, n: '03', tag: { en: 'Animation',     ar: 'الرسوم المتحركة' }, title: { en: 'Animation & Motion',           ar: 'الرسوم المتحركة والحركة' },    desc: { en: 'Character development to full animation. Digital publications with embedded animations — HTML5 eBooks, digital editions and interactive content.', ar: 'من تطوير الشخصيات إلى الرسوم المتحركة الكاملة. منشورات رقمية تتضمن رسومًا متحركة — كتب HTML5 وطبعات رقمية ومحتوى تفاعلي.' }, lnk: { en: 'Start a project →', ar: 'ابدأ مشروعك ←' } },
+  { cls: styles.svD, n: '04', tag: { en: 'Corporate',     ar: 'المؤسسي' },      title: { en: 'Corporate & Guideline Books',  ar: 'الكتب المؤسسية والإرشادية' },  desc: { en: 'Corporate communication books, brand guidelines and process manuals — structured, clear and brand-consistent throughout every spread.',           ar: 'كتب التواصل المؤسسي وإرشادات العلامة التجارية وأدلة العمليات — منظمة وواضحة ومتسقة في كل صفحة.' }, lnk: { en: 'Start a project →', ar: 'ابدأ مشروعك ←' } },
+  { cls: styles.svB, n: '05', tag: { en: 'Digital',       ar: 'الرقمي' },       title: { en: 'Digital Publications',         ar: 'المنشورات الرقمية' },          desc: { en: 'Interactive eBooks, HTML5 mini-websites and digital editions with embedded animations — modern, accessible and shareable on every device.',        ar: 'كتب إلكترونية تفاعلية ومواقع HTML5 مصغرة وطبعات رقمية — حديثة وسهلة الوصول وقابلة للمشاركة على جميع الأجهزة.' }, lnk: { en: 'Start a project →', ar: 'ابدأ مشروعك ←' } },
+  { cls: styles.svE, n: '06', tag: { en: 'Coaching',      ar: 'التدريب' },      title: { en: 'Coaching & Workshops',         ar: 'التدريب وورش العمل' },         desc: { en: 'Creative writing, storytelling and brand development workshops for individuals, teams and organisations — in Bahrain and online.',                 ar: 'ورش عمل في الكتابة الإبداعية والسرد القصصي وتطوير العلامة التجارية للأفراد والفرق والمؤسسات — في البحرين وعبر الإنترنت.' }, lnk: { en: 'Explore sessions →', ar: 'استكشف الجلسات ←' } },
 ]
+
+const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('All')
   const [portfolioCards, setPortfolioCards] = useState([])
-  const navigate = useNavigate()
+  const [form, setForm] = useState({ name: '', org: '', email: '', type: '', message: '' })
+  const [formErrors, setFormErrors] = useState({})
+  const [sent, setSent] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const { lang } = useLang()
   const isAr = lang === 'ar'
 
@@ -107,8 +122,8 @@ export default function Home() {
             )}
           </h1>
           <div className={styles.heroBtns}>
-            <button className={styles.btnW} onClick={() => navigate('/work')}>{isAr ? 'استعرض أعمالنا' : 'View our work'}</button>
-            <button className={styles.btnG} onClick={() => navigate('/contact')}>{isAr ? 'ابدأ مشروعك ←' : 'Start a project →'}</button>
+            <button className={styles.btnW} onClick={() => scrollTo('work')}>{isAr ? 'استعرض أعمالنا' : 'View our work'}</button>
+            <button className={styles.btnG} onClick={() => scrollTo('contact')}>{isAr ? 'ابدأ مشروعك ←' : 'Start a project →'}</button>
           </div>
           <div className={styles.heroStats}>
             <div className={styles.hstat}><strong>20+</strong><span>{isAr ? 'عامًا في البحرين' : 'Years in Bahrain'}</span></div>
@@ -188,7 +203,7 @@ export default function Home() {
       </div>
 
       {/* PORTFOLIO */}
-      <section className={styles.port}>
+      <section id="work" className={styles.port}>
         <div className={styles.portHd}>
           <div>
             <span className="sec-lbl">{isAr ? 'أعمال مختارة' : 'Selected work'}</span>
@@ -224,24 +239,25 @@ export default function Home() {
       </section>
 
       {/* SERVICES */}
-      <section className={styles.svcs}>
+      <section id="services" className={styles.svcs}>
         <span className="sec-lbl">{isAr ? 'ما نقدمه' : 'What we offer'}</span>
         <h2 className="sec-ttl" style={{ color: '#000' }}>{isAr ? <>خدمات إبداعية متكاملة،<br />من الفكرة حتى الطباعة</> : <>Full-service creative,<br />concept to print</>}</h2>
         <div className={styles.sg}>
           {services.map(s => (
             <div key={s.n} className={`${styles.sv} ${s.cls}`}>
+              <div className={styles.svIco}>{svgIcons[s.n]}</div>
               <div className={styles.svN}>{s.n}</div>
               <span className={styles.svTag}>{t(s.tag)}</span>
               <div className={styles.svTtl}>{t(s.title)}</div>
               <p className={styles.svDesc}>{t(s.desc)}</p>
-              <a href="/services" className={styles.svLnk}>{isAr ? 'اكتشف المزيد ←' : 'Explore →'}</a>
+              <a href="#contact" className={styles.svLnk}>{t(s.lnk)}</a>
             </div>
           ))}
         </div>
       </section>
 
-      {/* WHY */}
-      <section className={styles.why}>
+      {/* WHY / ABOUT */}
+      <section id="about" className={styles.why}>
         <div className={styles.whyL}>
           <h2>{isAr ? <>لماذا<br />توب رايت؟</> : <>Why<br />Top Right?</>}</h2>
           {whyItems.map(w => (
@@ -258,28 +274,57 @@ export default function Home() {
           <div className={styles.logoWm} aria-hidden="true">
             <img src="/logo.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.06, mixBlendMode: 'luminosity' }} />
           </div>
+          <div className={styles.whyDeco} style={{ width: 280, height: 280, bottom: -80, right: -80 }} />
+          <div className={styles.whyDeco} style={{ width: 180, height: 180, bottom: -40, right: -40 }} />
           <div className={styles.whyBig}>20+</div>
           <div className={styles.whyLbl}>{isAr ? 'عامًا في البحرين' : 'Years in Bahrain'}</div>
           <div className={styles.whyBox}>
             <p>{isAr ? 'هل أنت مستعد لبدء مطبوعتك أو كتابك أو حملتك القادمة؟ يسعدنا سماع تفاصيل مشروعك.' : 'Ready to start your next publication, book or campaign? We would love to hear about your project.'}</p>
-            <button onClick={() => navigate('/contact')}>{isAr ? 'تواصل معنا ←' : 'Get in touch →'}</button>
+            <button onClick={() => scrollTo('contact')}>{isAr ? 'تواصل معنا ←' : 'Get in touch →'}</button>
           </div>
         </div>
       </section>
 
       {/* COACHING TEASER */}
-      <section className={styles.coaching}>
+      <section id="coaching" className={styles.coaching}>
         <div className={styles.coaL}>
           <span className={styles.coaLbl}>{isAr ? 'التعليم الإبداعي' : 'Creative education'}</span>
           <h2>{isAr ? <>التدريب<br />وورش العمل</> : <>Coaching &amp;<br />Workshops</>}</h2>
           <p>{isAr ? 'تمكين الكتّاب والمربين والمهنيين من خلال التدريب الإبداعي وورش السرد القصصي وجلسات تطوير العلامة التجارية — في البحرين وعبر الإنترنت.' : 'Empowering writers, educators and professionals through creative coaching, storytelling workshops and brand development sessions — in Bahrain and online.'}</p>
-          <button className={styles.btnWht} onClick={() => navigate('/coaching')}>{isAr ? 'استفسر عن الجلسات' : 'Enquire about sessions'}</button>
+          <button className={styles.btnWht} onClick={() => scrollTo('contact')}>{isAr ? 'استفسر عن الجلسات' : 'Enquire about sessions'}</button>
         </div>
         <div className={styles.coaR}>
           <div className={styles.coaRing} style={{ width: 280, height: 280 }} />
           <div className={styles.coaRing} style={{ width: 180, height: 180 }} />
           <div className={styles.coaBig}>20+</div>
           <div className={styles.coaLbl2}>{isAr ? <>عامًا من التدريب<br />وورش العمل الإبداعية</> : <>Years of coaching<br />&amp; creative workshops</>}</div>
+        </div>
+      </section>
+
+      {/* EVENTS & CSR */}
+      <section id="events" className={styles.eventsSection}>
+        <div className={styles.eventsTopLine} />
+        <div className={styles.eventsInner}>
+          <span className="sec-lbl">{isAr ? 'المجتمع والمسؤولية' : 'Community & Responsibility'}</span>
+          <h2 className="sec-ttl" style={{ color: '#000', marginBottom: 12 }}>{isAr ? 'الفعاليات والمسؤولية المجتمعية' : 'Events & CSR'}</h2>
+          <p className={styles.eventsIntro}>{isAr ? 'بعيداً عن التصميم والنشر، تستثمر توب رايت في مبادرات مجتمعية تُحيي الإبداع. أقمنا أول فعالية لنا ضمن مبادرة "المجسمات المحلية" في البحرين — احتفاءً بالفن والحرف والثقافة المحلية.' : 'Beyond design and publishing, Top Right invests in community-driven initiatives that bring creativity to life. Our first event under the Local Miniatures initiative was held in Bahrain — a celebration of local art, craft and culture.'}</p>
+          <div className={styles.eventsGrid}>
+            <div className={styles.eventCardDark}>
+              <div className={styles.eventCardAccent} />
+              <span className={styles.eventCardLbl}>{isAr ? '/ مبادرة' : '/ Initiative'}</span>
+              <h3 className={styles.eventCardH3}>{isAr ? <>مجسمات<br />محلية</> : <>Local<br />Miniatures</>}</h3>
+              <p className={styles.eventCardP}>{isAr ? 'مبادرة من توب رايت تحتفي بفن المجسمات والثقافة الإبداعية المحلية في البحرين. جمعت فعاليتنا الأولى فنانين وهواة ومجتمعاً في تجربة غامرة.' : 'A Top Right initiative celebrating miniature art and local creative culture in Bahrain. Our inaugural event brought together artists, collectors and community members for an immersive experience.'}</p>
+              <a href="https://www.instagram.com/local_miniatures" target="_blank" rel="noopener" className={styles.eventInstagram}>{isAr ? 'تابعنا على انستغرام ←' : 'Follow on Instagram →'}</a>
+            </div>
+            <div className={styles.eventCardStats}>
+              <div className={styles.eventCircle}>
+                <div className={styles.eventCircleInner} />
+                <span className={styles.eventCircleNum}>1</span>
+              </div>
+              <div className={styles.eventStatLbl}>{isAr ? 'فعالية منعقدة' : 'Event held'}</div>
+              <div className={styles.eventStatTxt}>{isAr ? <>البحرين · ٢٠٢٥<br />فعاليات قادمة قريباً</> : <>Bahrain · 2025<br />More events coming soon</>}</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -301,6 +346,80 @@ export default function Home() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* CONTACT */}
+      <section id="contact" className={styles.contactSection}>
+        <div className={styles.contactL}>
+          <span className="sec-lbl">{isAr ? 'تواصل معنا' : 'Get in touch'}</span>
+          <h2>{isAr ? <>لنعمل<br />معًا</> : <>Let's work<br />together</>}</h2>
+          <p>{isAr ? 'أخبرنا عن مشروعك وسنردّ عليك خلال ٢٤ ساعة.' : 'Tell us about your project and we will get back to you within 24 hours.'}</p>
+          <div className={styles.contactItems}>
+            {CONTACT_DETAILS.map(item => (
+              <div key={item.labelEn} className={styles.contactItem}>
+                <div className={styles.contactLabel}>{isAr ? item.labelAr : item.labelEn}</div>
+                {item.href
+                  ? <a href={item.href} target={item.href.startsWith('http') ? '_blank' : undefined} rel="noopener" className={styles.contactVal}>{item.val}</a>
+                  : <div className={styles.contactVal}>{item.val}</div>
+                }
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.contactR}>
+          <form className={styles.contactForm} onSubmit={async (ev) => {
+            ev.preventDefault()
+            const e = {}
+            if (!form.name.trim()) e.name = true
+            if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) e.email = true
+            if (!form.message.trim()) e.message = true
+            setFormErrors(e)
+            if (Object.keys(e).length > 0) return
+            setSubmitting(true)
+            try {
+              await submitContactForm({ name: form.name, organisation: form.org, email: form.email, project_type: form.type, message: form.message })
+              setSent(true)
+              setForm({ name: '', org: '', email: '', type: '', message: '' })
+              setTimeout(() => setSent(false), 6000)
+            } finally {
+              setSubmitting(false)
+            }
+          }} noValidate>
+            <div className={styles.formRow}>
+              <div className={styles.fg}>
+                <label>{isAr ? 'الاسم *' : 'Name *'}</label>
+                <input type="text" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={isAr ? 'اسمك' : 'Your name'} className={formErrors.name ? styles.err : ''} />
+              </div>
+              <div className={styles.fg}>
+                <label>{isAr ? 'المؤسسة' : 'Organisation'}</label>
+                <input type="text" value={form.org} onChange={e => setForm(f => ({ ...f, org: e.target.value }))} placeholder={isAr ? 'اسم الشركة' : 'Company name'} />
+              </div>
+            </div>
+            <div className={styles.fg}>
+              <label>{isAr ? 'البريد الإلكتروني *' : 'Email *'}</label>
+              <input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="your@email.com" className={formErrors.email ? styles.err : ''} />
+            </div>
+            <div className={styles.fg}>
+              <label>{isAr ? 'نوع المشروع' : 'Type of project'}</label>
+              <input type="text" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} placeholder={isAr ? 'تقرير سنوي، كتاب أطفال...' : "Annual report, children's book..."} />
+            </div>
+            <div className={styles.fg}>
+              <label>{isAr ? 'الرسالة *' : 'Message *'}</label>
+              <textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder={isAr ? 'أخبرنا عن مشروعك...' : 'Tell us about your project...'} className={formErrors.message ? styles.err : ''} />
+            </div>
+            <div className={styles.formBtns}>
+              <button type="submit" className={styles.submitBtn} disabled={submitting}>
+                {submitting ? (isAr ? 'جارٍ الإرسال…' : 'Sending…') : (isAr ? 'إرسال الرسالة ←' : 'Send message →')}
+              </button>
+              <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noopener" className={styles.waBtn}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                WhatsApp
+              </a>
+            </div>
+            {sent && <div className={styles.formSuccess}>{isAr ? 'شكرًا — سنردّ عليك خلال ٢٤ ساعة.' : 'Thank you — we will get back to you within 24 hours.'}</div>}
+          </form>
         </div>
       </section>
     </>
