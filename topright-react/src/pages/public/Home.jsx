@@ -6,6 +6,15 @@ import { fetchPublishedPortfolioItems, getPublicUrl } from '../../services/portf
 import { submitContactForm } from '../../services/contactService'
 import { WA_NUMBER, CONTACT_DETAILS } from '../../config/constants'
 
+const CAT_COLORS = {
+  newsletter:   { bg: 'rgba(0,88,161,.15)',   color: '#5B9BD5' },
+  hse:          { bg: 'rgba(1,166,166,.15)',  color: '#01A6A6' },
+  storybooks:   { bg: 'rgba(119,62,132,.15)', color: '#a06ab4' },
+  illustration: { bg: 'rgba(231,67,43,.15)',  color: '#E7432B' },
+  animation:    { bg: 'rgba(231,67,43,.15)',  color: '#E7432B' },
+  corporate:    { bg: 'rgba(0,88,161,.15)',   color: '#5B9BD5' },
+}
+
 const clients = ['GPIC', 'Bapco Energies', 'Ministry of Interior',
   'Sharjah Heritage Institute', 'GCC Secretariat', 'INJAZ Bahrain', 'Bahrain Television']
 
@@ -100,9 +109,27 @@ export default function Home() {
         label: { en: item.label_en ?? '', ar: item.label_ar ?? '' },
         title: item.title,
         sub: { en: item.subtitle_en ?? '', ar: item.subtitle_ar ?? '' },
+        year: item.year ?? null,
+        project_url: item.project_url ?? null,
+        image_position: item.image_position ?? 'center center',
       })))
     })
   }, [])
+
+  // Scroll reveal — re-run when tab or cards change so newly visible cards animate
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => entries.forEach(e => {
+        if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) }
+      }),
+      { threshold: 0.06 }
+    )
+    // Small timeout so the newly-rendered cards are in the DOM
+    const id = setTimeout(() => {
+      document.querySelectorAll('.js-reveal:not(.visible)').forEach(el => observer.observe(el))
+    }, 20)
+    return () => { clearTimeout(id); observer.disconnect() }
+  }, [portfolioCards, activeTab])
 
   const filtered = portfolioCards.filter(c =>
     activeTab === 'All' || c.cat === activeTab.toLowerCase()
@@ -204,14 +231,6 @@ export default function Home() {
 
       {/* PORTFOLIO */}
       <section id="work" className={styles.port}>
-        <div className={styles.portHd}>
-          <div>
-            <span className="sec-lbl">{isAr ? 'أعمال مختارة' : 'Selected work'}</span>
-            <h2 className="sec-ttl">{isAr ? <>{'+٢٠ عامًا من<br />القصص المروية'}</> : <>20+ years of<br />stories told</>}</h2>
-          </div>
-          <a href="/work" className={styles.secLink}>{isAr ? 'عرض جميع المشاريع' : 'View all projects'}</a>
-        </div>
-
         <div className={styles.portTabs}>
           {tabs.map(tab => (
             <button key={tab.key} className={`${styles.ptab} ${activeTab === tab.key ? styles.ptabOn : ''}`} onClick={() => setActiveTab(tab.key)}>
@@ -222,15 +241,25 @@ export default function Home() {
 
         <div className={styles.portGrid}>
           {filtered.map((c, i) => (
-            <div key={i} className={styles.pcard}>
+            <div key={i} className={`${styles.pcard} js-reveal`} style={{ transitionDelay: `${i * 80}ms` }}>
               <div className={styles.pcardThumb}>
-                <img src={c.img} alt={c.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={c.img} alt={c.title} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: c.image_position || 'center center' }} />
               </div>
               <div className={styles.pcardInfo}>
+                <div className={styles.pcardMeta}>
+                  {(() => {
+                    const cl = CAT_COLORS[c.cat?.toLowerCase()] || { bg: 'rgba(255,255,255,.08)', color: '#888' }
+                    return <span className={styles.pcardBadge} style={{ background: cl.bg, color: cl.color }}>{c.cat}</span>
+                  })()}
+                  {c.year && <span className={styles.pcardYear}>{c.year}</span>}
+                </div>
                 <div className={styles.pcardCat}>{t(c.label)}</div>
                 <div className={styles.pcardTtl}>{c.title}</div>
                 <div className={styles.pcardSub}>{t(c.sub)}</div>
-                <span className={styles.pcardArrow}>{isAr ? 'عرض المشروع ←' : 'View project →'}</span>
+                {c.project_url
+                  ? <a href={c.project_url} target="_blank" rel="noopener" className={styles.pcardArrow}>{isAr ? 'عرض المشروع ←' : 'View project →'}</a>
+                  : <span className={styles.pcardArrow} style={{ opacity: 0.3 }}>{isAr ? 'عرض المشروع ←' : 'View project →'}</span>
+                }
               </div>
             </div>
           ))}
@@ -243,8 +272,8 @@ export default function Home() {
         <span className="sec-lbl">{isAr ? 'ما نقدمه' : 'What we offer'}</span>
         <h2 className="sec-ttl" style={{ color: '#000' }}>{isAr ? <>خدمات إبداعية متكاملة،<br />من الفكرة حتى الطباعة</> : <>Full-service creative,<br />concept to print</>}</h2>
         <div className={styles.sg}>
-          {services.map(s => (
-            <div key={s.n} className={`${styles.sv} ${s.cls}`}>
+          {services.map((s, i) => (
+            <div key={s.n} className={`${styles.sv} ${s.cls} js-reveal`} style={{ transitionDelay: `${i * 70}ms` }}>
               <div className={styles.svIco}>{svgIcons[s.n]}</div>
               <div className={styles.svN}>{s.n}</div>
               <span className={styles.svTag}>{t(s.tag)}</span>
@@ -334,7 +363,7 @@ export default function Home() {
         <h2 className="sec-ttl" style={{ color: '#000' }}>{isAr ? 'ماذا يقول عملاؤنا' : 'What our clients say'}</h2>
         <div className={styles.tg}>
           {testimonials.map((testimonial, i) => (
-            <div key={i} className={styles.tc}>
+            <div key={i} className={`${styles.tc} js-reveal`} style={{ transitionDelay: `${i * 100}ms` }}>
               <span className={styles.tcQ}>"</span>
               <p className={styles.tcTxt}>{t(testimonial.quote)}</p>
               <div className={styles.tcRow}>

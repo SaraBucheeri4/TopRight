@@ -45,5 +45,80 @@
   font-weight: 700;
   font-family: var(--font-body);
   transition: border-color 0.2s, color 0.2s;
+  cursor: pointer;
 }
 .langBtn:hover { border-color: #E7432B; color: #E7432B; }
+
+/* Mobile lang button inside drawer — hidden on desktop */
+.langBtnMobile { display: none; }
+
+/* Hamburger button */
+.burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+}
+.burger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #fff;
+  transition: background 0.2s;
+}
+.burger:hover span { background: #E7432B; }
+
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 48;
+}
+
+@media (max-width: 900px) {
+  .nav { padding: 0 20px; }
+
+  .burger { display: flex; }
+  .langBtn:not(.langBtnMobile) { display: none; }
+
+  .links {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 260px;
+    height: 100vh;
+    background: #111;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 0;
+    padding: 80px 32px 40px;
+    z-index: 49;
+    transition: right 0.3s ease;
+  }
+  .linksOpen { right: 0; }
+
+  .link {
+    font-size: 15px;
+    padding: 14px 0;
+    border-bottom: 1px solid #1a1a1a;
+    width: 100%;
+    display: block;
+  }
+
+  .langBtnMobile {
+    display: block;
+    margin-top: 24px;
+    font-size: 12px;
+    padding: 10px 20px;
+  }
+
+  .overlay { display: block; }
+}

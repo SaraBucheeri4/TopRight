@@ -98,6 +98,27 @@ img { display: block; }
   max-width: 520px;
 }
 
+/* SCROLL REVEAL ANIMATION */
+.js-reveal {
+  opacity: 0;
+  transform: translateX(-36px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.js-reveal.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* RESPONSIVE BASE */
+@media (max-width: 768px) {
+  .sec-ttl { font-size: 32px; }
+  .page-hero h1 { font-size: 44px; }
+}
+@media (max-width: 480px) {
+  .sec-ttl { font-size: 26px; }
+  .page-hero h1 { font-size: 32px; }
+}
+
 /* PLACEHOLDER BOX */
 .ph-card {
   background: #1a1a1a;

@@ -58,7 +58,7 @@
   transition: border-color 0.2s;
 }
 .btnG:hover { border-color: #555; }
-.heroStats { display: flex; gap: 36px; }
+.heroStats { display: flex; gap: 36px; flex-wrap: wrap; }
 .hstat strong {
   display: block;
   font-size: 38px;
@@ -142,6 +142,7 @@
   padding: 0 32px;
   margin-bottom: 28px;
   border-bottom: 1px solid #2a2a2a;
+  padding-top: 20px;
 }
 .ptab {
   font-size: 9px;
@@ -184,8 +185,8 @@
   font-size: 8px;
   letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: #E7432B;
-  margin-bottom: 10px;
+  color: #888;
+  margin-bottom: 6px;
 }
 .pcardTtl { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 8px; }
 .pcardSub { font-size: 11px; color: #888; line-height: 1.65; }
@@ -670,4 +671,139 @@
   color: #fff;
   padding: 12px 16px;
   font-size: 11px;
+}
+
+/* ── Category + year row on portfolio cards ── */
+.pcardMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.pcardBadge {
+  font-size: 7px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.pcardYear {
+  margin-left: 10px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: #555;
+  background: #2a2a2a;
+  padding: 2px 7px;
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1024px) {
+  .heroH1 { font-size: 56px; }
+  .portGrid { grid-template-columns: 1fr; }
+  .sg { grid-template-columns: repeat(2, 1fr); }
+  .why { grid-template-columns: 1fr; }
+  .whyR { min-height: 360px; }
+  .coaching { grid-template-columns: 1fr; }
+  .coaR { min-height: 240px; }
+  .tg { grid-template-columns: 1fr; }
+  .eventsGrid { grid-template-columns: 1fr; }
+  .contactSection { grid-template-columns: 1fr; }
+  .inboxLayout { grid-template-columns: 1fr; }
+  .statsRow { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; min-height: auto; }
+  .heroR { display: none; }
+  .heroL { padding: 56px 24px 44px; }
+  .heroH1 { font-size: 44px; }
+  .heroStats { gap: 20px; }
+
+  .clients { padding: 16px 20px; gap: 0; }
+  .clN { padding: 4px 12px; font-size: 8px; }
+
+  .port { padding: 48px 0; }
+  .portHd { flex-direction: column; align-items: flex-start; gap: 8px; padding: 0 20px 24px; }
+  .portTabs { padding: 0 20px; overflow-x: auto; flex-wrap: nowrap; }
+  .portGrid { padding: 0 20px; gap: 2px; }
+  .pcard { flex-direction: column; }
+  .pcardThumb { width: 100%; height: 200px; }
+  .pcardInfo { padding: 20px; border-left: none; border-top: 1px solid #333; }
+
+  .svcs { padding: 48px 20px; }
+  .sg { grid-template-columns: 1fr; }
+
+  .why { grid-template-columns: 1fr; }
+  .whyL { padding: 48px 24px; }
+  .whyL h2 { font-size: 36px; }
+  .whyR { padding: 48px 24px; }
+  .whyBig { font-size: 100px; }
+
+  .coaching { grid-template-columns: 1fr; }
+  .coaL { padding: 48px 24px; }
+  .coaL h2 { font-size: 36px; }
+  .coaR { display: none; }
+
+  .testi { padding: 48px 20px; }
+  .tg { grid-template-columns: 1fr; }
+
+  .eventsSection { padding: 48px 20px; }
+  .eventsGrid { grid-template-columns: 1fr; }
+
+  .contactSection { grid-template-columns: 1fr; }
+  .contactL { padding: 48px 24px; }
+  .contactL h2 { font-size: 36px; }
+  .contactR { padding: 48px 24px; }
+
+  .formRow { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .hero { min-height: auto; }
+  .heroL { padding: 44px 16px 32px; }
+  .heroH1 { font-size: 28px; letter-spacing: 0px; }
+  .heroBtns { flex-direction: column; gap: 8px; }
+  .heroStats { gap: 16px; }
+  .hstat strong { font-size: 26px; }
+  .hstat span { font-size: 7px; }
+
+  .port { padding: 36px 0; }
+  .portHd { padding: 0 16px 20px; }
+  .portTabs { padding: 0 16px; }
+  .portGrid { padding: 0 16px; }
+  .pcardThumb { height: 160px; }
+  .pcardInfo { padding: 16px; }
+  .pcardTtl { font-size: 14px; }
+
+  .svcs { padding: 36px 16px; }
+  .sv { padding: 24px 18px; }
+
+  .whyL { padding: 36px 16px; }
+  .whyL h2 { font-size: 28px; }
+  .whyR { padding: 36px 16px; }
+  .whyBig { font-size: 76px; }
+  .whyBox { padding: 20px 16px; }
+
+  .coaL { padding: 36px 16px; }
+  .coaL h2 { font-size: 28px; }
+
+  .testi { padding: 36px 16px; }
+  .tc { padding: 24px 18px; }
+
+  .eventsSection { padding: 36px 16px; }
+  .eventCardDark { padding: 28px 20px; }
+  .eventCardH3 { font-size: 20px; }
+
+  .contactL { padding: 36px 16px; }
+  .contactL h2 { font-size: 28px; }
+  .contactR { padding: 36px 16px; }
+
+  .clients { padding: 12px 16px; }
+  .clN { font-size: 7px; padding: 4px 8px; }
 }

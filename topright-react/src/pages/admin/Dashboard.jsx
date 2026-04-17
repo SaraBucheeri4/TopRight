@@ -26,7 +26,7 @@ const CATEGORIES = PORTFOLIO_CATEGORIES
 const EMPTY_ITEM = {
   slug: '', category: 'newsletter', label_en: '', label_ar: '',
   title: '', subtitle_en: '', subtitle_ar: '', year: '',
-  image_url: '', display_order: 0, is_published: true,
+  image_url: '', project_url: '', image_position: '50% 50%', display_order: 0, is_published: true,
 }
 
 function catClass(cat) {
@@ -41,6 +41,20 @@ function catClass(cat) {
   return map[cat] ?? ''
 }
 
+function CropSlider({ label, value, onChange, styles }) {
+  return (
+    <div className={styles.cropSliderRow}>
+      <span className={styles.cropSliderLbl}>{label}</span>
+      <input
+        type="range" min={0} max={100} value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className={styles.cropRange}
+      />
+      <span className={styles.cropSliderVal}>{value}%</span>
+    </div>
+  )
+}
+
 /* ── Portfolio Manager ── */
 function PortfolioManager({ onNav }) {
   const [items, setItems] = useState([])
@@ -52,8 +66,12 @@ function PortfolioManager({ onNav }) {
   const [uploadError, setUploadError] = useState(null)
   const [formErrors, setFormErrors] = useState({})
   const [search, setSearch] = useState('')
+  const [previewSrc, setPreviewSrc] = useState(null)
   const dragIdx = useRef(null)
   const fileRef = useRef(null)
+  const docRef = useRef(null)
+  const [uploadingDoc, setUploadingDoc] = useState(false)
+  const [uploadDocError, setUploadDocError] = useState(null)
 
   async function load() {
     setLoading(true)
@@ -87,13 +105,29 @@ function PortfolioManager({ onNav }) {
     await updatePortfolioOrder(items)
   }
 
-  function openEdit(item) { setEditItem({ ...item }); setIsNew(false); setFormErrors({}); setUploadError(null) }
-  function openNew() { setEditItem({ ...EMPTY_ITEM, display_order: items.length }); setIsNew(true); setFormErrors({}); setUploadError(null) }
-  function closeEdit() { setEditItem(null); setFormErrors({}); setUploadError(null) }
+  function openEdit(item) {
+    setEditItem({ ...item, image_position: item.image_position || '50% 50%' })
+    setIsNew(false)
+    setFormErrors({})
+    setUploadError(null)
+    setPreviewSrc(item.image_url ? getPublicUrl(item.image_url) : null)
+  }
+  function openNew() {
+    setEditItem({ ...EMPTY_ITEM, display_order: items.length })
+    setIsNew(true)
+    setFormErrors({})
+    setUploadError(null)
+    setPreviewSrc(null)
+  }
+  function closeEdit() { setEditItem(null); setFormErrors({}); setUploadError(null); setPreviewSrc(null) }
 
   async function handleImageUpload(file) {
     if (!file) return
     setUploadError(null)
+    // Show local preview immediately before upload
+    const reader = new FileReader()
+    reader.onload = e => setPreviewSrc(e.target.result)
+    reader.readAsDataURL(file)
     setUploading(true)
     try {
       const filename = await uploadPortfolioImage(file)
@@ -103,6 +137,20 @@ function PortfolioManager({ onNav }) {
       setUploadError(err.message)
     } finally {
       setUploading(false)
+    }
+  }
+
+  async function handleDocUpload(file) {
+    if (!file) return
+    setUploadDocError(null)
+    setUploadingDoc(true)
+    try {
+      const filename = await uploadPortfolioImage(file)
+      setEditItem(prev => ({ ...prev, project_url: getPublicUrl(filename) }))
+    } catch (err) {
+      setUploadDocError(err.message)
+    } finally {
+      setUploadingDoc(false)
     }
   }
 
@@ -168,6 +216,15 @@ function PortfolioManager({ onNav }) {
         </div>
 
         <table className={styles.table}>
+          <colgroup>
+            <col style={{ width: 36 }} />
+            <col style={{ width: 80 }} />
+            <col />
+            <col style={{ width: 140 }} />
+            <col style={{ width: 80 }} />
+            <col style={{ width: 100 }} />
+            <col style={{ width: 140 }} />
+          </colgroup>
           <thead>
             <tr>
               <th></th>
@@ -206,9 +263,11 @@ function PortfolioManager({ onNav }) {
                     {item.is_published ? '● Live' : '○ Draft'}
                   </button>
                 </td>
-                <td className={styles.tdActions}>
-                  <button className={`${styles.btnSm} ${styles.btnEdit}`} onClick={() => openEdit(item)}>Edit</button>
-                  <button className={`${styles.btnSm} ${styles.btnDel}`} onClick={() => handleDelete(item)}>Delete</button>
+                <td>
+                  <div className={styles.tdActions}>
+                    <button className={`${styles.btnSm} ${styles.btnEdit}`} onClick={() => openEdit(item)}>Edit</button>
+                    <button className={`${styles.btnSm} ${styles.btnDel}`} onClick={() => handleDelete(item)}>Delete</button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -297,20 +356,60 @@ function PortfolioManager({ onNav }) {
 
               <div className={styles.mfg}>
                 <label className={styles.fieldLabel}>Image *</label>
-                <div
-                  className={`${styles.uploadArea} ${formErrors.image_url ? styles.uploadAreaErr : ''}`}
-                  onClick={() => !uploading && fileRef.current?.click()}
-                >
-                  {editItem.image_url
-                    ? <img src={getPublicUrl(editItem.image_url)} alt="" className={styles.previewImg} />
-                    : <span style={{ fontSize: 24, opacity: 0.3 }}>↑</span>}
-                  <span className={styles.uploadAreaText}>
-                    {uploading ? 'Uploading…' : editItem.image_url ? 'Click to replace image' : 'Click to upload image'}
-                  </span>
-                  {editItem.image_url && (
-                    <span className={styles.uploadNote}>{editItem.image_url}</span>
-                  )}
-                  <span className={styles.uploadAreaHint}>JPG, PNG, WEBP</span>
+                <div className={styles.uploadWithPreview}>
+                  {/* Upload trigger */}
+                  <div
+                    className={`${styles.uploadArea} ${formErrors.image_url ? styles.uploadAreaErr : ''}`}
+                    onClick={() => !uploading && fileRef.current?.click()}
+                  >
+                    <span style={{ fontSize: 24, opacity: 0.3 }}>↑</span>
+                    <span className={styles.uploadAreaText}>
+                      {uploading ? 'Uploading…' : previewSrc ? 'Click to replace' : 'Click to upload image'}
+                    </span>
+                    <span className={styles.uploadAreaHint}>JPG, PNG, WEBP</span>
+                  </div>
+
+                  {/* Card preview + crop sliders */}
+                  <div className={styles.cardPreviewWrap}>
+                    <div className={styles.cardPreviewLabel}>Card preview</div>
+                    <div className={styles.cardPreview}>
+                      <div className={styles.cardPreviewThumb}>
+                        {previewSrc
+                          ? <img src={previewSrc} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: editItem.image_position || '50% 50%' }} />
+                          : <div className={styles.cardPreviewEmpty}>No image</div>
+                        }
+                      </div>
+                      <div className={styles.cardPreviewInfo}>
+                        <div className={styles.cardPreviewCat}>{editItem.category || 'Category'}</div>
+                        <div className={styles.cardPreviewTitle}>{editItem.title || 'Project Title'}</div>
+                        <div className={styles.cardPreviewSub}>{editItem.subtitle_en || 'Subtitle…'}</div>
+                        <div className={styles.cardPreviewArrow}>View project →</div>
+                      </div>
+                    </div>
+                    {uploading && <div className={styles.cardPreviewUploading}>Uploading…</div>}
+                    {previewSrc && (
+                      <div className={styles.cropSliders}>
+                        <CropSlider
+                          label="← Horizontal →"
+                          value={parseInt((editItem.image_position || '50% 50%').split(' ')[0]) || 50}
+                          onChange={v => {
+                            const py = parseInt((editItem.image_position || '50% 50%').split(' ')[1]) || 50
+                            setEditItem(p => ({ ...p, image_position: `${v}% ${py}%` }))
+                          }}
+                          styles={styles}
+                        />
+                        <CropSlider
+                          label="↑ Vertical ↓"
+                          value={parseInt((editItem.image_position || '50% 50%').split(' ')[1]) || 50}
+                          onChange={v => {
+                            const px = parseInt((editItem.image_position || '50% 50%').split(' ')[0]) || 50
+                            setEditItem(p => ({ ...p, image_position: `${px}% ${v}%` }))
+                          }}
+                          styles={styles}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 {uploadError && <span className={styles.fieldErr}>Upload failed: {uploadError}</span>}
                 {formErrors.image_url && !uploadError && <span className={styles.fieldErr}>{formErrors.image_url}</span>}
@@ -321,6 +420,42 @@ function PortfolioManager({ onNav }) {
                   className={styles.fileInput}
                   onChange={e => handleImageUpload(e.target.files?.[0])}
                 />
+              </div>
+
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Project Link / File</label>
+                <input
+                  className={styles.fieldInput}
+                  type="url"
+                  placeholder="https://… or upload a file below"
+                  value={editItem.project_url ?? ''}
+                  onChange={e => setEditItem(p => ({ ...p, project_url: e.target.value }))}
+                />
+                <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button
+                    type="button"
+                    className={styles.btnSecondary}
+                    style={{ fontSize: 12, padding: '4px 10px' }}
+                    onClick={() => docRef.current?.click()}
+                    disabled={uploadingDoc}
+                  >
+                    {uploadingDoc ? 'Uploading…' : '↑ Upload PDF / File'}
+                  </button>
+                  {editItem.project_url && (
+                    <a href={editItem.project_url} target="_blank" rel="noopener" style={{ fontSize: 12, opacity: 0.7 }}>
+                      Preview ↗
+                    </a>
+                  )}
+                </div>
+                {uploadDocError && <span className={styles.fieldErr}>Upload failed: {uploadDocError}</span>}
+                <input
+                  ref={docRef}
+                  type="file"
+                  accept=".pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.zip,image/*"
+                  className={styles.fileInput}
+                  onChange={e => handleDocUpload(e.target.files?.[0])}
+                />
+                <span className={styles.uploadAreaHint}>PDF, PPT, Word, Excel, ZIP, or any image</span>
               </div>
 
               <label className={styles.checkRow}>
@@ -848,6 +983,7 @@ function CalendarPage() {
 export default function Dashboard() {
   const [section, setSection] = useState('dashboard')
   const [counts, setCounts] = useState({ portfolio: 0, published: 0, draft: 0, text: 0, inbox: 0 })
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     fetchDashboardCounts().then(setCounts)
@@ -873,6 +1009,9 @@ export default function Dashboard() {
 
       <header className={styles.header}>
         <div className={styles.headerL}>
+          <button className={styles.sidebarToggle} onClick={() => setSidebarOpen(o => !o)} aria-label="Menu">
+            <span /><span /><span />
+          </button>
           <img src="/logo.png" alt="TopRight" className={styles.headerLogo} />
           <span className={styles.headerPortalLabel}>Admin Portal</span>
         </div>
@@ -882,7 +1021,8 @@ export default function Dashboard() {
       </header>
 
       <div className={styles.body}>
-        <nav className={styles.sidebar}>
+        {sidebarOpen && <div className={styles.sidebarOverlay} onClick={() => setSidebarOpen(false)} />}
+        <nav className={`${styles.sidebar} ${sidebarOpen ? styles.sidebarOpen : ''}`}>
           {groups.map(group => (
             <div key={group} className={styles.sidebarSection}>
               <div className={styles.sidebarLabel}>{group}</div>
@@ -890,7 +1030,7 @@ export default function Dashboard() {
                 <button
                   key={item.key}
                   className={`${styles.slink} ${section === item.key ? styles.slinkActive : ''}`}
-                  onClick={() => setSection(item.key)}
+                  onClick={() => { setSection(item.key); setSidebarOpen(false); }}
                 >
                   <span className={styles.slinkIcon}>{item.icon}</span>
                   {item.label}
