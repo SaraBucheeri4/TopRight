@@ -26,8 +26,6 @@ import {
   updateClient,
   deleteClient,
   updateClientsOrder,
-  uploadClientLogo,
-  getClientLogoUrl,
 } from '../../services/clientsService'
 import { fetchContactInfo, upsertContactInfo } from '../../services/contactInfoService'
 import { fetchFooter, upsertFooter } from '../../services/footerService'
@@ -1068,14 +1066,10 @@ function ClientsManager({ showToast }) {
   const [editClient, setEditClient] = useState(null)
   const [isNew, setIsNew] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [uploadError, setUploadError] = useState(null)
   const [saveError, setSaveError] = useState(null)
   const [formErrors, setFormErrors] = useState({})
-  const [previewSrc, setPreviewSrc] = useState(null)
   const [deleteConfirm, setDeleteConfirm] = useState(null)
   const dragIdx = useRef(null)
-  const fileRef = useRef(null)
 
   const EMPTY_CLIENT = { name: '', logo_url: '', display_order: 0, is_published: true }
 
@@ -1114,38 +1108,15 @@ function ClientsManager({ showToast }) {
     setEditClient({ ...EMPTY_CLIENT, display_order: clients.length })
     setIsNew(true)
     setFormErrors({})
-    setUploadError(null)
-    setPreviewSrc(null)
   }
   function openEdit(client) {
     setEditClient({ ...client })
     setIsNew(false)
     setFormErrors({})
-    setUploadError(null)
-    setPreviewSrc(client.logo_url ? getClientLogoUrl(client.logo_url) : null)
   }
   function closeEdit() {
     setEditClient(null)
     setFormErrors({})
-    setUploadError(null)
-    setPreviewSrc(null)
-  }
-
-  async function handleLogoUpload(file) {
-    if (!file) return
-    setUploadError(null)
-    const reader = new FileReader()
-    reader.onload = e => setPreviewSrc(e.target.result)
-    reader.readAsDataURL(file)
-    setUploading(true)
-    try {
-      const filename = await uploadClientLogo(file)
-      setEditClient(prev => ({ ...prev, logo_url: filename }))
-    } catch (err) {
-      setUploadError(err.message)
-    } finally {
-      setUploading(false)
-    }
   }
 
   function validate() {
@@ -1211,14 +1182,12 @@ function ClientsManager({ showToast }) {
         <table className={styles.table} style={{ tableLayout: 'fixed' }}>
           <colgroup>
             <col style={{ width: 36 }} />
-            <col style={{ width: 56 }} />
             <col />
             <col style={{ width: 110 }} />
             <col style={{ width: 140 }} />
           </colgroup>
           <thead>
             <tr>
-              <th></th>
               <th></th>
               <th>Client Name</th>
               <th>Status</th>
@@ -1236,11 +1205,6 @@ function ClientsManager({ showToast }) {
                 className={styles.draggableRow}
               >
                 <td className={styles.dragHandle}>⠿</td>
-                <td>
-                  {client.logo_url
-                    ? <img src={getClientLogoUrl(client.logo_url)} alt="" className={styles.thumb} />
-                    : <div className={styles.thumbEmpty} />}
-                </td>
                 <td className={styles.tdTitle}>{client.name}</td>
                 <td>
                   <button
@@ -1284,31 +1248,6 @@ function ClientsManager({ showToast }) {
                 {formErrors.name && <span className={styles.fieldErr}>{formErrors.name}</span>}
               </div>
 
-              <div className={styles.mfg}>
-                <label className={styles.fieldLabel}>Logo (optional)</label>
-                <div
-                  className={`${styles.uploadArea} ${uploadError ? styles.uploadAreaErr : ''}`}
-                  onClick={() => fileRef.current?.click()}
-                >
-                  {previewSrc
-                    ? <img src={previewSrc} alt="preview" style={{ maxHeight: 60, maxWidth: '100%', objectFit: 'contain' }} />
-                    : <>
-                        <div style={{ fontSize: 22, opacity: 0.3 }}>⊕</div>
-                        <span className={styles.uploadAreaText}>{uploading ? 'Uploading…' : 'Upload client logo'}</span>
-                        <span className={styles.uploadAreaHint}>SVG or PNG preferred</span>
-                      </>
-                  }
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={e => handleLogoUpload(e.target.files[0])}
-                  />
-                </div>
-                {uploadError && <span className={styles.fieldErr}>{uploadError}</span>}
-              </div>
-
               <div className={styles.mfgRow}>
                 <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Display Order</label>
@@ -1335,7 +1274,7 @@ function ClientsManager({ showToast }) {
             <div className={styles.modalFooter}>
               {saveError && <span className={styles.fieldErr} style={{ marginRight: 'auto' }}>{saveError}</span>}
               <button className={styles.btnSecondary} onClick={closeEdit}>Cancel</button>
-              <button className={styles.btnAdd} onClick={handleSave} disabled={saving || uploading}>
+              <button className={styles.btnAdd} onClick={handleSave} disabled={saving}>
                 {saving ? 'Saving…' : isNew ? 'Add Client' : 'Save Changes'}
               </button>
             </div>
@@ -1406,6 +1345,10 @@ function HeroEditor({ showToast }) {
     stat1_num: '20+', stat1_label_en: 'Years in Bahrain', stat1_label_ar: 'عامًا في البحرين',
     stat2_num: '100+', stat2_label_en: 'Publications', stat2_label_ar: 'مطبوعة',
     stat3_num: 'AR+EN', stat3_label_en: 'Bilingual', stat3_label_ar: 'ثنائي اللغة',
+    card1_line1: 'Safety with', card1_line2: 'Namool', card1_label: 'BAPCO ENERGIES · HSE', card1_color: '#01A6A6',
+    card2_line1: 'خليجية', card2_label: 'GPIC · SINCE 2001', card2_color: '#0058A1',
+    card3_line1: 'تطير بلا ريش', card3_line2: 'Flies Without Wings', card3_color: '#773E84',
+    card4_line1: 'SDG Booklets', card4_label: 'SDG', card4_color: '#00AEA2',
   }
 
   const [hero, setHero] = useState(null)
@@ -1509,6 +1452,40 @@ function HeroEditor({ showToast }) {
             <div className={styles.mfg}>
               <label className={styles.fieldLabel}>Label (AR)</label>
               <input className={styles.fieldInput} dir="rtl" value={hero[`stat${n}_label_ar`] ?? ''} onChange={e => set(`stat${n}_label_ar`, e.target.value)} />
+            </div>
+          </div>
+        ))}
+
+        <div style={{ marginTop: 24, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Book Cards (hero right panel)</div>
+
+        {[
+          { n: 1, lines: ['line1', 'line2'], labelField: 'label', hasLabel: true },
+          { n: 2, lines: ['line1'], labelField: 'label', hasLabel: true },
+          { n: 3, lines: ['line1', 'line2'], labelField: null, hasLabel: false },
+          { n: 4, lines: ['line1'], labelField: 'label', hasLabel: true },
+        ].map(({ n, lines, hasLabel }) => (
+          <div key={n} style={{ border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, padding: '14px 16px', marginBottom: 10 }}>
+            <div style={{ fontSize: 10, letterSpacing: 1, color: '#888', marginBottom: 10 }}>Card {n}</div>
+            <div className={styles.mfgRow}>
+              {lines.map(l => (
+                <div key={l} className={styles.mfg}>
+                  <label className={styles.fieldLabel}>{l === 'line1' ? 'Title' : 'Subtitle'}</label>
+                  <input className={styles.fieldInput} dir={n <= 2 && l === 'line1' ? (n === 2 ? 'rtl' : 'ltr') : 'ltr'} value={hero[`card${n}_${l}`] ?? ''} onChange={e => set(`card${n}_${l}`, e.target.value)} />
+                </div>
+              ))}
+              {hasLabel && (
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Small Label</label>
+                  <input className={styles.fieldInput} value={hero[`card${n}_label`] ?? ''} onChange={e => set(`card${n}_label`, e.target.value)} />
+                </div>
+              )}
+              <div className={styles.mfg} style={{ maxWidth: 110 }}>
+                <label className={styles.fieldLabel}>Color</label>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <input type="color" value={hero[`card${n}_color`] ?? '#01A6A6'} onChange={e => set(`card${n}_color`, e.target.value)} style={{ width: 36, height: 32, border: 'none', background: 'none', cursor: 'pointer' }} />
+                  <input className={styles.fieldInput} value={hero[`card${n}_color`] ?? ''} onChange={e => set(`card${n}_color`, e.target.value)} style={{ flex: 1 }} />
+                </div>
+              </div>
             </div>
           </div>
         ))}
@@ -2490,7 +2467,7 @@ export default function Dashboard() {
     { key: 'text',         icon: '✎', label: 'Site Text',     group: 'Website Content' },
     { key: 'contact',   icon: '☏', label: 'Contact Info', group: 'Pages' },
     { key: 'footer',    icon: '▭', label: 'Footer',       group: 'Pages' },
-    { key: 'calendar',  icon: '⬚', label: 'Calendar',     group: 'Schedule' },
+    { key: 'calendar',  icon: '⊟', label: 'Calendar',     group: 'Schedule' },
     { key: 'inbox',     icon: '✉', label: 'Submissions',  group: 'Inbox',   count: counts.inbox },
   ]
 

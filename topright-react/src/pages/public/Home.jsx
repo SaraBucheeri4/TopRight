@@ -176,42 +176,41 @@ export default function Home() {
             <circle cx="340" cy="400" r="80" fill="#E7432B" opacity=".05"/>
             {/* Book 1 */}
             <g transform="translate(60,80) rotate(-5)">
-              <rect width="190" height="250" rx="6" fill="#01A6A6"/>
+              <rect width="190" height="250" rx="6" fill={hero?.card1_color || '#01A6A6'}/>
               <rect x="12" y="12" width="166" height="226" rx="4" fill="rgba(0,0,0,.2)"/>
               <circle cx="95" cy="100" r="52" fill="rgba(255,255,255,.12)"/>
               <circle cx="95" cy="100" r="36" fill="#E7432B" opacity=".85"/>
               <ellipse cx="95" cy="97" rx="13" ry="9" fill="rgba(255,255,255,.9)"/>
               <circle cx="95" cy="84" r="7" fill="rgba(0,0,0,.75)"/>
               <rect x="20" y="160" width="150" height="60" rx="3" fill="rgba(0,0,0,.25)"/>
-              <text x="95" y="182" fontSize="15" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">Safety with</text>
-              <text x="95" y="200" fontSize="15" fontWeight="900" fill="#FBEED6" textAnchor="middle" fontFamily="system-ui">Namool</text>
-              <text x="95" y="235" fontSize="8" fill="rgba(255,255,255,.5)" textAnchor="middle" fontFamily="system-ui" letterSpacing="1">BAPCO ENERGIES · HSE</text>
+              <text x="95" y="182" fontSize="15" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card1_line1 || 'Safety with'}</text>
+              <text x="95" y="200" fontSize="15" fontWeight="900" fill="#FBEED6" textAnchor="middle" fontFamily="system-ui">{hero?.card1_line2 || 'Namool'}</text>
+              <text x="95" y="235" fontSize="8" fill="rgba(255,255,255,.5)" textAnchor="middle" fontFamily="system-ui" letterSpacing="1">{hero?.card1_label || 'BAPCO ENERGIES · HSE'}</text>
             </g>
             {/* Book 2 */}
             <g transform="translate(280,50) rotate(4)">
-              <rect width="170" height="220" rx="5" fill="#0058A1"/>
+              <rect width="170" height="220" rx="5" fill={hero?.card2_color || '#0058A1'}/>
               <rect x="10" y="10" width="150" height="200" rx="3" fill="rgba(0,0,0,.2)"/>
-              <text x="85" y="130" fontSize="26" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">خليجية</text>
-              <text x="85" y="157" fontSize="7" fill="rgba(255,255,255,.4)" textAnchor="middle" fontFamily="system-ui" letterSpacing="2">KHALEEJIEH</text>
-              <text x="85" y="205" fontSize="7" fill="rgba(255,255,255,.3)" textAnchor="middle" fontFamily="system-ui">GPIC · SINCE 2001</text>
+              <text x="85" y="130" fontSize="26" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card2_line1 || 'خليجية'}</text>
+              <text x="85" y="205" fontSize="7" fill="rgba(255,255,255,.3)" textAnchor="middle" fontFamily="system-ui">{hero?.card2_label || 'GPIC · SINCE 2001'}</text>
             </g>
             {/* Book 3 */}
             <g transform="translate(40,370) rotate(-3)">
-              <rect width="160" height="210" rx="5" fill="#773E84"/>
+              <rect width="160" height="210" rx="5" fill={hero?.card3_color || '#773E84'}/>
               <rect x="10" y="10" width="140" height="190" rx="3" fill="rgba(0,0,0,.25)"/>
               <circle cx="80" cy="85" r="40" fill="#F9DFB7" opacity=".85"/>
-              <circle cx="96" cy="74" r="32" fill="#773E84" opacity=".9"/>
-              <text x="80" y="145" fontSize="13" fontWeight="900" fill="#F9DFB7" textAnchor="middle" fontFamily="system-ui">تطير بلا ريش</text>
-              <text x="80" y="163" fontSize="8" fill="rgba(249,223,183,.5)" textAnchor="middle" fontFamily="system-ui">Flies Without Wings</text>
+              <circle cx="96" cy="74" r="32" fill={hero?.card3_color || '#773E84'} opacity=".9"/>
+              <text x="80" y="145" fontSize="13" fontWeight="900" fill="#F9DFB7" textAnchor="middle" fontFamily="system-ui">{hero?.card3_line1 || 'تطير بلا ريش'}</text>
+              <text x="80" y="163" fontSize="8" fill="rgba(249,223,183,.5)" textAnchor="middle" fontFamily="system-ui">{hero?.card3_line2 || 'Flies Without Wings'}</text>
             </g>
             {/* Book 4 */}
             <g transform="translate(300,330) rotate(6)">
-              <rect width="155" height="200" rx="5" fill="#00AEA2"/>
+              <rect width="155" height="200" rx="5" fill={hero?.card4_color || '#00AEA2'}/>
               <rect x="10" y="10" width="135" height="180" rx="3" fill="rgba(0,0,0,.2)"/>
               <circle cx="77" cy="80" r="44" fill="none" stroke="rgba(255,255,255,.2)" strokeWidth="2"/>
               <circle cx="77" cy="80" r="28" fill="rgba(255,255,255,.15)"/>
-              <text x="77" y="76" fontSize="9" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">SDG</text>
-              <text x="77" y="140" fontSize="11" fontWeight="700" fill="#fff" textAnchor="middle" fontFamily="system-ui">SDG Booklets</text>
+              <text x="77" y="76" fontSize="9" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card4_label || 'SDG'}</text>
+              <text x="77" y="140" fontSize="11" fontWeight="700" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card4_line1 || 'SDG Booklets'}</text>
             </g>
             {/* Al Basta banner */}
             <g transform="translate(50,600)">
