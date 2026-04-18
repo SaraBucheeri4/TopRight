@@ -65,8 +65,8 @@ export default function Home() {
         cat: item.category,
         img: item.image_url ? getPublicUrl(item.image_url) : null,
         video_url: item.video_url ?? null,
-        label: { en: item.label_en ?? '', ar: item.label_ar ?? '' },
-        title: item.title,
+        title_en: item.title_en ?? '',
+        title_ar: item.title_ar ?? '',
         sub: { en: item.subtitle_en ?? '', ar: item.subtitle_ar ?? '' },
         year: item.year ?? null,
         project_url: item.project_url ?? null,
@@ -223,7 +223,7 @@ export default function Home() {
           {filtered.map((c, i) => (
             <div key={i} className={`${styles.pcard} js-reveal`} style={{ transitionDelay: `${i * 80}ms` }}>
               <div className={styles.pcardThumb}>
-                <img src={c.img} alt={c.title} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: c.image_position || 'center center' }} />
+                <img src={c.img} alt={c.title_en} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: c.image_position || 'center center' }} />
               </div>
               <div className={styles.pcardInfo}>
                 <div className={styles.pcardMeta}>
@@ -233,8 +233,7 @@ export default function Home() {
                   })()}
                   {c.year && <span className={styles.pcardYear}>{c.year}</span>}
                 </div>
-                <div className={styles.pcardCat}>{t(c.label)}</div>
-                <div className={styles.pcardTtl}>{c.title}</div>
+                <div className={styles.pcardTtl}>{isAr ? c.title_ar || c.title_en : c.title_en}</div>
                 <div className={styles.pcardSub}>{t(c.sub)}</div>
                 {(c.video_url || c.project_url)
                   ? <a href={c.video_url || c.project_url} target="_blank" rel="noopener" className={styles.pcardArrow}>{isAr ? 'عرض المشروع ←' : 'View project →'}</a>

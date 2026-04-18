@@ -55,8 +55,8 @@ import {
 const CATEGORIES = PORTFOLIO_CATEGORIES
 
 const EMPTY_ITEM = {
-  slug: '', category: 'newsletter', label_en: '', label_ar: '',
-  title: '', subtitle_en: '', subtitle_ar: '', year: '',
+  slug: '', category: 'newsletter',
+  title_en: '', title_ar: '', subtitle_en: '', subtitle_ar: '', year: '',
   image_url: '', project_url: '', video_url: '', image_position: '50% 50%', display_order: 0, is_published: true,
 }
 
@@ -204,8 +204,8 @@ function PortfolioManager({ onNav, showToast }) {
 
   function validate() {
     const e = {}
-    if (!editItem.title.trim()) e.title = 'Title is required'
-    if (editItem.title.trim().length > 120) e.title = 'Title must be 120 characters or fewer'
+    if (!editItem.title_en?.trim()) e.title_en = 'Title (EN) is required'
+    if (editItem.title_en?.trim().length > 120) e.title_en = 'Title must be 120 characters or fewer'
     if (!editItem.category) e.category = 'Category is required'
     if (!editItem.image_url) e.image_url = 'Please upload an image'
     if (editItem.year && (Number(editItem.year) < 1990 || Number(editItem.year) > new Date().getFullYear())) {
@@ -234,13 +234,13 @@ function PortfolioManager({ onNav, showToast }) {
   }
 
   async function handleDelete(item) {
-    if (!window.confirm(`Delete "${item.title}"? This cannot be undone.`)) return
+    if (!window.confirm(`Delete "${item.title_en}"? This cannot be undone.`)) return
     await deletePortfolioItem(item.id)
     load()
   }
 
   const visible = items.filter(i =>
-    !search || i.title.toLowerCase().includes(search.toLowerCase())
+    !search || i.title_en?.toLowerCase().includes(search.toLowerCase())
   )
 
   if (loading) return <p className={styles.loading}>Loading…</p>
@@ -306,7 +306,7 @@ function PortfolioManager({ onNav, showToast }) {
                     ? <img src={getPublicUrl(item.image_url)} alt="" className={styles.thumb} />
                     : <div className={styles.thumbEmpty} />}
                 </td>
-                <td className={styles.tdTitle}>{item.title}</td>
+                <td className={styles.tdTitle}>{item.title_en}</td>
                 <td><span className={`${styles.catBadge} ${catClass(item.category)}`}>{item.category}</span></td>
                 <td>{item.year || '—'}</td>
                 <td>
@@ -355,25 +355,26 @@ function PortfolioManager({ onNav, showToast }) {
                 </div>
               </div>
 
-              <div className={styles.mfg}>
-                <label className={styles.fieldLabel}>Title *</label>
-                <input
-                  className={`${styles.fieldInput} ${formErrors.title ? styles.fieldInputErr : ''}`}
-                  value={editItem.title}
-                  onChange={e => setEditItem(p => ({ ...p, title: e.target.value }))}
-                  placeholder="Project title"
-                />
-                {formErrors.title && <span className={styles.fieldErr}>{formErrors.title}</span>}
-              </div>
-
               <div className={styles.mfgRow}>
                 <div className={styles.mfg}>
-                  <label className={styles.fieldLabel}>Label EN</label>
-                  <input className={styles.fieldInput} value={editItem.label_en ?? ''} onChange={e => setEditItem(p => ({ ...p, label_en: e.target.value }))} />
+                  <label className={styles.fieldLabel}>Title (EN) *</label>
+                  <input
+                    className={`${styles.fieldInput} ${formErrors.title_en ? styles.fieldInputErr : ''}`}
+                    value={editItem.title_en ?? ''}
+                    onChange={e => setEditItem(p => ({ ...p, title_en: e.target.value }))}
+                    placeholder="Project title in English"
+                  />
+                  {formErrors.title_en && <span className={styles.fieldErr}>{formErrors.title_en}</span>}
                 </div>
                 <div className={styles.mfg}>
-                  <label className={styles.fieldLabel}>Label AR</label>
-                  <input className={styles.fieldInput} dir="rtl" value={editItem.label_ar ?? ''} onChange={e => setEditItem(p => ({ ...p, label_ar: e.target.value }))} />
+                  <label className={styles.fieldLabel}>Title (AR)</label>
+                  <input
+                    className={styles.fieldInput}
+                    dir="rtl"
+                    value={editItem.title_ar ?? ''}
+                    onChange={e => setEditItem(p => ({ ...p, title_ar: e.target.value }))}
+                    placeholder="عنوان المشروع بالعربي"
+                  />
                 </div>
               </div>
 
@@ -435,7 +436,7 @@ function PortfolioManager({ onNav, showToast }) {
                       </div>
                       <div className={styles.cardPreviewInfo}>
                         <div className={styles.cardPreviewCat}>{editItem.category || 'Category'}</div>
-                        <div className={styles.cardPreviewTitle}>{editItem.title || 'Project Title'}</div>
+                        <div className={styles.cardPreviewTitle}>{editItem.title_en || 'Project Title'}</div>
                         <div className={styles.cardPreviewSub}>{editItem.subtitle_en || 'Subtitle…'}</div>
                         <div className={styles.cardPreviewArrow}>View project →</div>
                       </div>
