@@ -9,6 +9,7 @@ import { fetchPublishedClients, getClientLogoUrl } from '../../services/clientsS
 import { fetchContactInfo } from '../../services/contactInfoService'
 import { fetchPublishedServices } from '../../services/servicesService'
 import { fetchPublishedTestimonials } from '../../services/testimonialsService'
+import { fetchHeroContent } from '../../services/heroService'
 
 const CAT_COLORS = {
   newsletter:   { bg: 'rgba(0,88,161,.15)',   color: '#5B9BD5' },
@@ -76,6 +77,7 @@ export default function Home() {
   const [services, setServices] = useState([])
   const [testimonials, setTestimonials] = useState([])
   const [contactInfo, setContactInfo] = useState(null)
+  const [hero, setHero] = useState(null)
   const [form, setForm] = useState({ name: '', org: '', email: '', type: '', message: '' })
   const [formErrors, setFormErrors] = useState({})
   const [sent, setSent] = useState(false)
@@ -90,6 +92,7 @@ export default function Home() {
     fetchContactInfo().then(setContactInfo)
     fetchPublishedServices().then(setServices)
     fetchPublishedTestimonials().then(setTestimonials)
+    fetchHeroContent().then(setHero)
     fetchPublishedPortfolioItems().then(data => {
       setPortfolioCards(data.map(item => ({
         cat: item.category,
@@ -128,12 +131,20 @@ export default function Home() {
       {/* HERO */}
       <section className={styles.hero}>
         <div className={styles.heroL}>
-          <span className={styles.heroTag}>{isAr ? 'البحرين · تأسست ٢٠٠١ · استوديو ثنائي اللغة' : 'Bahrain · Est. 2001 · Bilingual Studio'}</span>
+          <span className={styles.heroTag}>
+            {isAr ? (hero?.tag_ar || 'البحرين · تأسست ٢٠٠١ · استوديو ثنائي اللغة') : (hero?.tag_en || 'Bahrain · Est. 2001 · Bilingual Studio')}
+          </span>
           <h1 className={styles.heroH1}>
-            {isAr ? (
-              <>نحكي<br />قصتك<br /><span style={{ color: '#01A6A6' }}>بلغة التصميم</span></>
+            {hero ? (
+              <>
+                {isAr ? hero.headline1_ar : hero.headline1_en}<br />
+                {isAr ? hero.headline2_ar : hero.headline2_en}<br />
+                <span style={{ color: '#01A6A6' }}>{isAr ? hero.accent_ar : hero.accent_en}</span>
+              </>
             ) : (
-              <>We tell<br />your story<br /><span style={{ color: '#01A6A6' }}>through design</span></>
+              isAr
+                ? <>نحكي<br />قصتك<br /><span style={{ color: '#01A6A6' }}>بلغة التصميم</span></>
+                : <>We tell<br />your story<br /><span style={{ color: '#01A6A6' }}>through design</span></>
             )}
           </h1>
           <div className={styles.heroBtns}>
@@ -141,9 +152,18 @@ export default function Home() {
             <button className={styles.btnG} onClick={() => scrollTo('contact')}>{isAr ? 'ابدأ مشروعك ←' : 'Start a project →'}</button>
           </div>
           <div className={styles.heroStats}>
-            <div className={styles.hstat}><strong>20+</strong><span>{isAr ? 'عامًا في البحرين' : 'Years in Bahrain'}</span></div>
-            <div className={styles.hstat}><strong>100+</strong><span>{isAr ? 'مطبوعة' : 'Publications'}</span></div>
-            <div className={styles.hstat}><strong>AR+EN</strong><span>{isAr ? 'ثنائي اللغة' : 'Bilingual'}</span></div>
+            <div className={styles.hstat}>
+              <strong>{hero?.stat1_num || '20+'}</strong>
+              <span>{isAr ? (hero?.stat1_label_ar || 'عامًا في البحرين') : (hero?.stat1_label_en || 'Years in Bahrain')}</span>
+            </div>
+            <div className={styles.hstat}>
+              <strong>{hero?.stat2_num || '100+'}</strong>
+              <span>{isAr ? (hero?.stat2_label_ar || 'مطبوعة') : (hero?.stat2_label_en || 'Publications')}</span>
+            </div>
+            <div className={styles.hstat}>
+              <strong>{hero?.stat3_num || 'AR+EN'}</strong>
+              <span>{isAr ? (hero?.stat3_label_ar || 'ثنائي اللغة') : (hero?.stat3_label_en || 'Bilingual')}</span>
+            </div>
           </div>
         </div>
 

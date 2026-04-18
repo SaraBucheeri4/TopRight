@@ -31,6 +31,7 @@ import {
 } from '../../services/clientsService'
 import { fetchContactInfo, upsertContactInfo } from '../../services/contactInfoService'
 import { fetchFooter, upsertFooter } from '../../services/footerService'
+import { fetchHeroContent, upsertHeroContent } from '../../services/heroService'
 import {
   fetchAllServices,
   createService,
@@ -1394,6 +1395,130 @@ const EMPTY_TESTIMONIAL = {
   avatar_color: '#E7432B', display_order: 0, is_published: true,
 }
 
+/* ── Hero Editor ── */
+function HeroEditor({ showToast }) {
+  const DEFAULTS = {
+    tag_en: 'Bahrain · Est. 2001 · Bilingual Studio',
+    tag_ar: 'البحرين · تأسست ٢٠٠١ · استوديو ثنائي اللغة',
+    headline1_en: 'We tell', headline1_ar: 'نحكي',
+    headline2_en: 'your story', headline2_ar: 'قصتك',
+    accent_en: 'through design', accent_ar: 'بلغة التصميم',
+    stat1_num: '20+', stat1_label_en: 'Years in Bahrain', stat1_label_ar: 'عامًا في البحرين',
+    stat2_num: '100+', stat2_label_en: 'Publications', stat2_label_ar: 'مطبوعة',
+    stat3_num: 'AR+EN', stat3_label_en: 'Bilingual', stat3_label_ar: 'ثنائي اللغة',
+  }
+
+  const [hero, setHero] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+
+  useEffect(() => {
+    fetchHeroContent()
+      .then(data => setHero(data ?? DEFAULTS))
+      .catch(() => setHero(DEFAULTS))
+      .finally(() => setLoading(false))
+  }, [])
+
+  function set(field, value) { setHero(prev => ({ ...prev, [field]: value })) }
+
+  async function handleSave() {
+    setSaving(true)
+    setSaveError(null)
+    try {
+      await upsertHeroContent(hero)
+      showToast?.('Hero saved', 'Homepage headline updated successfully.')
+    } catch (err) {
+      setSaveError(err.message ?? 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Website Content</div>
+          <h1 className={styles.pageTitle}>Hero Section</h1>
+        </div>
+        <button className={styles.btnAdd} onClick={handleSave} disabled={saving}>
+          {saving ? 'Saving…' : 'Save Changes ↓'}
+        </button>
+      </div>
+
+      <div className={styles.tableWrap} style={{ padding: 28 }}>
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Eyebrow Tag (EN)</label>
+            <input className={styles.fieldInput} value={hero.tag_en ?? ''} onChange={e => set('tag_en', e.target.value)} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Eyebrow Tag (AR)</label>
+            <input className={styles.fieldInput} dir="rtl" value={hero.tag_ar ?? ''} onChange={e => set('tag_ar', e.target.value)} />
+          </div>
+        </div>
+
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Headline Line 1 (EN)</label>
+            <input className={styles.fieldInput} value={hero.headline1_en ?? ''} onChange={e => set('headline1_en', e.target.value)} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Headline Line 1 (AR)</label>
+            <input className={styles.fieldInput} dir="rtl" value={hero.headline1_ar ?? ''} onChange={e => set('headline1_ar', e.target.value)} />
+          </div>
+        </div>
+
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Headline Line 2 (EN)</label>
+            <input className={styles.fieldInput} value={hero.headline2_en ?? ''} onChange={e => set('headline2_en', e.target.value)} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Headline Line 2 (AR)</label>
+            <input className={styles.fieldInput} dir="rtl" value={hero.headline2_ar ?? ''} onChange={e => set('headline2_ar', e.target.value)} />
+          </div>
+        </div>
+
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Accent Line (EN) — shown in teal</label>
+            <input className={styles.fieldInput} value={hero.accent_en ?? ''} onChange={e => set('accent_en', e.target.value)} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Accent Line (AR)</label>
+            <input className={styles.fieldInput} dir="rtl" value={hero.accent_ar ?? ''} onChange={e => set('accent_ar', e.target.value)} />
+          </div>
+        </div>
+
+        <div style={{ marginTop: 16, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Stats</div>
+
+        {[1, 2, 3].map(n => (
+          <div key={n} className={styles.mfgRow}>
+            <div className={styles.mfg} style={{ maxWidth: 120 }}>
+              <label className={styles.fieldLabel}>Stat {n} — Number</label>
+              <input className={styles.fieldInput} value={hero[`stat${n}_num`] ?? ''} onChange={e => set(`stat${n}_num`, e.target.value)} />
+            </div>
+            <div className={styles.mfg}>
+              <label className={styles.fieldLabel}>Label (EN)</label>
+              <input className={styles.fieldInput} value={hero[`stat${n}_label_en`] ?? ''} onChange={e => set(`stat${n}_label_en`, e.target.value)} />
+            </div>
+            <div className={styles.mfg}>
+              <label className={styles.fieldLabel}>Label (AR)</label>
+              <input className={styles.fieldInput} dir="rtl" value={hero[`stat${n}_label_ar`] ?? ''} onChange={e => set(`stat${n}_label_ar`, e.target.value)} />
+            </div>
+          </div>
+        ))}
+
+        {saveError && <p style={{ color: '#E7432B', fontSize: 11, marginTop: 8 }}>{saveError}</p>}
+      </div>
+    </div>
+  )
+}
+
 /* ── Services Manager ── */
 function ServicesManager({ showToast }) {
   const [items, setItems] = useState([])
@@ -2357,6 +2482,7 @@ export default function Dashboard() {
 
   const navItems = [
     { key: 'dashboard', icon: '◈', label: 'Dashboard',    group: 'Overview' },
+    { key: 'hero',         icon: '⬒', label: 'Hero Section',  group: 'Website Content' },
     { key: 'portfolio',     icon: '⊞', label: 'Portfolio',     group: 'Website Content', count: counts.portfolio },
     { key: 'clients',      icon: '◉', label: 'Clients Bar',   group: 'Website Content', count: counts.clients },
     { key: 'services',     icon: '◧', label: 'Services',      group: 'Website Content', count: counts.services },
@@ -2414,6 +2540,7 @@ export default function Dashboard() {
 
         <main className={styles.main}>
           {section === 'dashboard' && <DashboardOverview onNav={setSection} counts={counts} />}
+          {section === 'hero'          && <HeroEditor showToast={showToast} />}
           {section === 'portfolio'     && <PortfolioManager onNav={setSection} showToast={showToast} />}
           {section === 'clients'      && <ClientsManager showToast={showToast} />}
           {section === 'services'     && <ServicesManager showToast={showToast} />}
