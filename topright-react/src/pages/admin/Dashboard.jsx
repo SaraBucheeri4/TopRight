@@ -31,6 +31,13 @@ import { fetchContactInfo, upsertContactInfo } from '../../services/contactInfoS
 import { fetchFooter, upsertFooter } from '../../services/footerService'
 import { fetchHeroContent, upsertHeroContent } from '../../services/heroService'
 import {
+  fetchAllWhyItems,
+  createWhyItem,
+  updateWhyItem,
+  deleteWhyItem,
+  updateWhyOrder,
+} from '../../services/whyService'
+import {
   fetchAllServices,
   createService,
   updateService,
@@ -50,7 +57,7 @@ const CATEGORIES = PORTFOLIO_CATEGORIES
 const EMPTY_ITEM = {
   slug: '', category: 'newsletter', label_en: '', label_ar: '',
   title: '', subtitle_en: '', subtitle_ar: '', year: '',
-  image_url: '', project_url: '', image_position: '50% 50%', display_order: 0, is_published: true,
+  image_url: '', project_url: '', video_url: '', image_position: '50% 50%', display_order: 0, is_published: true,
 }
 
 function catClass(cat) {
@@ -94,8 +101,11 @@ function PortfolioManager({ onNav, showToast }) {
   const dragIdx = useRef(null)
   const fileRef = useRef(null)
   const docRef = useRef(null)
+  const videoRef = useRef(null)
   const [uploadingDoc, setUploadingDoc] = useState(false)
   const [uploadDocError, setUploadDocError] = useState(null)
+  const [uploadingVideo, setUploadingVideo] = useState(false)
+  const [uploadVideoError, setUploadVideoError] = useState(null)
 
   async function load() {
     setLoading(true)
@@ -175,6 +185,20 @@ function PortfolioManager({ onNav, showToast }) {
       setUploadDocError(err.message)
     } finally {
       setUploadingDoc(false)
+    }
+  }
+
+  async function handleVideoUpload(file) {
+    if (!file) return
+    setUploadVideoError(null)
+    setUploadingVideo(true)
+    try {
+      const filename = await uploadPortfolioImage(file)
+      setEditItem(prev => ({ ...prev, video_url: getPublicUrl(filename) }))
+    } catch (err) {
+      setUploadVideoError(err.message)
+    } finally {
+      setUploadingVideo(false)
     }
   }
 
@@ -487,6 +511,39 @@ function PortfolioManager({ onNav, showToast }) {
                   onChange={e => handleDocUpload(e.target.files?.[0])}
                 />
                 <span className={styles.uploadAreaHint}>PDF, PPT, Word, Excel, ZIP, or any image</span>
+              </div>
+
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Video (optional)</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button
+                    type="button"
+                    className={styles.btnSecondary}
+                    style={{ fontSize: 12, padding: '4px 10px' }}
+                    onClick={() => videoRef.current?.click()}
+                    disabled={uploadingVideo}
+                  >
+                    {uploadingVideo ? 'Uploading…' : '↑ Upload Video'}
+                  </button>
+                  {editItem.video_url && (
+                    <span style={{ fontSize: 11, color: '#01A6A6' }}>✓ Video attached</span>
+                  )}
+                  {editItem.video_url && (
+                    <button type="button" style={{ fontSize: 11, color: '#E7432B', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setEditItem(p => ({ ...p, video_url: '' }))}>Remove</button>
+                  )}
+                </div>
+                {editItem.video_url && (
+                  <video src={editItem.video_url} controls style={{ marginTop: 8, width: '100%', maxHeight: 160, borderRadius: 4, background: '#000' }} />
+                )}
+                {uploadVideoError && <span className={styles.fieldErr}>Upload failed: {uploadVideoError}</span>}
+                <input
+                  ref={videoRef}
+                  type="file"
+                  accept="video/mp4,video/webm,video/mov,video/quicktime,video/*"
+                  className={styles.fileInput}
+                  onChange={e => handleVideoUpload(e.target.files?.[0])}
+                />
+                <span className={styles.uploadAreaHint}>MP4, WebM or MOV — max 50 MB</span>
               </div>
 
               <label className={styles.checkRow}>
@@ -1308,21 +1365,6 @@ function ClientsManager({ showToast }) {
   )
 }
 
-const SERVICE_COLORS = [
-  { label: 'Orange', value: '#E7432B' },
-  { label: 'Black',  value: '#000000' },
-  { label: 'Teal',   value: '#01A6A6' },
-  { label: 'Blue',   value: '#0058A1' },
-  { label: 'Purple', value: '#773E84' },
-  { label: 'Charcoal', value: '#1a1a1a' },
-]
-
-const AVATAR_COLORS = [
-  { label: 'Orange', value: '#E7432B' },
-  { label: 'Teal',   value: '#01A6A6' },
-  { label: 'Blue',   value: '#0058A1' },
-  { label: 'Purple', value: '#773E84' },
-]
 
 const EMPTY_SERVICE = {
   title_en: '', title_ar: '', description_en: '', description_ar: '',
@@ -1496,6 +1538,207 @@ function HeroEditor({ showToast }) {
   )
 }
 
+/* ── Why Manager ── */
+const EMPTY_WHY = { number: '', title_en: '', title_ar: '', body_en: '', body_ar: '', display_order: 0, is_published: true }
+
+function WhyManager({ showToast }) {
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [editItem, setEditItem] = useState(null)
+  const [isNew, setIsNew] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const [formErrors, setFormErrors] = useState({})
+  const [deleteConfirm, setDeleteConfirm] = useState(null)
+  const dragIdx = useRef(null)
+
+  async function load() {
+    setLoading(true)
+    const data = await fetchAllWhyItems()
+    setItems(data)
+    setLoading(false)
+  }
+  useEffect(() => { load() }, [])
+
+  async function togglePublish(item) {
+    const updated = !item.is_published
+    setItems(prev => prev.map(i => i.id === item.id ? { ...i, is_published: updated } : i))
+    await updateWhyItem(item.id, { is_published: updated })
+  }
+
+  function onDragStart(idx) { dragIdx.current = idx }
+  function onDragOver(e, idx) {
+    e.preventDefault()
+    if (dragIdx.current === idx) return
+    setItems(prev => {
+      const next = [...prev]
+      const [moved] = next.splice(dragIdx.current, 1)
+      next.splice(idx, 0, moved)
+      dragIdx.current = idx
+      return next
+    })
+  }
+  async function onDrop() { dragIdx.current = null; await updateWhyOrder(items) }
+
+  function openNew() { setEditItem({ ...EMPTY_WHY, display_order: items.length }); setIsNew(true); setFormErrors({}); setSaveError(null) }
+  function openEdit(item) { setEditItem({ ...item }); setIsNew(false); setFormErrors({}); setSaveError(null) }
+  function closeEdit() { setEditItem(null); setFormErrors({}); setSaveError(null) }
+
+  function validate() {
+    const e = {}
+    if (!editItem.title_en?.trim()) e.title_en = 'Title (EN) is required'
+    setFormErrors(e)
+    return Object.keys(e).length === 0
+  }
+
+  async function handleSave() {
+    if (!validate()) return
+    setSaving(true); setSaveError(null)
+    try {
+      if (isNew) {
+        const { id: _id, ...rest } = editItem
+        await createWhyItem({ ...rest, display_order: items.length })
+        showToast?.('Item added', `"${editItem.title_en}" added.`)
+      } else {
+        const { id, ...rest } = editItem
+        await updateWhyItem(id, rest)
+        showToast?.('Item updated', 'Changes saved.')
+      }
+      closeEdit(); load()
+    } catch (err) {
+      setSaveError(err.message ?? 'Save failed')
+    } finally { setSaving(false) }
+  }
+
+  async function handleDelete(item) {
+    setSaving(true)
+    try {
+      await deleteWhyItem(item.id)
+      showToast?.('Item removed', `"${item.title_en}" deleted.`)
+      setDeleteConfirm(null); load()
+    } catch (err) {
+      setSaveError(err.message ?? 'Delete failed')
+      setDeleteConfirm(null)
+    } finally { setSaving(false) }
+  }
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Website Content</div>
+          <h1 className={styles.pageTitle}>Why Top Right?</h1>
+        </div>
+        <button className={styles.btnAdd} onClick={openNew}>+ Add Item</button>
+      </div>
+
+      <div className={styles.tableWrap}>
+        <table className={styles.table} style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: 36 }} /><col style={{ width: 40 }} /><col /><col style={{ width: 110 }} /><col style={{ width: 140 }} />
+          </colgroup>
+          <thead><tr><th></th><th>#</th><th>Title (EN)</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            {items.map((item, idx) => (
+              <tr key={item.id} draggable onDragStart={() => onDragStart(idx)} onDragOver={e => onDragOver(e, idx)} onDrop={onDrop} className={styles.draggableRow}>
+                <td className={styles.dragHandle}>⠿</td>
+                <td style={{ color: '#666', fontSize: 11 }}>{item.number || String(idx + 1).padStart(2, '0')}</td>
+                <td className={styles.tdTitle}>{item.title_en}</td>
+                <td>
+                  <button className={`${styles.toggle} ${item.is_published ? styles.toggleOn : styles.toggleOff}`} onClick={() => togglePublish(item)}>
+                    {item.is_published ? '● Live' : '○ Draft'}
+                  </button>
+                </td>
+                <td>
+                  <div className={styles.tdActions}>
+                    <button className={`${styles.btnSm} ${styles.btnEdit}`} onClick={() => openEdit(item)}>Edit</button>
+                    <button className={`${styles.btnSm} ${styles.btnDel}`} onClick={() => setDeleteConfirm(item)}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {items.length === 0 && <div className={styles.empty}>No items yet. Add one above.</div>}
+      </div>
+
+      {editItem && (
+        <div className={styles.modalOverlay} onClick={e => e.target === e.currentTarget && closeEdit()}>
+          <div className={styles.modal}>
+            <div className={styles.modalHd}>
+              <span className={styles.modalTtl}>{isNew ? 'New Item' : 'Edit Item'}</span>
+              <button className={styles.modalClose} onClick={closeEdit}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg} style={{ maxWidth: 80 }}>
+                  <label className={styles.fieldLabel}>Number</label>
+                  <input className={styles.fieldInput} placeholder="01" value={editItem.number} onChange={e => setEditItem(p => ({ ...p, number: e.target.value }))} />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Title (EN) *</label>
+                  <input className={`${styles.fieldInput} ${formErrors.title_en ? styles.fieldInputErr : ''}`} value={editItem.title_en} onChange={e => setEditItem(p => ({ ...p, title_en: e.target.value }))} />
+                  {formErrors.title_en && <span className={styles.fieldErr}>{formErrors.title_en}</span>}
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Title (AR)</label>
+                  <input className={styles.fieldInput} dir="rtl" value={editItem.title_ar} onChange={e => setEditItem(p => ({ ...p, title_ar: e.target.value }))} />
+                </div>
+              </div>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Body (EN)</label>
+                <textarea className={styles.fieldInput} style={{ height: 72, resize: 'none' }} value={editItem.body_en} onChange={e => setEditItem(p => ({ ...p, body_en: e.target.value }))} />
+              </div>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Body (AR)</label>
+                <textarea className={styles.fieldInput} dir="rtl" style={{ height: 72, resize: 'none' }} value={editItem.body_ar} onChange={e => setEditItem(p => ({ ...p, body_ar: e.target.value }))} />
+              </div>
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Visibility</label>
+                  <select className={styles.fieldInput} value={editItem.is_published ? 'live' : 'draft'} onChange={e => setEditItem(p => ({ ...p, is_published: e.target.value === 'live' }))}>
+                    <option value="live">Live</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              {saveError && <span className={styles.fieldErr} style={{ marginRight: 'auto' }}>{saveError}</span>}
+              <button className={styles.btnSecondary} onClick={closeEdit}>Cancel</button>
+              <button className={styles.btnAdd} onClick={handleSave} disabled={saving}>
+                {saving ? 'Saving…' : isNew ? 'Add Item' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteConfirm && (
+        <div className={styles.modalOverlay} onClick={() => setDeleteConfirm(null)}>
+          <div className={styles.modal} style={{ width: 400 }} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHd}>
+              <h2 className={styles.modalTtl}>Delete Item?</h2>
+              <button className={styles.modalClose} onClick={() => setDeleteConfirm(null)}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              <p style={{ color: '#888', fontSize: 13, lineHeight: 1.6 }}>"{deleteConfirm.title_en}" will be permanently removed.</p>
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.btnSecondary} onClick={() => setDeleteConfirm(null)}>Cancel</button>
+              <button className={`${styles.btnSm} ${styles.btnDel}`} style={{ padding: '10px 20px' }} onClick={() => handleDelete(deleteConfirm)} disabled={saving}>
+                {saving ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ── Services Manager ── */
 function ServicesManager({ showToast }) {
   const [items, setItems] = useState([])
@@ -1652,12 +1895,10 @@ function ServicesManager({ showToast }) {
                     <span style={{
                       display: 'inline-block', width: 14, height: 14,
                       background: item.card_color,
-                      border: item.card_color === '#000000' || item.card_color === '#1a1a1a' ? '1px solid #555' : 'none',
+                      border: '1px solid rgba(255,255,255,.15)',
                       flexShrink: 0,
                     }} />
-                    <span style={{ fontSize: 11, color: '#888' }}>
-                      {SERVICE_COLORS.find(c => c.value === item.card_color)?.label ?? item.card_color}
-                    </span>
+                    <span style={{ fontSize: 11, color: '#888' }}>{item.card_color}</span>
                   </span>
                 </td>
                 <td>
@@ -1708,23 +1949,18 @@ function ServicesManager({ showToast }) {
                     type="text"
                     dir="rtl"
                     placeholder="بالعربي"
-                    value={editItem.name_ar}
-                    onChange={e => setEditItem(p => ({ ...p, name_ar: e.target.value }))}
+                    value={editItem.title_ar}
+                    onChange={e => setEditItem(p => ({ ...p, title_ar: e.target.value }))}
                   />
                 </div>
               </div>
 
               <div className={styles.mfg}>
                 <label className={styles.fieldLabel}>Card Color</label>
-                <select
-                  className={styles.fieldInput}
-                  value={editItem.card_color}
-                  onChange={e => setEditItem(p => ({ ...p, card_color: e.target.value }))}
-                >
-                  {SERVICE_COLORS.map(c => (
-                    <option key={c.value} value={c.value}>{c.label} ({c.value})</option>
-                  ))}
-                </select>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <input type="color" value={editItem.card_color ?? '#E7432B'} onChange={e => setEditItem(p => ({ ...p, card_color: e.target.value }))} style={{ width: 40, height: 36, border: 'none', background: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }} />
+                  <input className={styles.fieldInput} value={editItem.card_color ?? ''} onChange={e => setEditItem(p => ({ ...p, card_color: e.target.value }))} placeholder="#E7432B" style={{ flex: 1 }} />
+                </div>
               </div>
 
               <div className={styles.mfgRow}>
@@ -1873,7 +2109,7 @@ function TestimonialsManager({ showToast }) {
   function validate() {
     const e = {}
     if (!editItem.quote_en?.trim()) e.quote_en = 'Quote (EN) is required'
-    if (!editItem.person_name?.trim()) e.person_name = 'Person name / role is required'
+    if (!editItem.name?.trim()) e.name = 'Person name / role is required'
     setFormErrors(e)
     return Object.keys(e).length === 0
   }
@@ -1969,13 +2205,13 @@ function TestimonialsManager({ showToast }) {
                     fontSize: 11, fontWeight: 700, color: '#fff',
                     textAlign: 'center', lineHeight: '26px',
                   }}>
-                    {item.person_name?.[0]?.toUpperCase() ?? '?'}
+                    {item.name?.[0]?.toUpperCase() ?? '?'}
                   </span>
                 </td>
                 <td style={{ fontSize: 11, color: '#888', fontStyle: 'italic', whiteSpace: 'normal', lineHeight: 1.5 }}>
                   "{item.quote_en?.slice(0, 60)}{item.quote_en?.length > 60 ? '…' : ''}"
                 </td>
-                <td className={styles.tdTitle} style={{ fontSize: 11 }}>{item.person_name}</td>
+                <td className={styles.tdTitle} style={{ fontSize: 11 }}>{item.name}</td>
                 <td style={{ fontSize: 11, color: '#888' }}>{item.company}</td>
                 <td>
                   <button
@@ -2032,13 +2268,13 @@ function TestimonialsManager({ showToast }) {
                 <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Person Name / Role *</label>
                   <input
-                    className={`${styles.fieldInput} ${formErrors.person_name ? styles.fieldInputErr : ''}`}
+                    className={`${styles.fieldInput} ${formErrors.name ? styles.fieldInputErr : ''}`}
                     type="text"
                     placeholder="e.g. HSE Manager"
-                    value={editItem.person_name}
-                    onChange={e => setEditItem(p => ({ ...p, person_name: e.target.value }))}
+                    value={editItem.name}
+                    onChange={e => setEditItem(p => ({ ...p, name: e.target.value }))}
                   />
-                  {formErrors.person_name && <span className={styles.fieldErr}>{formErrors.person_name}</span>}
+                  {formErrors.name && <span className={styles.fieldErr}>{formErrors.name}</span>}
                 </div>
                 <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Company</label>
@@ -2054,15 +2290,10 @@ function TestimonialsManager({ showToast }) {
               <div className={styles.mfgRow}>
                 <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Avatar Color</label>
-                  <select
-                    className={styles.fieldInput}
-                    value={editItem.avatar_color}
-                    onChange={e => setEditItem(p => ({ ...p, avatar_color: e.target.value }))}
-                  >
-                    {AVATAR_COLORS.map(c => (
-                      <option key={c.value} value={c.value}>{c.label} ({c.value})</option>
-                    ))}
-                  </select>
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <input type="color" value={editItem.avatar_color ?? '#E7432B'} onChange={e => setEditItem(p => ({ ...p, avatar_color: e.target.value }))} style={{ width: 40, height: 36, border: 'none', background: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }} />
+                    <input className={styles.fieldInput} value={editItem.avatar_color ?? ''} onChange={e => setEditItem(p => ({ ...p, avatar_color: e.target.value }))} placeholder="#E7432B" style={{ flex: 1 }} />
+                  </div>
                 </div>
                 <div className={styles.mfg}>
                   <label className={styles.fieldLabel}>Visibility</label>
@@ -2460,6 +2691,7 @@ export default function Dashboard() {
   const navItems = [
     { key: 'dashboard', icon: '◈', label: 'Dashboard',    group: 'Overview' },
     { key: 'hero',         icon: '⬒', label: 'Hero Section',  group: 'Website Content' },
+    { key: 'why',          icon: '◑', label: 'Why Section',   group: 'Website Content' },
     { key: 'portfolio',     icon: '⊞', label: 'Portfolio',     group: 'Website Content', count: counts.portfolio },
     { key: 'clients',      icon: '◉', label: 'Clients Bar',   group: 'Website Content', count: counts.clients },
     { key: 'services',     icon: '◧', label: 'Services',      group: 'Website Content', count: counts.services },
@@ -2518,6 +2750,7 @@ export default function Dashboard() {
         <main className={styles.main}>
           {section === 'dashboard' && <DashboardOverview onNav={setSection} counts={counts} />}
           {section === 'hero'          && <HeroEditor showToast={showToast} />}
+          {section === 'why'           && <WhyManager showToast={showToast} />}
           {section === 'portfolio'     && <PortfolioManager onNav={setSection} showToast={showToast} />}
           {section === 'clients'      && <ClientsManager showToast={showToast} />}
           {section === 'services'     && <ServicesManager showToast={showToast} />}

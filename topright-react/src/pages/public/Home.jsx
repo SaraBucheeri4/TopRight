@@ -10,6 +10,7 @@ import { fetchContactInfo } from '../../services/contactInfoService'
 import { fetchPublishedServices } from '../../services/servicesService'
 import { fetchPublishedTestimonials } from '../../services/testimonialsService'
 import { fetchHeroContent } from '../../services/heroService'
+import { fetchPublishedWhyItems } from '../../services/whyService'
 
 const CAT_COLORS = {
   newsletter:   { bg: 'rgba(0,88,161,.15)',   color: '#5B9BD5' },
@@ -29,43 +30,7 @@ const tabs = [
   { key: 'Illustration', en: 'Illustration', ar: 'الرسوم' },
 ]
 
-const whyItems = [
-  {
-    n: '01',
-    title: { en: '20+ years of creative experience in Bahrain', ar: 'أكثر من ٢٠ عامًا من الخبرة الإبداعية في البحرين' },
-    body:  { en: 'A depth of client trust, creative judgment and established relationships that newer competitors simply cannot replicate.', ar: 'عمق من ثقة العملاء والحكم الإبداعي والعلاقات الراسخة التي لا يستطيع المنافسون الجدد ببساطة تكرارها.' },
-  },
-  {
-    n: '02',
-    title: { en: 'Fully bilingual — Arabic and English', ar: 'ثنائية اللغة بالكامل — عربي وإنجليزي' },
-    body:  { en: 'One team that writes, designs and produces in both languages. No brief lost in translation. No separate vendors.', ar: 'فريق واحد يكتب ويصمم وينتج بكلتا اللغتين. لا شيء يضيع في الترجمة. لا موردون منفصلون.' },
-  },
-  {
-    n: '03',
-    title: { en: 'Direct, personal communication', ar: 'تواصل مباشر وشخصي' },
-    body:  { en: 'Every client speaks directly with the creative leads. No account managers, no dilution of vision — just clear, focused collaboration.', ar: 'كل عميل يتحدث مباشرة مع القادة الإبداعيين. لا مديري حسابات، لا تمييع للرؤية — مجرد تعاون واضح ومركّز.' },
-  },
-  {
-    n: '04',
-    title: { en: 'Full-service from concept to print', ar: 'خدمة متكاملة من الفكرة حتى الطباعة' },
-    body:  { en: 'Writing, illustration, design and production — all under one roof. One partner for the entire process.', ar: 'الكتابة والرسوم والتصميم والإنتاج — كل ذلك تحت سقف واحد. شريك واحد لكامل العملية.' },
-  },
-  {
-    n: '05',
-    title: { en: 'Proudly Bahraini — GCC culturally rooted', ar: 'بحرينيون بفخر — متجذرون ثقافيًا في الخليج' },
-    body:  { en: '20+ years of understanding Gulf visual language, business culture and audience expectations.', ar: 'أكثر من ٢٠ عامًا من فهم اللغة البصرية الخليجية وثقافة الأعمال وتوقعات الجمهور.' },
-  },
-]
 
-
-const svgIcons = {
-  '01': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="2" stroke="#01A6A6" strokeWidth="1.5"/><path d="M6 8h10M6 11h7M6 14h9" stroke="#01A6A6" strokeWidth="1.2" strokeLinecap="round"/></svg>,
-  '02': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="5" stroke="rgba(255,255,255,.7)" strokeWidth="1.5"/><path d="M4 20c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="rgba(255,255,255,.7)" strokeWidth="1.5" strokeLinecap="round"/></svg>,
-  '03': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v4M11 15v4M3 11h4M15 11h4" stroke="rgba(255,255,255,.7)" strokeWidth="1.5" strokeLinecap="round"/><circle cx="11" cy="11" r="4" stroke="rgba(255,255,255,.7)" strokeWidth="1.5"/></svg>,
-  '04': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="14" rx="2" stroke="rgba(255,255,255,.7)" strokeWidth="1.5"/><path d="M7 9h8M7 13h5" stroke="rgba(255,255,255,.7)" strokeWidth="1.2" strokeLinecap="round"/></svg>,
-  '05': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="2" stroke="#01A6A6" strokeWidth="1.5"/><path d="M7 7l4 4-4 4M13 15h3" stroke="#01A6A6" strokeWidth="1.2" strokeLinecap="round"/></svg>,
-  '06': <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M5 17L11 5l6 12" stroke="rgba(255,255,255,.7)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/><path d="M7 13h8" stroke="rgba(255,255,255,.7)" strokeWidth="1.2" strokeLinecap="round"/></svg>,
-}
 
 
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
@@ -76,6 +41,7 @@ export default function Home() {
   const [clients, setClients] = useState([])
   const [services, setServices] = useState([])
   const [testimonials, setTestimonials] = useState([])
+  const [whyItems, setWhyItems] = useState([])
   const [contactInfo, setContactInfo] = useState(null)
   const [hero, setHero] = useState(null)
   const [form, setForm] = useState({ name: '', org: '', email: '', type: '', message: '' })
@@ -92,11 +58,13 @@ export default function Home() {
     fetchContactInfo().then(setContactInfo)
     fetchPublishedServices().then(setServices)
     fetchPublishedTestimonials().then(setTestimonials)
+    fetchPublishedWhyItems().then(setWhyItems)
     fetchHeroContent().then(setHero)
     fetchPublishedPortfolioItems().then(data => {
       setPortfolioCards(data.map(item => ({
         cat: item.category,
         img: item.image_url ? getPublicUrl(item.image_url) : null,
+        video_url: item.video_url ?? null,
         label: { en: item.label_en ?? '', ar: item.label_ar ?? '' },
         title: item.title,
         sub: { en: item.subtitle_en ?? '', ar: item.subtitle_ar ?? '' },
@@ -268,8 +236,8 @@ export default function Home() {
                 <div className={styles.pcardCat}>{t(c.label)}</div>
                 <div className={styles.pcardTtl}>{c.title}</div>
                 <div className={styles.pcardSub}>{t(c.sub)}</div>
-                {c.project_url
-                  ? <a href={c.project_url} target="_blank" rel="noopener" className={styles.pcardArrow}>{isAr ? 'عرض المشروع ←' : 'View project →'}</a>
+                {(c.video_url || c.project_url)
+                  ? <a href={c.video_url || c.project_url} target="_blank" rel="noopener" className={styles.pcardArrow}>{isAr ? 'عرض المشروع ←' : 'View project →'}</a>
                   : <span className={styles.pcardArrow} style={{ opacity: 0.3 }}>{isAr ? 'عرض المشروع ←' : 'View project →'}</span>
                 }
               </div>
@@ -305,11 +273,11 @@ export default function Home() {
         <div className={styles.whyL}>
           <h2>{isAr ? <>لماذا<br />توب رايت؟</> : <>Why<br />Top Right?</>}</h2>
           {whyItems.map(w => (
-            <div key={w.n} className={styles.wi}>
-              <span className={styles.wiN}>{w.n}</span>
+            <div key={w.id} className={styles.wi}>
+              <span className={styles.wiN}>{w.number}</span>
               <div>
-                <strong>{t(w.title)}</strong>
-                <p>{t(w.body)}</p>
+                <strong>{isAr ? w.title_ar : w.title_en}</strong>
+                <p>{isAr ? w.body_ar : w.body_en}</p>
               </div>
             </div>
           ))}
