@@ -39,6 +39,13 @@ function AppInner() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/admin/login" element={<Login />} />
         <Route path="/admin" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="*" element={
+          <div style={{ padding: '4rem', textAlign: 'center' }}>
+            <h1>404</h1>
+            <p>Page not found.</p>
+            <a href="/">Go home</a>
+          </div>
+        } />
       </Routes>
       {!isAdmin && <Footer />}
       {!isAdmin && <div className="tbar" />}

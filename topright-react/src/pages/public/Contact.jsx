@@ -166,10 +166,6 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* MAP PLACEHOLDER */}
-      <div className={styles.mapPlaceholder}>
-        <span>{isAr ? 'الخريطة — موقع البحرين (سيُضاف لاحقًا)' : 'Map — Bahrain location (to be embedded)'}</span>
-      </div>
     </>
   )
 }

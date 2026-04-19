@@ -452,6 +452,8 @@ export default function Home() {
               setSent(true)
               setForm({ name: '', org: '', email: '', type: '', message: '' })
               setTimeout(() => setSent(false), 6000)
+            } catch {
+              alert(isAr ? 'حدث خطأ. يرجى المحاولة مرة أخرى.' : 'Something went wrong. Please try again.')
             } finally {
               setSubmitting(false)
             }
