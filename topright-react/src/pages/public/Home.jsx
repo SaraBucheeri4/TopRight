@@ -293,7 +293,7 @@ export default function Home() {
             const num = String(i + 1).padStart(2, '0')
             return (
               <div key={s.id} className={`${styles.sv} js-reveal`} style={{ background: s.card_color, transitionDelay: `${i * 70}ms` }}>
-                <div className={styles.svIco}>{svgIcons[num]}</div>
+                {/* <div className={styles.svIco}>{svgIcons[num]}</div> */}
                 <div className={styles.svN}>{num}</div>
                 <span className={styles.svTag}>{s.tag_label}</span>
                 <div className={styles.svTtl}>{isAr ? s.title_ar : s.title_en}</div>
