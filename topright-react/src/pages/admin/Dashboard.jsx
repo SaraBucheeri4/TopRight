@@ -10,7 +10,7 @@ import {
   getPublicUrl,
 } from '../../services/portfolioService'
 import { fetchContactSubmissions, deleteContactSubmission } from '../../services/contactService'
-import { fetchSiteText, updateSiteTextRow } from '../../services/siteTextService'
+// import { fetchSiteText, updateSiteTextRow } from '../../services/siteTextService'
 import { fetchDashboardCounts } from '../../services/dashboardService'
 import { signOut } from '../../services/authService'
 import { PORTFOLIO_CATEGORIES } from '../../config/constants'
@@ -2903,7 +2903,7 @@ export default function Dashboard() {
     { key: 'clients',      icon: '◉', label: 'Clients Bar',   group: 'Website Content', count: counts.clients },
     { key: 'services',     icon: '◧', label: 'Services',      group: 'Website Content', count: counts.services },
     { key: 'testimonials', icon: '❝', label: 'Testimonials',  group: 'Website Content', count: counts.testimonials },
-    { key: 'text',         icon: '✎', label: 'Site Text',     group: 'Website Content' },
+    // { key: 'text',         icon: '✎', label: 'Site Text',     group: 'Website Content' },
     { key: 'contact',   icon: '☏', label: 'Contact Info', group: 'Pages' },
     { key: 'footer',    icon: '▭', label: 'Footer',       group: 'Pages' },
     { key: 'calendar',  icon: '⊟', label: 'Calendar',     group: 'Schedule' },
