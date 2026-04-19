@@ -9,7 +9,7 @@ import { fetchPublishedClients, getClientLogoUrl } from '../../services/clientsS
 import { fetchContactInfo } from '../../services/contactInfoService'
 import { fetchPublishedServices } from '../../services/servicesService'
 import { fetchPublishedTestimonials } from '../../services/testimonialsService'
-import { fetchHeroContent } from '../../services/heroService'
+import { fetchHeroContent, getHeroCardImageUrl } from '../../services/heroService'
 import { fetchPublishedWhyItems } from '../../services/whyService'
 
 const CAT_COLORS = {
@@ -33,6 +33,15 @@ const tabs = [
 
 
 
+const svgIcons = {
+  '01': <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>,
+  '02': <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l5 3"/></svg>,
+  '03': <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>,
+  '04': <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="1.5"><path d="M15 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V7z"/><path d="M14 2v5h5M8 13h8M8 17h5"/></svg>,
+  '05': <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="1.5"><path d="M12 2a5 5 0 100 10A5 5 0 0012 2zM2 22c0-5.523 4.477-10 10-10s10 4.477 10 10"/></svg>,
+  '06': <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.6)" strokeWidth="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>,
+}
+
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 
 export default function Home() {
@@ -43,7 +52,12 @@ export default function Home() {
   const [testimonials, setTestimonials] = useState([])
   const [whyItems, setWhyItems] = useState([])
   const [contactInfo, setContactInfo] = useState(null)
-  const [hero, setHero] = useState(null)
+  const [hero, setHero] = useState({
+    card1_color: '#01A6A6', card1_line1: 'Safety with', card1_line2: 'Namool', card1_label: 'BAPCO ENERGIES · HSE',
+    card2_color: '#0058A1', card2_line1: 'خليجية', card2_label: 'GPIC · SINCE 2001',
+    card3_color: '#773E84', card3_line1: 'تطير بلا ريش', card3_line2: 'Flies Without Wings',
+    card4_color: '#00AEA2', card4_line1: 'SDG Booklets', card4_label: 'SDG',
+  })
   const [form, setForm] = useState({ name: '', org: '', email: '', type: '', message: '' })
   const [formErrors, setFormErrors] = useState({})
   const [sent, setSent] = useState(false)
@@ -59,7 +73,7 @@ export default function Home() {
     fetchPublishedServices().then(setServices)
     fetchPublishedTestimonials().then(setTestimonials)
     fetchPublishedWhyItems().then(setWhyItems)
-    fetchHeroContent().then(setHero)
+    fetchHeroContent().then(data => { if (data) setHero(prev => ({ ...prev, ...data })) })
     fetchPublishedPortfolioItems().then(data => {
       setPortfolioCards(data.map(item => ({
         cat: item.category,
@@ -144,41 +158,65 @@ export default function Home() {
             <circle cx="340" cy="400" r="80" fill="#E7432B" opacity=".05"/>
             {/* Book 1 */}
             <g transform="translate(60,80) rotate(-5)">
-              <rect width="190" height="250" rx="6" fill={hero?.card1_color || '#01A6A6'}/>
-              <rect x="12" y="12" width="166" height="226" rx="4" fill="rgba(0,0,0,.2)"/>
-              <circle cx="95" cy="100" r="52" fill="rgba(255,255,255,.12)"/>
-              <circle cx="95" cy="100" r="36" fill="#E7432B" opacity=".85"/>
-              <ellipse cx="95" cy="97" rx="13" ry="9" fill="rgba(255,255,255,.9)"/>
-              <circle cx="95" cy="84" r="7" fill="rgba(0,0,0,.75)"/>
-              <rect x="20" y="160" width="150" height="60" rx="3" fill="rgba(0,0,0,.25)"/>
-              <text x="95" y="182" fontSize="15" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card1_line1 || 'Safety with'}</text>
-              <text x="95" y="200" fontSize="15" fontWeight="900" fill="#FBEED6" textAnchor="middle" fontFamily="system-ui">{hero?.card1_line2 || 'Namool'}</text>
-              <text x="95" y="235" fontSize="8" fill="rgba(255,255,255,.5)" textAnchor="middle" fontFamily="system-ui" letterSpacing="1">{hero?.card1_label || 'BAPCO ENERGIES · HSE'}</text>
+              <g className={styles.heroCard1}>
+                <rect width="190" height="250" rx="6" fill={hero?.card1_color || '#01A6A6'}/>
+                {!hero?.card1_image && <>
+                  <rect x="12" y="12" width="166" height="226" rx="4" fill="rgba(0,0,0,.2)"/>
+                  <circle cx="95" cy="100" r="52" fill="rgba(255,255,255,.12)"/>
+                  <circle cx="95" cy="100" r="36" fill="#E7432B" opacity=".85"/>
+                  <ellipse cx="95" cy="97" rx="13" ry="9" fill="rgba(255,255,255,.9)"/>
+                  <circle cx="95" cy="84" r="7" fill="rgba(0,0,0,.75)"/>
+                  <rect x="20" y="160" width="150" height="60" rx="3" fill="rgba(0,0,0,.25)"/>
+                  <text x="95" y="182" fontSize="15" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card1_line1 || 'Safety with'}</text>
+                  <text x="95" y="200" fontSize="15" fontWeight="900" fill="#FBEED6" textAnchor="middle" fontFamily="system-ui">{hero?.card1_line2 || 'Namool'}</text>
+                  <text x="95" y="235" fontSize="8" fill="rgba(255,255,255,.5)" textAnchor="middle" fontFamily="system-ui" letterSpacing="1">{hero?.card1_label || 'BAPCO ENERGIES · HSE'}</text>
+                </>}
+                {hero?.card1_image && <image href={getHeroCardImageUrl(hero.card1_image)} x="0" y="0" width="190" height="250" preserveAspectRatio="xMidYMid slice" clipPath="url(#clip1)"/>}
+                <defs><clipPath id="clip1"><rect width="190" height="250" rx="6"/></clipPath></defs>
+              </g>
             </g>
             {/* Book 2 */}
             <g transform="translate(280,50) rotate(4)">
-              <rect width="170" height="220" rx="5" fill={hero?.card2_color || '#0058A1'}/>
-              <rect x="10" y="10" width="150" height="200" rx="3" fill="rgba(0,0,0,.2)"/>
-              <text x="85" y="130" fontSize="26" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card2_line1 || 'خليجية'}</text>
-              <text x="85" y="205" fontSize="7" fill="rgba(255,255,255,.3)" textAnchor="middle" fontFamily="system-ui">{hero?.card2_label || 'GPIC · SINCE 2001'}</text>
+              <g className={styles.heroCard2}>
+                <rect width="170" height="220" rx="5" fill={hero?.card2_color || '#0058A1'}/>
+                {!hero?.card2_image && <>
+                  <rect x="10" y="10" width="150" height="200" rx="3" fill="rgba(0,0,0,.2)"/>
+                  <text x="85" y="130" fontSize="26" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card2_line1 || 'خليجية'}</text>
+                  <text x="85" y="205" fontSize="7" fill="rgba(255,255,255,.3)" textAnchor="middle" fontFamily="system-ui">{hero?.card2_label || 'GPIC · SINCE 2001'}</text>
+                </>}
+                {hero?.card2_image && <image href={getHeroCardImageUrl(hero.card2_image)} x="0" y="0" width="170" height="220" preserveAspectRatio="xMidYMid slice" clipPath="url(#clip2)"/>}
+                <defs><clipPath id="clip2"><rect width="170" height="220" rx="5"/></clipPath></defs>
+              </g>
             </g>
             {/* Book 3 */}
             <g transform="translate(40,370) rotate(-3)">
-              <rect width="160" height="210" rx="5" fill={hero?.card3_color || '#773E84'}/>
-              <rect x="10" y="10" width="140" height="190" rx="3" fill="rgba(0,0,0,.25)"/>
-              <circle cx="80" cy="85" r="40" fill="#F9DFB7" opacity=".85"/>
-              <circle cx="96" cy="74" r="32" fill={hero?.card3_color || '#773E84'} opacity=".9"/>
-              <text x="80" y="145" fontSize="13" fontWeight="900" fill="#F9DFB7" textAnchor="middle" fontFamily="system-ui">{hero?.card3_line1 || 'تطير بلا ريش'}</text>
-              <text x="80" y="163" fontSize="8" fill="rgba(249,223,183,.5)" textAnchor="middle" fontFamily="system-ui">{hero?.card3_line2 || 'Flies Without Wings'}</text>
+              <g className={styles.heroCard3}>
+                <rect width="160" height="210" rx="5" fill={hero?.card3_color || '#773E84'}/>
+                {!hero?.card3_image && <>
+                  <rect x="10" y="10" width="140" height="190" rx="3" fill="rgba(0,0,0,.25)"/>
+                  <circle cx="80" cy="85" r="40" fill="#F9DFB7" opacity=".85"/>
+                  <circle cx="96" cy="74" r="32" fill={hero?.card3_color || '#773E84'} opacity=".9"/>
+                  <text x="80" y="145" fontSize="13" fontWeight="900" fill="#F9DFB7" textAnchor="middle" fontFamily="system-ui">{hero?.card3_line1 || 'تطير بلا ريش'}</text>
+                  <text x="80" y="163" fontSize="8" fill="rgba(249,223,183,.5)" textAnchor="middle" fontFamily="system-ui">{hero?.card3_line2 || 'Flies Without Wings'}</text>
+                </>}
+                {hero?.card3_image && <image href={getHeroCardImageUrl(hero.card3_image)} x="0" y="0" width="160" height="210" preserveAspectRatio="xMidYMid slice" clipPath="url(#clip3)"/>}
+                <defs><clipPath id="clip3"><rect width="160" height="210" rx="5"/></clipPath></defs>
+              </g>
             </g>
             {/* Book 4 */}
             <g transform="translate(300,330) rotate(6)">
-              <rect width="155" height="200" rx="5" fill={hero?.card4_color || '#00AEA2'}/>
-              <rect x="10" y="10" width="135" height="180" rx="3" fill="rgba(0,0,0,.2)"/>
-              <circle cx="77" cy="80" r="44" fill="none" stroke="rgba(255,255,255,.2)" strokeWidth="2"/>
-              <circle cx="77" cy="80" r="28" fill="rgba(255,255,255,.15)"/>
-              <text x="77" y="76" fontSize="9" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card4_label || 'SDG'}</text>
-              <text x="77" y="140" fontSize="11" fontWeight="700" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card4_line1 || 'SDG Booklets'}</text>
+              <g className={styles.heroCard4}>
+                <rect width="155" height="200" rx="5" fill={hero?.card4_color || '#00AEA2'}/>
+                {!hero?.card4_image && <>
+                  <rect x="10" y="10" width="135" height="180" rx="3" fill="rgba(0,0,0,.2)"/>
+                  <circle cx="77" cy="80" r="44" fill="none" stroke="rgba(255,255,255,.2)" strokeWidth="2"/>
+                  <circle cx="77" cy="80" r="28" fill="rgba(255,255,255,.15)"/>
+                  <text x="77" y="76" fontSize="9" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card4_label || 'SDG'}</text>
+                  <text x="77" y="140" fontSize="11" fontWeight="700" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card4_line1 || 'SDG Booklets'}</text>
+                </>}
+                {hero?.card4_image && <image href={getHeroCardImageUrl(hero.card4_image)} x="0" y="0" width="155" height="200" preserveAspectRatio="xMidYMid slice" clipPath="url(#clip4)"/>}
+                <defs><clipPath id="clip4"><rect width="155" height="200" rx="5"/></clipPath></defs>
+              </g>
             </g>
             {/* Al Basta banner */}
             <g transform="translate(50,600)">

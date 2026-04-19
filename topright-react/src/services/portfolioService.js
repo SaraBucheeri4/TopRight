@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabase'
 import { STORAGE_BUCKET } from '../config/constants'
+import { compressImage } from '../utils/compressImage'
 
 export function getPublicUrl(filename) {
   if (!filename) return null
@@ -56,12 +57,12 @@ export async function updatePortfolioOrder(items) {
 }
 
 export async function uploadPortfolioImage(file) {
-  const ext = file.name.split('.').pop().toLowerCase()
-  const filename = `${Date.now()}.${ext}`
-  const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(filename, file, {
+  const compressed = await compressImage(file)
+  const filename = `${Date.now()}.webp`
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(filename, compressed, {
     cacheControl: '3600',
     upsert: false,
-    contentType: file.type,
+    contentType: 'image/webp',
   })
   if (error) throw error
   return filename

@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabase'
 import { STORAGE_BUCKET } from '../config/constants'
+import { compressImage } from '../utils/compressImage'
 
 export async function fetchAllClients() {
   const { data, error } = await supabase
@@ -42,12 +43,12 @@ export async function updateClientsOrder(clients) {
 }
 
 export async function uploadClientLogo(file) {
-  const ext = file.name.split('.').pop().toLowerCase()
-  const filename = `clients/${Date.now()}.${ext}`
-  const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(filename, file, {
+  const compressed = await compressImage(file, { maxWidth: 600, maxHeight: 400, quality: 0.88 })
+  const filename = `clients/${Date.now()}.webp`
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(filename, compressed, {
     cacheControl: '3600',
     upsert: false,
-    contentType: file.type,
+    contentType: 'image/webp',
   })
   if (error) throw error
   return filename

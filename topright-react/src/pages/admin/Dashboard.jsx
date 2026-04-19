@@ -29,7 +29,7 @@ import {
 } from '../../services/clientsService'
 import { fetchContactInfo, upsertContactInfo } from '../../services/contactInfoService'
 import { fetchFooter, upsertFooter } from '../../services/footerService'
-import { fetchHeroContent, upsertHeroContent } from '../../services/heroService'
+import { fetchHeroContent, upsertHeroContent, uploadHeroCardImage, getHeroCardImageUrl } from '../../services/heroService'
 import {
   fetchAllWhyItems,
   createWhyItem,
@@ -1378,6 +1378,156 @@ const EMPTY_TESTIMONIAL = {
 }
 
 /* ── Hero Editor ── */
+function HeroEditorTMP_PLACEHOLDER({ showToast }) {
+  const DEFAULTS = {
+    story_en: "Top Right was founded in Bahrain in 2001 with a single purpose: to tell stories beautifully, in both Arabic and English.\n\nOver two decades we have grown into a full-service creative studio trusted by some of the GCC's most respected organisations — from GPIC and Bapco Energies to the Ministry of Interior and Bahrain Television.\n\nWhat makes us different is our genuine bilingualism. We don't translate — we create in both languages simultaneously, ensuring every piece communicates authentically to every reader.",
+    story_ar: 'تأسست توب رايت في البحرين عام ٢٠٠١ بهدف واحد: رواية القصص بجمال، بالعربية والإنجليزية معًا.\n\nعلى مدى عقدين نمونا لنصبح استوديو إبداعي متكامل تثق به بعض أبرز المؤسسات في منطقة الخليج.\n\nما يميزنا هو ثنائيتنا اللغوية الحقيقية. نحن لا نترجم — بل نبتكر بكلتا اللغتين في آنٍ واحد.',
+    member1_name: '', member1_role_en: 'Creative Director & Founder', member1_role_ar: 'المدير الإبداعي والمؤسس',
+    member1_bio_en: 'Over 20 years leading creative projects across Bahrain and the GCC.', member1_bio_ar: 'أكثر من ٢٠ عامًا في قيادة المشاريع الإبداعية في البحرين ومنطقة الخليج.', member1_image: null,
+    member2_name: '', member2_role_en: 'Senior Designer', member2_role_ar: 'مصمم أول',
+    member2_bio_en: 'Specialises in layout and typographic design for Arabic and English publications.', member2_bio_ar: 'متخصص في تصميم التخطيط والطباعة للمطبوعات العربية والإنجليزية.', member2_image: null,
+    member3_name: '', member3_role_en: 'Illustrator & Animator', member3_role_ar: 'رسّام ومصمم رسوم متحركة',
+    member3_bio_en: "Creates character-driven illustrations for children's books and educational materials.", member3_bio_ar: 'يبتكر رسومًا توضيحية مبنية على الشخصيات لكتب الأطفال والمواد التعليمية.', member3_image: null,
+  }
+
+  const [about, setAbout] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState(null)
+  const [uploading, setUploading] = useState({})
+  const [previews, setPreviews] = useState({})
+  const fileRefs = { 1: useRef(), 2: useRef(), 3: useRef() }
+
+  useEffect(() => {
+    fetchAboutContent()
+      .then(data => {
+        const merged = { ...DEFAULTS, ...(data ?? {}) }
+        setAbout(merged)
+        const p = {}
+        ;[1, 2, 3].forEach(n => {
+          if (merged[`member${n}_image`]) p[n] = getAboutImageUrl(merged[`member${n}_image`])
+        })
+        setPreviews(p)
+      })
+      .catch(() => setAbout(DEFAULTS))
+      .finally(() => setLoading(false))
+  }, [])
+
+  function set(field, value) { setAbout(prev => ({ ...prev, [field]: value })) }
+
+  async function handleImageUpload(n, file) {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = e => setPreviews(p => ({ ...p, [n]: e.target.result }))
+    reader.readAsDataURL(file)
+    setUploading(u => ({ ...u, [n]: true }))
+    try {
+      const filename = await uploadAboutImage(file)
+      set(`member${n}_image`, filename)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setUploading(u => ({ ...u, [n]: false }))
+    }
+  }
+
+  async function handleSave() {
+    setSaving(true); setSaveError(null)
+    try {
+      await upsertAboutContent(about)
+      showToast?.('About saved', 'About page updated successfully.')
+    } catch (err) {
+      setSaveError(err.message ?? 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (loading) return <p className={styles.loading}>Loading…</p>
+
+  return (
+    <div>
+      <div className={styles.pageHd}>
+        <div>
+          <div className={styles.pageEyebrow}>Website Content</div>
+          <h1 className={styles.pageTitle}>About Page</h1>
+        </div>
+        <button className={styles.btnAdd} onClick={handleSave} disabled={saving}>
+          {saving ? 'Saving…' : 'Save Changes ↓'}
+        </button>
+      </div>
+
+      <div className={styles.tableWrap} style={{ padding: 28 }}>
+
+        {/* Story */}
+        <div style={{ marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Our Story</div>
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Story Text (EN)</label>
+            <textarea className={styles.fieldInput} rows={6} value={about.story_en ?? ''} onChange={e => set('story_en', e.target.value)} style={{ resize: 'vertical' }} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Story Text (AR)</label>
+            <textarea className={styles.fieldInput} rows={6} dir="rtl" value={about.story_ar ?? ''} onChange={e => set('story_ar', e.target.value)} style={{ resize: 'vertical' }} />
+          </div>
+        </div>
+
+        {/* Team members */}
+        <div style={{ marginTop: 28, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Team Members</div>
+        {[1, 2, 3].map(n => (
+          <div key={n} style={{ border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, padding: '16px', marginBottom: 14 }}>
+            <div style={{ fontSize: 10, letterSpacing: 1, color: '#888', marginBottom: 12 }}>Member {n}</div>
+
+            {/* Photo upload */}
+            <div className={styles.mfgRow} style={{ alignItems: 'flex-start', marginBottom: 12 }}>
+              <div style={{ width: 90, flexShrink: 0 }}>
+                <div
+                  style={{ width: 80, height: 80, borderRadius: '50%', background: '#1a1a1a', border: '2px dashed #333', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', fontSize: 11, color: '#555' }}
+                  onClick={() => fileRefs[n].current?.click()}
+                >
+                  {previews[n]
+                    ? <img src={previews[n]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : uploading[n] ? '…' : '+ Photo'
+                  }
+                </div>
+                <input ref={fileRefs[n]} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleImageUpload(n, e.target.files[0])} />
+              </div>
+              <div className={styles.mfg} style={{ flex: 1 }}>
+                <label className={styles.fieldLabel}>Full Name</label>
+                <input className={styles.fieldInput} value={about[`member${n}_name`] ?? ''} onChange={e => set(`member${n}_name`, e.target.value)} placeholder="Full name" />
+              </div>
+            </div>
+
+            <div className={styles.mfgRow}>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Role (EN)</label>
+                <input className={styles.fieldInput} value={about[`member${n}_role_en`] ?? ''} onChange={e => set(`member${n}_role_en`, e.target.value)} />
+              </div>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Role (AR)</label>
+                <input className={styles.fieldInput} dir="rtl" value={about[`member${n}_role_ar`] ?? ''} onChange={e => set(`member${n}_role_ar`, e.target.value)} />
+              </div>
+            </div>
+            <div className={styles.mfgRow}>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Bio (EN)</label>
+                <textarea className={styles.fieldInput} rows={3} value={about[`member${n}_bio_en`] ?? ''} onChange={e => set(`member${n}_bio_en`, e.target.value)} style={{ resize: 'vertical' }} />
+              </div>
+              <div className={styles.mfg}>
+                <label className={styles.fieldLabel}>Bio (AR)</label>
+                <textarea className={styles.fieldInput} rows={3} dir="rtl" value={about[`member${n}_bio_ar`] ?? ''} onChange={e => set(`member${n}_bio_ar`, e.target.value)} style={{ resize: 'vertical' }} />
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {saveError && <p style={{ color: '#E7432B', fontSize: 11, marginTop: 8 }}>{saveError}</p>}
+      </div>
+    </div>
+  )
+}
+
+/* ── Hero Editor ── */
 function HeroEditor({ showToast }) {
   const DEFAULTS = {
     tag_en: 'Bahrain · Est. 2001 · Bilingual Studio',
@@ -1398,13 +1548,41 @@ function HeroEditor({ showToast }) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState(null)
+  const [cardUploading, setCardUploading] = useState({})
+  const [cardPreviews, setCardPreviews] = useState({})
+  const cardFileRefs = { 1: useRef(), 2: useRef(), 3: useRef(), 4: useRef() }
 
   useEffect(() => {
     fetchHeroContent()
-      .then(data => setHero(data ?? DEFAULTS))
+      .then(data => {
+        setHero(data ?? DEFAULTS)
+        if (data) {
+          const p = {}
+          ;[1, 2, 3, 4].forEach(n => {
+            if (data[`card${n}_image`]) p[n] = getHeroCardImageUrl(data[`card${n}_image`])
+          })
+          setCardPreviews(p)
+        }
+      })
       .catch(() => setHero(DEFAULTS))
       .finally(() => setLoading(false))
   }, [])
+
+  async function handleCardImageUpload(n, file) {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = e => setCardPreviews(p => ({ ...p, [n]: e.target.result }))
+    reader.readAsDataURL(file)
+    setCardUploading(u => ({ ...u, [n]: true }))
+    try {
+      const filename = await uploadHeroCardImage(file)
+      setHero(prev => ({ ...prev, [`card${n}_image`]: filename }))
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setCardUploading(u => ({ ...u, [n]: false }))
+    }
+  }
 
   function set(field, value) { setHero(prev => ({ ...prev, [field]: value })) }
 
@@ -1502,31 +1680,59 @@ function HeroEditor({ showToast }) {
         <div style={{ marginTop: 24, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Book Cards (hero right panel)</div>
 
         {[
-          { n: 1, lines: ['line1', 'line2'], labelField: 'label', hasLabel: true },
-          { n: 2, lines: ['line1'], labelField: 'label', hasLabel: true },
-          { n: 3, lines: ['line1', 'line2'], labelField: null, hasLabel: false },
-          { n: 4, lines: ['line1'], labelField: 'label', hasLabel: true },
+          { n: 1, lines: ['line1', 'line2'], hasLabel: true },
+          { n: 2, lines: ['line1'], hasLabel: true },
+          { n: 3, lines: ['line1', 'line2'], hasLabel: false },
+          { n: 4, lines: ['line1'], hasLabel: true },
         ].map(({ n, lines, hasLabel }) => (
           <div key={n} style={{ border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, padding: '14px 16px', marginBottom: 10 }}>
-            <div style={{ fontSize: 10, letterSpacing: 1, color: '#888', marginBottom: 10 }}>Card {n}</div>
-            <div className={styles.mfgRow}>
-              {lines.map(l => (
-                <div key={l} className={styles.mfg}>
-                  <label className={styles.fieldLabel}>{l === 'line1' ? 'Title' : 'Subtitle'}</label>
-                  <input className={styles.fieldInput} dir={n <= 2 && l === 'line1' ? (n === 2 ? 'rtl' : 'ltr') : 'ltr'} value={hero[`card${n}_${l}`] ?? ''} onChange={e => set(`card${n}_${l}`, e.target.value)} />
+            <div style={{ fontSize: 10, letterSpacing: 1, color: '#888', marginBottom: 12 }}>Card {n}</div>
+
+            {/* Image upload row */}
+            <div className={styles.mfgRow} style={{ alignItems: 'flex-start', marginBottom: 12 }}>
+              <div style={{ flexShrink: 0 }}>
+                <label className={styles.fieldLabel}>Cover Image (optional)</label>
+                <div
+                  style={{ width: 80, height: 100, borderRadius: 6, background: hero[`card${n}_color`] || '#333', border: '2px dashed rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', fontSize: 10, color: 'rgba(255,255,255,.5)', textAlign: 'center', lineHeight: 1.3 }}
+                  onClick={() => cardFileRefs[n].current?.click()}
+                >
+                  {cardPreviews[n]
+                    ? <img src={cardPreviews[n]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : cardUploading[n] ? '…' : '+ Image'
+                  }
                 </div>
-              ))}
-              {hasLabel && (
-                <div className={styles.mfg}>
-                  <label className={styles.fieldLabel}>Small Label</label>
-                  <input className={styles.fieldInput} value={hero[`card${n}_label`] ?? ''} onChange={e => set(`card${n}_label`, e.target.value)} />
+                {cardPreviews[n] && (
+                  <button
+                    style={{ marginTop: 4, fontSize: 9, color: '#E7432B', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    onClick={() => { setCardPreviews(p => ({ ...p, [n]: null })); setHero(prev => ({ ...prev, [`card${n}_image`]: null })) }}
+                  >Remove</button>
+                )}
+                <input ref={cardFileRefs[n]} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleCardImageUpload(n, e.target.files[0])} />
+              </div>
+
+              <div style={{ flex: 1 }}>
+                <div className={styles.mfgRow}>
+                  {lines.map(l => (
+                    <div key={l} className={styles.mfg}>
+                      <label className={styles.fieldLabel}>{l === 'line1' ? 'Title' : 'Subtitle'}</label>
+                      <input className={styles.fieldInput} dir={n === 2 && l === 'line1' ? 'rtl' : 'ltr'} value={hero[`card${n}_${l}`] ?? ''} onChange={e => set(`card${n}_${l}`, e.target.value)} />
+                    </div>
+                  ))}
+                  {hasLabel && (
+                    <div className={styles.mfg}>
+                      <label className={styles.fieldLabel}>Small Label</label>
+                      <input className={styles.fieldInput} value={hero[`card${n}_label`] ?? ''} onChange={e => set(`card${n}_label`, e.target.value)} />
+                    </div>
+                  )}
                 </div>
-              )}
-              <div className={styles.mfg} style={{ maxWidth: 110 }}>
-                <label className={styles.fieldLabel}>Color</label>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                  <input type="color" value={hero[`card${n}_color`] ?? '#01A6A6'} onChange={e => set(`card${n}_color`, e.target.value)} style={{ width: 36, height: 32, border: 'none', background: 'none', cursor: 'pointer' }} />
-                  <input className={styles.fieldInput} value={hero[`card${n}_color`] ?? ''} onChange={e => set(`card${n}_color`, e.target.value)} style={{ flex: 1 }} />
+                <div className={styles.mfgRow}>
+                  <div className={styles.mfg} style={{ maxWidth: 140 }}>
+                    <label className={styles.fieldLabel}>Card Color</label>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input type="color" value={hero[`card${n}_color`] ?? '#01A6A6'} onChange={e => set(`card${n}_color`, e.target.value)} style={{ width: 36, height: 32, border: 'none', background: 'none', cursor: 'pointer' }} />
+                      <input className={styles.fieldInput} value={hero[`card${n}_color`] ?? ''} onChange={e => set(`card${n}_color`, e.target.value)} style={{ flex: 1 }} />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

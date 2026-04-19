@@ -90,6 +90,34 @@
   background-size: 36px 36px;
 }
 
+/* ── HERO CARD ANIMATIONS ── */
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateX(160px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes floatA {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+@keyframes floatB {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes floatC {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+@keyframes floatD {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-7px); }
+}
+
+/* slide-in delay + 0.7s duration = when float starts */
+.heroCard1 { animation: cardSlideIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.1s both, floatA 4s ease-in-out 0.8s infinite; }
+.heroCard2 { animation: cardSlideIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.3s both, floatB 5s ease-in-out 1.0s infinite; }
+.heroCard3 { animation: cardSlideIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.5s both, floatC 4.5s ease-in-out 1.2s infinite; }
+.heroCard4 { animation: cardSlideIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.7s both, floatD 3.8s ease-in-out 1.4s infinite; }
+
 /* ── CLIENTS ── */
 .clients {
   background: #d0d1cf;
@@ -632,7 +660,7 @@
   background: transparent;
   padding: 11px 0;
   font-size: 12px;
-  color: #fff;
+  color: #000;
   font-family: var(--font-body);
   outline: none;
   transition: border-color .2s;
