@@ -1542,6 +1542,7 @@ function HeroEditor({ showToast }) {
     card2_line1: 'خليجية', card2_label: 'GPIC · SINCE 2001', card2_color: '#0058A1',
     card3_line1: 'تطير بلا ريش', card3_line2: 'Flies Without Wings', card3_color: '#773E84',
     card4_line1: 'SDG Booklets', card4_label: 'SDG', card4_color: '#00AEA2',
+    basta_title: 'البسطة', basta_label: 'AL BASTA · BAHRAIN TV', basta_color: '#E7432B',
   }
 
   const [hero, setHero] = useState(null)
@@ -1550,7 +1551,7 @@ function HeroEditor({ showToast }) {
   const [saveError, setSaveError] = useState(null)
   const [cardUploading, setCardUploading] = useState({})
   const [cardPreviews, setCardPreviews] = useState({})
-  const cardFileRefs = { 1: useRef(), 2: useRef(), 3: useRef(), 4: useRef() }
+  const cardFileRefs = { 1: useRef(), 2: useRef(), 3: useRef(), 4: useRef(), basta: useRef() }
 
   useEffect(() => {
     fetchHeroContent()
@@ -1561,6 +1562,7 @@ function HeroEditor({ showToast }) {
           ;[1, 2, 3, 4].forEach(n => {
             if (data[`card${n}_image`]) p[n] = getHeroCardImageUrl(data[`card${n}_image`])
           })
+          if (data.basta_image) p['basta'] = getHeroCardImageUrl(data.basta_image)
           setCardPreviews(p)
         }
       })
@@ -1576,7 +1578,8 @@ function HeroEditor({ showToast }) {
     setCardUploading(u => ({ ...u, [n]: true }))
     try {
       const filename = await uploadHeroCardImage(file)
-      setHero(prev => ({ ...prev, [`card${n}_image`]: filename }))
+      const key = n === 'basta' ? 'basta_image' : `card${n}_image`
+      setHero(prev => ({ ...prev, [key]: filename }))
     } catch (err) {
       console.error(err)
     } finally {
@@ -1738,6 +1741,53 @@ function HeroEditor({ showToast }) {
             </div>
           </div>
         ))}
+
+        <div style={{ marginTop: 24, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Al Basta Banner (hero bottom)</div>
+        <div style={{ border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, padding: '14px 16px', marginBottom: 10 }}>
+          <div style={{ fontSize: 10, letterSpacing: 1, color: '#888', marginBottom: 12 }}>البسطة Card</div>
+          <div className={styles.mfgRow} style={{ alignItems: 'flex-start', marginBottom: 12 }}>
+            <div style={{ flexShrink: 0 }}>
+              <label className={styles.fieldLabel}>Cover Image (optional)</label>
+              <div
+                style={{ width: 120, height: 70, borderRadius: 6, background: hero.basta_color || '#E7432B', border: '2px dashed rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', fontSize: 10, color: 'rgba(255,255,255,.5)', textAlign: 'center', lineHeight: 1.3 }}
+                onClick={() => cardFileRefs['basta'].current?.click()}
+              >
+                {cardPreviews['basta']
+                  ? <img src={cardPreviews['basta']} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : cardUploading['basta'] ? '…' : '+ Image'
+                }
+              </div>
+              {cardPreviews['basta'] && (
+                <button
+                  style={{ marginTop: 4, fontSize: 9, color: '#E7432B', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  onClick={() => { setCardPreviews(p => ({ ...p, basta: null })); setHero(prev => ({ ...prev, basta_image: null })) }}
+                >Remove</button>
+              )}
+              <input ref={cardFileRefs['basta']} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleCardImageUpload('basta', e.target.files[0])} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Title (Arabic)</label>
+                  <input className={styles.fieldInput} dir="rtl" value={hero.basta_title ?? 'البسطة'} onChange={e => set('basta_title', e.target.value)} />
+                </div>
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Label / Subtitle</label>
+                  <input className={styles.fieldInput} value={hero.basta_label ?? 'AL BASTA · BAHRAIN TV'} onChange={e => set('basta_label', e.target.value)} />
+                </div>
+              </div>
+              <div className={styles.mfgRow}>
+                <div className={styles.mfg} style={{ maxWidth: 180 }}>
+                  <label className={styles.fieldLabel}>Card Color</label>
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <input type="color" value={hero.basta_color ?? '#E7432B'} onChange={e => set('basta_color', e.target.value)} style={{ width: 36, height: 32, border: 'none', background: 'none', cursor: 'pointer' }} />
+                    <input className={styles.fieldInput} value={hero.basta_color ?? '#E7432B'} onChange={e => set('basta_color', e.target.value)} style={{ flex: 1 }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {saveError && <p style={{ color: '#E7432B', fontSize: 11, marginTop: 8 }}>{saveError}</p>}
       </div>
@@ -2566,6 +2616,7 @@ function ContactInfoEditor({ showToast }) {
     setInfo(data ?? {
       email: '', phone_primary: '', phone_secondary: '', whatsapp: '',
       address_en: '', address_ar: '', cr_number: '',
+      label_en: 'Get in touch', label_ar: 'تواصل معنا',
       section_title_en: '', section_title_ar: '',
       description_en: '', description_ar: '',
     })
@@ -2673,6 +2724,18 @@ function ContactInfoEditor({ showToast }) {
           </div>
         </div>
 
+        <div style={{ marginTop: 8, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Get in Touch Section</div>
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Eyebrow Label (EN) — "Get in touch"</label>
+            <input className={styles.fieldInput} type="text" placeholder="Get in touch" value={info.label_en ?? ''} onChange={e => set('label_en', e.target.value)} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Eyebrow Label (AR) — "تواصل معنا"</label>
+            <input className={styles.fieldInput} type="text" dir="rtl" placeholder="تواصل معنا" value={info.label_ar ?? ''} onChange={e => set('label_ar', e.target.value)} />
+          </div>
+        </div>
+
         <div className={styles.mfg}>
           <label className={styles.fieldLabel}>Section Title (EN)</label>
           <input
@@ -2771,7 +2834,29 @@ function FooterEditor({ showToast }) {
   async function load() {
     setLoading(true)
     const d = await fetchFooter()
-    setData(d ?? { description_en: '', description_ar: '', copyright_text: '' })
+    const DEFAULTS = {
+      description_en: '', description_ar: '', copyright_text: '',
+      services_heading_en: 'Services', services_heading_ar: 'الخدمات',
+      portfolio_heading_en: 'Portfolio', portfolio_heading_ar: 'أعمالنا',
+      contact_heading_en: 'Contact', contact_heading_ar: 'تواصل',
+      instagram_url: '', whatsapp_url: '', linkedin_url: '',
+      services_links: JSON.stringify([
+        { en: 'Publication Design', ar: 'تصميم المطبوعات', url: '/#services' },
+        { en: 'Illustration & Art', ar: 'الرسم التوضيحي', url: '/#services' },
+        { en: 'Animation', ar: 'الرسوم المتحركة', url: '/#services' },
+        { en: 'Corporate Books', ar: 'الكتب المؤسسية', url: '/#services' },
+        { en: 'Digital Publications', ar: 'المنشورات الرقمية', url: '/#services' },
+        { en: 'Coaching', ar: 'التدريب', url: '/#coaching' },
+      ]),
+      portfolio_links: JSON.stringify([
+        { en: "Children's Books", ar: 'كتب الأطفال', url: '/#work' },
+        { en: 'HSE Publications', ar: 'مطبوعات السلامة المهنية', url: '/#work' },
+        { en: 'Corporate', ar: 'مؤسسي', url: '/#work' },
+        { en: 'Illustration', ar: 'الرسم التوضيحي', url: '/#work' },
+        { en: 'Animation', ar: 'الرسوم المتحركة', url: '/#work' },
+      ]),
+    }
+    setData(d ? { ...DEFAULTS, ...d } : DEFAULTS)
     setLoading(false)
   }
   useEffect(() => { load() }, [])
@@ -2780,6 +2865,28 @@ function FooterEditor({ showToast }) {
     setData(prev => ({ ...prev, [field]: value }))
     setSaved(false)
     setFieldErrors(prev => ({ ...prev, [field]: null }))
+  }
+
+  function parseLinks(col) {
+    try { return JSON.parse(data?.[col] || '[]') } catch { return [] }
+  }
+
+  function setLinks(col, links) {
+    set(col, JSON.stringify(links))
+  }
+
+  function addLink(col) {
+    setLinks(col, [...parseLinks(col), { en: '', ar: '', url: '' }])
+  }
+
+  function updateLink(col, idx, field, val) {
+    const links = parseLinks(col)
+    links[idx] = { ...links[idx], [field]: val }
+    setLinks(col, links)
+  }
+
+  function removeLink(col, idx) {
+    setLinks(col, parseLinks(col).filter((_, i) => i !== idx))
   }
 
   function validate() {
@@ -2856,6 +2963,92 @@ function FooterEditor({ showToast }) {
             onChange={e => set('copyright_text', e.target.value)}
           />
           {fieldErrors.copyright_text && <span className={styles.fieldErr}>{fieldErrors.copyright_text}</span>}
+        </div>
+
+        <div style={{ marginTop: 24, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Footer Column Headings</div>
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Services Heading (EN)</label>
+            <input className={styles.fieldInput} value={data.services_heading_en ?? 'Services'} onChange={e => set('services_heading_en', e.target.value)} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Services Heading (AR)</label>
+            <input className={styles.fieldInput} dir="rtl" value={data.services_heading_ar ?? 'الخدمات'} onChange={e => set('services_heading_ar', e.target.value)} />
+          </div>
+        </div>
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Portfolio Heading (EN)</label>
+            <input className={styles.fieldInput} value={data.portfolio_heading_en ?? 'Portfolio'} onChange={e => set('portfolio_heading_en', e.target.value)} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Portfolio Heading (AR)</label>
+            <input className={styles.fieldInput} dir="rtl" value={data.portfolio_heading_ar ?? 'أعمالنا'} onChange={e => set('portfolio_heading_ar', e.target.value)} />
+          </div>
+        </div>
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Contact Heading (EN)</label>
+            <input className={styles.fieldInput} value={data.contact_heading_en ?? 'Contact'} onChange={e => set('contact_heading_en', e.target.value)} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Contact Heading (AR)</label>
+            <input className={styles.fieldInput} dir="rtl" value={data.contact_heading_ar ?? 'تواصل'} onChange={e => set('contact_heading_ar', e.target.value)} />
+          </div>
+        </div>
+
+        {/* ── Services links editor ── */}
+        <div style={{ marginTop: 24, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Services Column Links</div>
+        {parseLinks('services_links').map((lnk, idx) => (
+          <div key={idx} className={styles.mfgRow} style={{ alignItems: 'center', marginBottom: 6 }}>
+            <div className={styles.mfg}>
+              <input className={styles.fieldInput} placeholder="Label (EN)" value={lnk.en} onChange={e => updateLink('services_links', idx, 'en', e.target.value)} />
+            </div>
+            <div className={styles.mfg}>
+              <input className={styles.fieldInput} placeholder="العنوان (AR)" dir="rtl" value={lnk.ar} onChange={e => updateLink('services_links', idx, 'ar', e.target.value)} />
+            </div>
+            <div className={styles.mfg}>
+              <input className={styles.fieldInput} placeholder="URL" value={lnk.url} onChange={e => updateLink('services_links', idx, 'url', e.target.value)} />
+            </div>
+            <button onClick={() => removeLink('services_links', idx)} style={{ background: 'none', border: 'none', color: '#E7432B', cursor: 'pointer', fontSize: 16, flexShrink: 0, padding: '0 8px' }}>✕</button>
+          </div>
+        ))}
+        <button onClick={() => addLink('services_links')} style={{ background: 'none', border: '1px dashed #444', color: '#888', fontSize: 9, letterSpacing: 1, textTransform: 'uppercase', padding: '7px 16px', cursor: 'pointer', marginBottom: 16 }}>+ Add Service Link</button>
+
+        {/* ── Portfolio links editor ── */}
+        <div style={{ marginTop: 8, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Portfolio Column Links</div>
+        {parseLinks('portfolio_links').map((lnk, idx) => (
+          <div key={idx} className={styles.mfgRow} style={{ alignItems: 'center', marginBottom: 6 }}>
+            <div className={styles.mfg}>
+              <input className={styles.fieldInput} placeholder="Label (EN)" value={lnk.en} onChange={e => updateLink('portfolio_links', idx, 'en', e.target.value)} />
+            </div>
+            <div className={styles.mfg}>
+              <input className={styles.fieldInput} placeholder="العنوان (AR)" dir="rtl" value={lnk.ar} onChange={e => updateLink('portfolio_links', idx, 'ar', e.target.value)} />
+            </div>
+            <div className={styles.mfg}>
+              <input className={styles.fieldInput} placeholder="URL" value={lnk.url} onChange={e => updateLink('portfolio_links', idx, 'url', e.target.value)} />
+            </div>
+            <button onClick={() => removeLink('portfolio_links', idx)} style={{ background: 'none', border: 'none', color: '#E7432B', cursor: 'pointer', fontSize: 16, flexShrink: 0, padding: '0 8px' }}>✕</button>
+          </div>
+        ))}
+        <button onClick={() => addLink('portfolio_links')} style={{ background: 'none', border: '1px dashed #444', color: '#888', fontSize: 9, letterSpacing: 1, textTransform: 'uppercase', padding: '7px 16px', cursor: 'pointer', marginBottom: 16 }}>+ Add Portfolio Link</button>
+
+        <div style={{ marginTop: 8, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Social Links</div>
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Instagram URL</label>
+            <input className={styles.fieldInput} type="url" placeholder="https://instagram.com/topright" value={data.instagram_url ?? ''} onChange={e => set('instagram_url', e.target.value)} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>WhatsApp URL</label>
+            <input className={styles.fieldInput} type="url" placeholder="https://wa.me/97336622100" value={data.whatsapp_url ?? ''} onChange={e => set('whatsapp_url', e.target.value)} />
+          </div>
+        </div>
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>LinkedIn URL</label>
+            <input className={styles.fieldInput} type="url" placeholder="https://linkedin.com/company/topright" value={data.linkedin_url ?? ''} onChange={e => set('linkedin_url', e.target.value)} />
+          </div>
         </div>
       </div>
     </div>

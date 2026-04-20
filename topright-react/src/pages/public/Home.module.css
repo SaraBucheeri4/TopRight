@@ -222,6 +222,21 @@
 .pcardArrow { font-size: 10px; color: #444; margin-top: 14px; letter-spacing: 1px; text-transform: uppercase; font-weight: 700; transition: color .2s; }
 .pcard:hover .pcardArrow { color: #E7432B; }
 .portEmpty { padding: 60px 32px; color: #333; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; }
+.viewMoreWrap { display: flex; justify-content: center; padding: 36px 32px 0; }
+.viewMoreBtn {
+  background: transparent;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 13px 36px;
+  border: 1px solid #444;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.viewMoreBtn:hover { border-color: #E7432B; color: #E7432B; }
 
 /* ── SERVICES ── */
 .svcs {
@@ -294,7 +309,7 @@
   justify-content: center;
 }
 .whyL h2 {
-  font-size: 50px;
+  font-size: 64px;
   font-weight: 200;
   letter-spacing: 3px;
   color: #000;
@@ -310,9 +325,9 @@
   border-bottom: 1px solid rgba(0,0,0,.12);
 }
 .wi:last-child { border-bottom: none; }
-.wiN { font-size: 10px; font-weight: 900; color: rgba(0,0,0,.35); min-width: 24px; padding-top: 1px; }
-.wi strong { display: block; font-size: 12px; font-weight: 700; color: #000; margin-bottom: 3px; }
-.wi p { font-size: 10px; color: rgba(0,0,0,.55); line-height: 1.6; }
+.wiN { font-size: 12px; font-weight: 900; color: rgba(0,0,0,.35); min-width: 24px; padding-top: 1px; }
+.wi strong { display: block; font-size: 15px; font-weight: 700; color: #000; margin-bottom: 4px; }
+.wi p { font-size: 13px; color: rgba(0,0,0,.55); line-height: 1.65; }
 .whyR {
   background: #1E1E1E;
   padding: 72px 56px;
@@ -770,7 +785,7 @@
 
   .why { grid-template-columns: 1fr; }
   .whyL { padding: 48px 24px; }
-  .whyL h2 { font-size: 36px; }
+  .whyL h2 { font-size: 44px; }
   .whyR { padding: 48px 24px; }
   .whyBig { font-size: 100px; }
 
@@ -814,7 +829,7 @@
   .sv { padding: 24px 18px; }
 
   .whyL { padding: 36px 16px; }
-  .whyL h2 { font-size: 28px; }
+  .whyL h2 { font-size: 36px; }
   .whyR { padding: 36px 16px; }
   .whyBig { font-size: 76px; }
   .whyBox { padding: 20px 16px; }

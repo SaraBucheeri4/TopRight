@@ -3,7 +3,7 @@ import { useLang } from "../../LangContext";
 import styles from "./Navbar.module.css";
 
 const links = [
-  { to: "/#work", en: "Work", ar: "أعمالنا" },
+  { to: "/#work", en: "Portfolio", ar: "أعمالنا" },
   { to: "/#services", en: "Services", ar: "خدماتنا" },
   { to: "/#about", en: "About", ar: "من نحن" },
   { to: "/#coaching", en: "Coaching", ar: "التدريب" },
