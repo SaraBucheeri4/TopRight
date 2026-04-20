@@ -12,6 +12,23 @@ import { fetchPublishedTestimonials } from '../../services/testimonialsService'
 import { fetchHeroContent, getHeroCardImageUrl } from '../../services/heroService'
 import { fetchPublishedWhyItems } from '../../services/whyService'
 
+const CACHE_KEY = 'home_data_cache'
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
+function getCached() {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const { ts, data } = JSON.parse(raw)
+    if (Date.now() - ts > CACHE_TTL) { sessionStorage.removeItem(CACHE_KEY); return null }
+    return data
+  } catch { return null }
+}
+
+function setCache(data) {
+  try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })) } catch {}
+}
+
 const CAT_COLORS = {
   newsletter:   { bg: 'rgba(0,88,161,.15)',   color: '#5B9BD5' },
   hse:          { bg: 'rgba(1,166,166,.15)',  color: '#01A6A6' },
@@ -70,14 +87,28 @@ export default function Home() {
   const t = (obj) => isAr ? obj.ar : obj.en
 
   useEffect(() => {
-    fetchPublishedClients().then(setClients)
-    fetchContactInfo().then(setContactInfo)
-    fetchPublishedServices().then(setServices)
-    fetchPublishedTestimonials().then(setTestimonials)
-    fetchPublishedWhyItems().then(setWhyItems)
-    fetchHeroContent().then(data => { if (data) setHero(prev => ({ ...prev, ...data })) })
-    fetchPublishedPortfolioItems().then(data => {
-      setPortfolioCards(data.map(item => ({
+    const cached = getCached()
+    if (cached) {
+      setClients(cached.clients)
+      setContactInfo(cached.contactInfo)
+      setServices(cached.services)
+      setTestimonials(cached.testimonials)
+      setWhyItems(cached.whyItems)
+      if (cached.hero) setHero(prev => ({ ...prev, ...cached.hero }))
+      setPortfolioCards(cached.portfolioCards)
+      return
+    }
+
+    Promise.all([
+      fetchPublishedClients().catch(e => { console.error('clients:', e); return [] }),
+      fetchContactInfo().catch(e => { console.error('contactInfo:', e); return null }),
+      fetchPublishedServices().catch(e => { console.error('services:', e); return [] }),
+      fetchPublishedTestimonials().catch(e => { console.error('testimonials:', e); return [] }),
+      fetchPublishedWhyItems().catch(e => { console.error('whyItems:', e); return [] }),
+      fetchHeroContent().catch(e => { console.error('hero:', e); return null }),
+      fetchPublishedPortfolioItems().catch(e => { console.error('portfolio:', e); return [] }),
+    ]).then(([clients, contactInfo, services, testimonials, whyItems, hero, portfolioRaw]) => {
+      const portfolioCards = portfolioRaw.map(item => ({
         cat: item.category,
         img: item.image_url ? getPublicUrl(item.image_url) : null,
         video_url: item.video_url ?? null,
@@ -87,7 +118,17 @@ export default function Home() {
         year: item.year ?? null,
         project_url: item.project_url ?? null,
         image_position: item.image_position ?? 'center center',
-      })))
+      }))
+
+      setClients(clients)
+      setContactInfo(contactInfo)
+      setServices(services)
+      setTestimonials(testimonials)
+      setWhyItems(whyItems)
+      if (hero) setHero(prev => ({ ...prev, ...hero }))
+      setPortfolioCards(portfolioCards)
+
+      setCache({ clients, contactInfo, services, testimonials, whyItems, hero, portfolioCards })
     })
   }, [])
 
