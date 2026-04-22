@@ -61,9 +61,19 @@ const svgIcons = {
 
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
 
+function posToAspectRatio(pos) {
+  const [xStr, yStr] = (pos || '50% 50%').split(' ')
+  const x = parseInt(xStr) || 50
+  const y = parseInt(yStr) || 50
+  const xa = x < 34 ? 'xMin' : x > 66 ? 'xMax' : 'xMid'
+  const ya = y < 34 ? 'YMin' : y > 66 ? 'YMax' : 'YMid'
+  return `${xa}${ya} slice`
+}
+
 export default function Home() {
   const [activeTab, setActiveTab] = useState('All')
   const [visibleCount, setVisibleCount] = useState(4)
+  const [visibleTestimonials, setVisibleTestimonials] = useState(4)
   const [portfolioCards, setPortfolioCards] = useState([])
   const [clients, setClients] = useState([])
   const [services, setServices] = useState([])
@@ -145,7 +155,7 @@ export default function Home() {
       document.querySelectorAll('.js-reveal:not(.visible)').forEach(el => observer.observe(el))
     }, 20)
     return () => { clearTimeout(id); observer.disconnect() }
-  }, [portfolioCards, activeTab, visibleCount])
+  }, [portfolioCards, activeTab, visibleCount, visibleTestimonials])
 
   const filtered = portfolioCards.filter(c =>
     activeTab === 'All' || c.cat === activeTab.toLowerCase()
@@ -216,7 +226,7 @@ export default function Home() {
                   <text x="95" y="200" fontSize="15" fontWeight="900" fill="#FBEED6" textAnchor="middle" fontFamily="system-ui">{hero?.card1_line2 || 'Namool'}</text>
                   <text x="95" y="235" fontSize="8" fill="rgba(255,255,255,.5)" textAnchor="middle" fontFamily="system-ui" letterSpacing="1">{hero?.card1_label || 'BAPCO ENERGIES · HSE'}</text>
                 </>}
-                {hero?.card1_image && <image href={getHeroCardImageUrl(hero.card1_image)} x="0" y="0" width="190" height="250" preserveAspectRatio="xMidYMid slice" clipPath="url(#clip1)"/>}
+                {hero?.card1_image && <image href={getHeroCardImageUrl(hero.card1_image)} x="0" y="0" width="190" height="250" preserveAspectRatio={posToAspectRatio(hero.card1_image_position)} clipPath="url(#clip1)"/>}
                 <defs><clipPath id="clip1"><rect width="190" height="250" rx="6"/></clipPath></defs>
               </g>
             </g>
@@ -229,7 +239,7 @@ export default function Home() {
                   <text x="85" y="130" fontSize="26" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card2_line1 || 'خليجية'}</text>
                   <text x="85" y="205" fontSize="7" fill="rgba(255,255,255,.3)" textAnchor="middle" fontFamily="system-ui">{hero?.card2_label || 'GPIC · SINCE 2001'}</text>
                 </>}
-                {hero?.card2_image && <image href={getHeroCardImageUrl(hero.card2_image)} x="0" y="0" width="170" height="220" preserveAspectRatio="xMidYMid slice" clipPath="url(#clip2)"/>}
+                {hero?.card2_image && <image href={getHeroCardImageUrl(hero.card2_image)} x="0" y="0" width="170" height="220" preserveAspectRatio={posToAspectRatio(hero.card2_image_position)} clipPath="url(#clip2)"/>}
                 <defs><clipPath id="clip2"><rect width="170" height="220" rx="5"/></clipPath></defs>
               </g>
             </g>
@@ -244,7 +254,7 @@ export default function Home() {
                   <text x="80" y="145" fontSize="13" fontWeight="900" fill="#F9DFB7" textAnchor="middle" fontFamily="system-ui">{hero?.card3_line1 || 'تطير بلا ريش'}</text>
                   <text x="80" y="163" fontSize="8" fill="rgba(249,223,183,.5)" textAnchor="middle" fontFamily="system-ui">{hero?.card3_line2 || 'Flies Without Wings'}</text>
                 </>}
-                {hero?.card3_image && <image href={getHeroCardImageUrl(hero.card3_image)} x="0" y="0" width="160" height="210" preserveAspectRatio="xMidYMid slice" clipPath="url(#clip3)"/>}
+                {hero?.card3_image && <image href={getHeroCardImageUrl(hero.card3_image)} x="0" y="0" width="160" height="210" preserveAspectRatio={posToAspectRatio(hero.card3_image_position)} clipPath="url(#clip3)"/>}
                 <defs><clipPath id="clip3"><rect width="160" height="210" rx="5"/></clipPath></defs>
               </g>
             </g>
@@ -259,21 +269,9 @@ export default function Home() {
                   <text x="77" y="76" fontSize="9" fontWeight="900" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card4_label || 'SDG'}</text>
                   <text x="77" y="140" fontSize="11" fontWeight="700" fill="#fff" textAnchor="middle" fontFamily="system-ui">{hero?.card4_line1 || 'SDG Booklets'}</text>
                 </>}
-                {hero?.card4_image && <image href={getHeroCardImageUrl(hero.card4_image)} x="0" y="0" width="155" height="200" preserveAspectRatio="xMidYMid slice" clipPath="url(#clip4)"/>}
+                {hero?.card4_image && <image href={getHeroCardImageUrl(hero.card4_image)} x="0" y="0" width="155" height="200" preserveAspectRatio={posToAspectRatio(hero.card4_image_position)} clipPath="url(#clip4)"/>}
                 <defs><clipPath id="clip4"><rect width="155" height="200" rx="5"/></clipPath></defs>
               </g>
-            </g>
-            {/* Al Basta banner */}
-            <g transform="translate(50,600)">
-              <rect width="420" height="80" rx="4" fill={`${hero?.basta_color || '#E7432B'}22`}/>
-              {hero?.basta_image
-                ? <image href={getHeroCardImageUrl(hero.basta_image)} x="50" y="600" width="420" height="80" preserveAspectRatio="xMidYMid slice" clipPath="url(#clipBasta)"/>
-                : <>
-                    <text x="210" y="28" fontSize="18" fontWeight="900" fill={hero?.basta_color || '#E7432B'} textAnchor="middle" fontFamily="system-ui">{hero?.basta_title || 'البسطة'}</text>
-                    <text x="210" y="47" fontSize="8" fill={`${hero?.basta_color || '#E7432B'}80`} textAnchor="middle" fontFamily="system-ui" letterSpacing="3">{hero?.basta_label || 'AL BASTA · BAHRAIN TV'}</text>
-                  </>
-              }
-              <defs><clipPath id="clipBasta"><rect x="50" y="600" width="420" height="80" rx="4"/></clipPath></defs>
             </g>
           </svg>
         </div>
@@ -321,9 +319,6 @@ export default function Home() {
                     return <span className={styles.pcardBadge} style={{ background: cl.bg, color: cl.color }}>{c.cat}</span>
                   })()}
                   {c.year && <span className={styles.pcardYear}>{c.year}</span>}
-                  <span style={{ marginLeft: 'auto', fontSize: 8, letterSpacing: 1, textTransform: 'uppercase', color: (c.video_url || c.project_url) ? '#01A6A6' : '#555' }}>
-                    {(c.video_url || c.project_url) ? (isAr ? '● متاح' : '● Accessible') : (isAr ? '○ غير متاح' : '○ No link')}
-                  </span>
                 </div>
                 <div className={styles.pcardTtl}>{isAr ? c.title_ar || c.title_en : c.title_en}</div>
                 <div className={styles.pcardSub}>{t(c.sub)}</div>
@@ -390,8 +385,7 @@ export default function Home() {
           <div className={styles.whyLbl}>{isAr ? 'عامًا في البحرين' : 'Years in Bahrain'}</div>
           <div className={styles.whyBox}>
             <div style={{ fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(255,255,255,.5)', marginBottom: 10 }}>{isAr ? '/ قصتنا' : '/ Our Story'}</div>
-            <p>{isAr ? 'تأسست توب رايت في البحرين عام ٢٠٠١، وقضت أكثر من عقدين في رواية قصص الخليج من خلال التصميم. من كتب الأطفال إلى المطبوعات المؤسسية، نحوّل الأفكار إلى واقع — بالعربية والإنجليزية.' : 'Founded in Bahrain in 2001, Top Right has spent over two decades telling the Gulf\'s stories through design. From children\'s books to corporate publications, we bring ideas to life — in Arabic and English.'}</p>
-            <button onClick={() => scrollTo('contact')}>{isAr ? 'تواصل معنا ←' : 'Get in touch →'}</button>
+            <p>{isAr ? (hero?.story_ar || 'تأسست توب رايت في البحرين عام ٢٠٠١، وقضت أكثر من عقدين في رواية قصص الخليج من خلال التصميم. من كتب الأطفال إلى المطبوعات المؤسسية، نحوّل الأفكار إلى واقع — بالعربية والإنجليزية.') : (hero?.story_en || 'Founded in Bahrain in 2001, Top Right has spent over two decades telling the Gulf\'s stories through design. From children\'s books to corporate publications, we bring ideas to life — in Arabic and English.')}</p>
           </div>
         </div>
       </section>
@@ -444,7 +438,7 @@ export default function Home() {
         <span className="sec-lbl">{isAr ? 'أصوات عملائنا' : 'Client voices'}</span>
         <h2 className="sec-ttl" style={{ color: '#000' }}>{isAr ? 'ماذا يقول عملاؤنا' : 'What our clients say'}</h2>
         <div className={styles.tg}>
-          {testimonials.map((testimonial, i) => (
+          {testimonials.slice(0, visibleTestimonials).map((testimonial, i) => (
             <div key={testimonial.id} className={`${styles.tc} js-reveal`} style={{ transitionDelay: `${i * 100}ms` }}>
               <span className={styles.tcQ}>"</span>
               <p className={styles.tcTxt}>{isAr ? testimonial.quote_ar : testimonial.quote_en}</p>
@@ -460,6 +454,13 @@ export default function Home() {
             </div>
           ))}
         </div>
+        {testimonials.length > visibleTestimonials && (
+          <div className={styles.viewMoreWrap}>
+            <button className={styles.viewMoreBtn} onClick={() => setVisibleTestimonials(n => n + 4)}>
+              {isAr ? 'عرض المزيد ↓' : 'View more ↓'}
+            </button>
+          </div>
+        )}
       </section>
 
       {/* CONTACT */}
@@ -547,7 +548,7 @@ export default function Home() {
                 {submitting ? (isAr ? 'جارٍ الإرسال…' : 'Sending…') : (isAr ? 'إرسال الرسالة ←' : 'Send message →')}
               </button>
             </div>
-            {sent && <div className={styles.formSuccess}>{isAr ? 'شكرًا — سنردّ عليك خلال ٢٤ ساعة.' : 'Thank you — we will get back to you within 24 hours.'}</div>}
+            {sent && <div className={styles.formSuccess}>{isAr ? 'شكرًا — سنتواصل معك قريبًا.' : 'Thank you — we will be in touch soon.'}</div>}
           </form>
         </div>
       </section>
