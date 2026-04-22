@@ -1542,7 +1542,11 @@ function HeroEditor({ showToast }) {
     card2_line1: 'خليجية', card2_label: 'GPIC · SINCE 2001', card2_color: '#0058A1',
     card3_line1: 'تطير بلا ريش', card3_line2: 'Flies Without Wings', card3_color: '#773E84',
     card4_line1: 'SDG Booklets', card4_label: 'SDG', card4_color: '#00AEA2',
+    card1_image_position: '50% 50%', card2_image_position: '50% 50%', card3_image_position: '50% 50%', card4_image_position: '50% 50%',
+    basta_image_position: '50% 50%',
     basta_title: 'البسطة', basta_label: 'AL BASTA · BAHRAIN TV', basta_color: '#E7432B',
+    story_en: "Founded in Bahrain in 2001, Top Right has spent over two decades telling the Gulf's stories through design. From children's books to corporate publications, we bring ideas to life — in Arabic and English.",
+    story_ar: 'تأسست توب رايت في البحرين عام ٢٠٠١، وقضت أكثر من عقدين في رواية قصص الخليج من خلال التصميم. من كتب الأطفال إلى المطبوعات المؤسسية، نحوّل الأفكار إلى واقع — بالعربية والإنجليزية.',
   }
 
   const [hero, setHero] = useState(null)
@@ -1680,114 +1684,111 @@ function HeroEditor({ showToast }) {
           </div>
         ))}
 
+        <div style={{ marginTop: 24, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Our Story (Why section)</div>
+        <div className={styles.mfgRow}>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Story Text (EN)</label>
+            <textarea className={styles.fieldInput} rows={4} value={hero.story_en ?? ''} onChange={e => set('story_en', e.target.value)} style={{ resize: 'vertical' }} />
+          </div>
+          <div className={styles.mfg}>
+            <label className={styles.fieldLabel}>Story Text (AR)</label>
+            <textarea className={styles.fieldInput} rows={4} dir="rtl" value={hero.story_ar ?? ''} onChange={e => set('story_ar', e.target.value)} style={{ resize: 'vertical' }} />
+          </div>
+        </div>
+
         <div style={{ marginTop: 24, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Book Cards (hero right panel)</div>
 
         {[
-          { n: 1, lines: ['line1', 'line2'], hasLabel: true },
-          { n: 2, lines: ['line1'], hasLabel: true },
-          { n: 3, lines: ['line1', 'line2'], hasLabel: false },
-          { n: 4, lines: ['line1'], hasLabel: true },
-        ].map(({ n, lines, hasLabel }) => (
+          { n: 1, lines: ['line1', 'line2'], hasLabel: true,  pw: 114, ph: 150 },
+          { n: 2, lines: ['line1'], hasLabel: true,           pw: 102, ph: 132 },
+          { n: 3, lines: ['line1', 'line2'], hasLabel: false, pw: 96,  ph: 126 },
+          { n: 4, lines: ['line1'], hasLabel: true,           pw: 93,  ph: 120 },
+        ].map(({ n, lines, hasLabel, pw, ph }) => (
           <div key={n} style={{ border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, padding: '14px 16px', marginBottom: 10 }}>
             <div style={{ fontSize: 10, letterSpacing: 1, color: '#888', marginBottom: 12 }}>Card {n}</div>
 
             {/* Image upload row */}
-            <div className={styles.mfgRow} style={{ alignItems: 'flex-start', marginBottom: 12 }}>
-              <div style={{ flexShrink: 0 }}>
-                <label className={styles.fieldLabel}>Cover Image (optional)</label>
+            <div className={styles.mfg} style={{ marginBottom: 12 }}>
+              <label className={styles.fieldLabel}>Cover Image (optional)</label>
+              <div className={styles.uploadWithPreview}>
                 <div
-                  style={{ width: 80, height: 100, borderRadius: 6, background: hero[`card${n}_color`] || '#333', border: '2px dashed rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', fontSize: 10, color: 'rgba(255,255,255,.5)', textAlign: 'center', lineHeight: 1.3 }}
-                  onClick={() => cardFileRefs[n].current?.click()}
+                  className={styles.uploadArea}
+                  onClick={() => !cardUploading[n] && cardFileRefs[n].current?.click()}
                 >
-                  {cardPreviews[n]
-                    ? <img src={cardPreviews[n]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : cardUploading[n] ? '…' : '+ Image'
-                  }
+                  <span style={{ fontSize: 24, opacity: 0.3 }}>↑</span>
+                  <span className={styles.uploadAreaText}>
+                    {cardUploading[n] ? 'Uploading…' : cardPreviews[n] ? 'Click to replace' : 'Click to upload image'}
+                  </span>
+                  <span className={styles.uploadAreaHint}>JPG, PNG, WEBP</span>
                 </div>
-                {cardPreviews[n] && (
-                  <button
-                    style={{ marginTop: 4, fontSize: 9, color: '#E7432B', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                    onClick={() => { setCardPreviews(p => ({ ...p, [n]: null })); setHero(prev => ({ ...prev, [`card${n}_image`]: null })) }}
-                  >Remove</button>
-                )}
-                <input ref={cardFileRefs[n]} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleCardImageUpload(n, e.target.files[0])} />
-              </div>
-
-              <div style={{ flex: 1 }}>
-                <div className={styles.mfgRow}>
-                  {lines.map(l => (
-                    <div key={l} className={styles.mfg}>
-                      <label className={styles.fieldLabel}>{l === 'line1' ? 'Title' : 'Subtitle'}</label>
-                      <input className={styles.fieldInput} dir={n === 2 && l === 'line1' ? 'rtl' : 'ltr'} value={hero[`card${n}_${l}`] ?? ''} onChange={e => set(`card${n}_${l}`, e.target.value)} />
-                    </div>
-                  ))}
-                  {hasLabel && (
-                    <div className={styles.mfg}>
-                      <label className={styles.fieldLabel}>Small Label</label>
-                      <input className={styles.fieldInput} value={hero[`card${n}_label`] ?? ''} onChange={e => set(`card${n}_label`, e.target.value)} />
-                    </div>
-                  )}
-                </div>
-                <div className={styles.mfgRow}>
-                  <div className={styles.mfg} style={{ maxWidth: 140 }}>
-                    <label className={styles.fieldLabel}>Card Color</label>
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      <input type="color" value={hero[`card${n}_color`] ?? '#01A6A6'} onChange={e => set(`card${n}_color`, e.target.value)} style={{ width: 36, height: 32, border: 'none', background: 'none', cursor: 'pointer' }} />
-                      <input className={styles.fieldInput} value={hero[`card${n}_color`] ?? ''} onChange={e => set(`card${n}_color`, e.target.value)} style={{ flex: 1 }} />
+                <div className={styles.cardPreviewWrap}>
+                  <div className={styles.cardPreviewLabel}>Card preview</div>
+                  <div className={styles.cardPreview}>
+                    <div className={styles.cardPreviewThumb} style={{ background: hero[`card${n}_color`] || '#333', width: pw, height: ph }}>
+                      {cardPreviews[n]
+                        ? <img src={cardPreviews[n]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: hero[`card${n}_image_position`] || '50% 50%' }} />
+                        : <div className={styles.cardPreviewEmpty}>No image</div>
+                      }
                     </div>
                   </div>
+                  {cardPreviews[n] && (
+                    <div className={styles.cropSliders}>
+                      <CropSlider
+                        label="← Horizontal →"
+                        value={parseInt((hero[`card${n}_image_position`] || '50% 50%').split(' ')[0]) || 50}
+                        onChange={v => {
+                          const py = parseInt((hero[`card${n}_image_position`] || '50% 50%').split(' ')[1]) || 50
+                          set(`card${n}_image_position`, `${v}% ${py}%`)
+                        }}
+                        styles={styles}
+                      />
+                      <CropSlider
+                        label="↑ Vertical ↓"
+                        value={parseInt((hero[`card${n}_image_position`] || '50% 50%').split(' ')[1]) || 50}
+                        onChange={v => {
+                          const px = parseInt((hero[`card${n}_image_position`] || '50% 50%').split(' ')[0]) || 50
+                          set(`card${n}_image_position`, `${px}% ${v}%`)
+                        }}
+                        styles={styles}
+                      />
+                    </div>
+                  )}
+                  {cardPreviews[n] && (
+                    <button
+                      style={{ marginTop: 6, fontSize: 10, color: '#E7432B', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                      onClick={() => { setCardPreviews(p => ({ ...p, [n]: null })); setHero(prev => ({ ...prev, [`card${n}_image`]: null, [`card${n}_image_position`]: '50% 50%' })) }}
+                    >Remove image</button>
+                  )}
+                </div>
+              </div>
+              <input ref={cardFileRefs[n]} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleCardImageUpload(n, e.target.files[0])} />
+            </div>
+
+            <div className={styles.mfgRow}>
+              {lines.map(l => (
+                <div key={l} className={styles.mfg}>
+                  <label className={styles.fieldLabel}>{l === 'line1' ? 'Title' : 'Subtitle'}</label>
+                  <input className={styles.fieldInput} dir={n === 2 && l === 'line1' ? 'rtl' : 'ltr'} value={hero[`card${n}_${l}`] ?? ''} onChange={e => set(`card${n}_${l}`, e.target.value)} />
+                </div>
+              ))}
+              {hasLabel && (
+                <div className={styles.mfg}>
+                  <label className={styles.fieldLabel}>Small Label</label>
+                  <input className={styles.fieldInput} value={hero[`card${n}_label`] ?? ''} onChange={e => set(`card${n}_label`, e.target.value)} />
+                </div>
+              )}
+            </div>
+            <div className={styles.mfgRow}>
+              <div className={styles.mfg} style={{ maxWidth: 140 }}>
+                <label className={styles.fieldLabel}>Card Color</label>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <input type="color" value={hero[`card${n}_color`] ?? '#01A6A6'} onChange={e => set(`card${n}_color`, e.target.value)} style={{ width: 36, height: 32, border: 'none', background: 'none', cursor: 'pointer' }} />
+                  <input className={styles.fieldInput} value={hero[`card${n}_color`] ?? ''} onChange={e => set(`card${n}_color`, e.target.value)} style={{ flex: 1 }} />
                 </div>
               </div>
             </div>
           </div>
         ))}
-
-        <div style={{ marginTop: 24, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Al Basta Banner (hero bottom)</div>
-        <div style={{ border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, padding: '14px 16px', marginBottom: 10 }}>
-          <div style={{ fontSize: 10, letterSpacing: 1, color: '#888', marginBottom: 12 }}>البسطة Card</div>
-          <div className={styles.mfgRow} style={{ alignItems: 'flex-start', marginBottom: 12 }}>
-            <div style={{ flexShrink: 0 }}>
-              <label className={styles.fieldLabel}>Cover Image (optional)</label>
-              <div
-                style={{ width: 120, height: 70, borderRadius: 6, background: hero.basta_color || '#E7432B', border: '2px dashed rgba(255,255,255,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', fontSize: 10, color: 'rgba(255,255,255,.5)', textAlign: 'center', lineHeight: 1.3 }}
-                onClick={() => cardFileRefs['basta'].current?.click()}
-              >
-                {cardPreviews['basta']
-                  ? <img src={cardPreviews['basta']} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : cardUploading['basta'] ? '…' : '+ Image'
-                }
-              </div>
-              {cardPreviews['basta'] && (
-                <button
-                  style={{ marginTop: 4, fontSize: 9, color: '#E7432B', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                  onClick={() => { setCardPreviews(p => ({ ...p, basta: null })); setHero(prev => ({ ...prev, basta_image: null })) }}
-                >Remove</button>
-              )}
-              <input ref={cardFileRefs['basta']} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => handleCardImageUpload('basta', e.target.files[0])} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div className={styles.mfgRow}>
-                <div className={styles.mfg}>
-                  <label className={styles.fieldLabel}>Title (Arabic)</label>
-                  <input className={styles.fieldInput} dir="rtl" value={hero.basta_title ?? 'البسطة'} onChange={e => set('basta_title', e.target.value)} />
-                </div>
-                <div className={styles.mfg}>
-                  <label className={styles.fieldLabel}>Label / Subtitle</label>
-                  <input className={styles.fieldInput} value={hero.basta_label ?? 'AL BASTA · BAHRAIN TV'} onChange={e => set('basta_label', e.target.value)} />
-                </div>
-              </div>
-              <div className={styles.mfgRow}>
-                <div className={styles.mfg} style={{ maxWidth: 180 }}>
-                  <label className={styles.fieldLabel}>Card Color</label>
-                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                    <input type="color" value={hero.basta_color ?? '#E7432B'} onChange={e => set('basta_color', e.target.value)} style={{ width: 36, height: 32, border: 'none', background: 'none', cursor: 'pointer' }} />
-                    <input className={styles.fieldInput} value={hero.basta_color ?? '#E7432B'} onChange={e => set('basta_color', e.target.value)} style={{ flex: 1 }} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {saveError && <p style={{ color: '#E7432B', fontSize: 11, marginTop: 8 }}>{saveError}</p>}
       </div>
@@ -2385,6 +2386,7 @@ function TestimonialsManager({ showToast }) {
         await updateTestimonial(id, rest)
         showToast?.('Testimonial updated', 'Changes saved successfully.')
       }
+      try { sessionStorage.removeItem('home_data_cache') } catch {}
       closeEdit()
       load()
     } catch (err) {
@@ -2399,6 +2401,7 @@ function TestimonialsManager({ showToast }) {
     try {
       await deleteTestimonial(item.id)
       showToast?.('Testimonial removed', 'Quote has been deleted.')
+      try { sessionStorage.removeItem('home_data_cache') } catch {}
       setDeleteConfirm(null)
       load()
     } catch (err) {
