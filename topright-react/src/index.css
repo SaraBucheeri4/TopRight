@@ -112,11 +112,15 @@ img { display: block; }
 /* RESPONSIVE BASE */
 @media (max-width: 768px) {
   .sec-ttl { font-size: 32px; }
+  .page-hero { padding: 80px 20px 48px; }
   .page-hero h1 { font-size: 44px; }
+  .page-hero p { font-size: 13px; }
 }
 @media (max-width: 480px) {
   .sec-ttl { font-size: 26px; }
-  .page-hero h1 { font-size: 32px; }
+  .page-hero { padding: 64px 16px 36px; }
+  .page-hero h1 { font-size: 32px; letter-spacing: 2px; }
+  .page-hero p { font-size: 12px; }
 }
 
 /* PLACEHOLDER BOX */

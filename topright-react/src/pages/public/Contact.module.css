@@ -138,3 +138,20 @@ a.infoVal:hover { color: #E7432B; }
   letter-spacing: 2px;
   text-transform: uppercase;
 }
+
+@media (max-width: 768px) {
+  .contact { grid-template-columns: 1fr; min-height: auto; }
+  .infoPanel { padding: 48px 24px; }
+  .infoPanel h2 { font-size: 36px; margin-bottom: 24px; }
+  .formPanel { padding: 48px 24px; }
+  .row { grid-template-columns: 1fr; gap: 0; }
+  .mapPlaceholder { height: 220px; }
+}
+
+@media (max-width: 480px) {
+  .infoPanel { padding: 36px 16px; }
+  .infoPanel h2 { font-size: 28px; }
+  .formPanel { padding: 36px 16px; }
+  .formBtns { flex-direction: column; }
+  .waBtn { justify-content: center; }
+}

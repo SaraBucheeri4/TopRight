@@ -114,12 +114,12 @@ export default function Login() {
               </button>
             </form>
 
-            <div className={styles.loginDivider}><span>Secured</span></div>
+            {/* <div className={styles.loginDivider}><span>Secured</span></div> */}
 
-            <div className={styles.securityNote}>
+            {/* <div className={styles.securityNote}>
               <div className={styles.secDot} />
               <span>Sessions expire after 2 hours of inactivity for security.</span>
-            </div>
+            </div> */}
 
           </div>
 

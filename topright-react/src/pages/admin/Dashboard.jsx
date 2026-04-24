@@ -3122,7 +3122,7 @@ export default function Dashboard() {
         </div>
         <div className={styles.headerR}>
           <a href="/" target="_blank" rel="noopener" className={styles.viewSiteBtn}>↗ View Site</a>
-          <div className={styles.adminAvatar}>A</div>
+          {/* <div className={styles.adminAvatar}>A</div> */}
           <button className={styles.logoutBtn} onClick={handleLogout}>Sign Out</button>
         </div>
       </header>

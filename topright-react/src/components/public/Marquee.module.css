@@ -33,3 +33,12 @@
   background: rgba(255,255,255,.35);
   flex-shrink: 0;
 }
+
+@media (max-width: 768px) {
+  .marquee { padding: 12px 0; }
+  .item { font-size: 8px; gap: 14px; padding: 0 14px; }
+}
+
+@media (max-width: 480px) {
+  .item { font-size: 7.5px; gap: 10px; padding: 0 10px; letter-spacing: 1.5px; }
+}

@@ -96,3 +96,23 @@
 }
 .step strong { font-size: 13px; color: #fff; font-weight: 700; }
 .step p { font-size: 11px; color: #666; line-height: 1.65; }
+
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+  .steps { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .grid { grid-template-columns: 1fr; padding: 1px; }
+  .card { padding: 28px 24px; }
+  .process { padding: 48px 20px; }
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .step { padding: 24px 20px; }
+}
+
+@media (max-width: 480px) {
+  .card { padding: 24px 18px; }
+  .process { padding: 36px 14px; }
+  .steps { grid-template-columns: 1fr; }
+  .n { font-size: 40px; }
+}

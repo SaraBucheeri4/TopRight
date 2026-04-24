@@ -128,3 +128,31 @@
   transition: background 0.2s;
 }
 .ctaBtn:hover { background: #c93520; }
+
+@media (max-width: 768px) {
+  .stats { padding: 24px 16px; gap: 0; }
+  .stat { padding: 0 20px; }
+  .statDiv { height: 28px; }
+
+  .programmes { padding: 48px 20px; }
+  .grid { grid-template-columns: 1fr; }
+
+  .who { grid-template-columns: 1fr; min-height: auto; }
+  .whoL { padding: 48px 24px; }
+  .whoR { padding: 48px 24px; }
+  .whoBig { font-size: 64px; }
+
+  .cta { padding: 48px 20px; }
+  .cta h2 { font-size: 32px; letter-spacing: 2px; }
+}
+
+@media (max-width: 480px) {
+  .stats { flex-wrap: wrap; justify-content: flex-start; }
+  .stat { padding: 10px 16px; flex: 1 1 40%; }
+  .statDiv { display: none; }
+  .programmes { padding: 36px 14px; }
+  .whoL { padding: 36px 16px; }
+  .whoR { padding: 36px 16px; }
+  .whoBig { font-size: 48px; }
+  .cta h2 { font-size: 26px; }
+}

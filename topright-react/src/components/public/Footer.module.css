@@ -67,3 +67,24 @@
 .sb:hover { border-color: #E7432B; color: #E7432B; }
 .wa { background: #25D366; border-color: #25D366; color: #fff !important; }
 .wa:hover { border-color: #1da851 !important; background: #1da851; }
+
+@media (max-width: 768px) {
+  .footer { padding: 40px 20px 20px; }
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+  }
+  .bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer { padding: 32px 16px 16px; }
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
