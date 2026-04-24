@@ -36,7 +36,7 @@ img { display: block; }
 
 /* SECTION LABEL */
 .sec-lbl {
-  font-size: 9px;
+  font-size: 11px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--red);
@@ -92,8 +92,8 @@ img { display: block; }
   margin-bottom: 18px;
 }
 .page-hero p {
-  font-size: 13px;
-  color: #555;
+  font-size: 14px;
+  color: #888;
   line-height: 1.75;
   max-width: 520px;
 }

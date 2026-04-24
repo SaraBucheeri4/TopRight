@@ -1699,11 +1699,11 @@ function HeroEditor({ showToast }) {
         <div style={{ marginTop: 24, marginBottom: 8, fontSize: 8, letterSpacing: 2, textTransform: 'uppercase', color: '#666' }}>Book Cards (hero right panel)</div>
 
         {[
-          { n: 1, lines: ['line1', 'line2'], hasLabel: true,  pw: 114, ph: 150 },
-          { n: 2, lines: ['line1'], hasLabel: true,           pw: 102, ph: 132 },
-          { n: 3, lines: ['line1', 'line2'], hasLabel: false, pw: 96,  ph: 126 },
-          { n: 4, lines: ['line1'], hasLabel: true,           pw: 93,  ph: 120 },
-        ].map(({ n, lines, hasLabel, pw, ph }) => (
+          { n: 1, lines: ['line1', 'line2'], hasLabel: true,  pw: 114, ph: 150, rotate: -5 },
+          { n: 2, lines: ['line1'], hasLabel: true,           pw: 102, ph: 132, rotate:  4 },
+          { n: 3, lines: ['line1', 'line2'], hasLabel: false, pw: 96,  ph: 126, rotate: -3 },
+          { n: 4, lines: ['line1'], hasLabel: true,           pw: 93,  ph: 120, rotate:  6 },
+        ].map(({ n, lines, hasLabel, pw, ph, rotate }) => (
           <div key={n} style={{ border: '1px solid rgba(255,255,255,.08)', borderRadius: 8, padding: '14px 16px', marginBottom: 10 }}>
             <div style={{ fontSize: 10, letterSpacing: 1, color: '#888', marginBottom: 12 }}>Card {n}</div>
 
@@ -1724,7 +1724,7 @@ function HeroEditor({ showToast }) {
                 <div className={styles.cardPreviewWrap}>
                   <div className={styles.cardPreviewLabel}>Card preview</div>
                   <div className={styles.cardPreview}>
-                    <div className={styles.cardPreviewThumb} style={{ background: hero[`card${n}_color`] || '#333', width: pw, height: ph }}>
+                    <div className={styles.cardPreviewThumb} style={{ background: hero[`card${n}_color`] || '#333', width: pw, height: ph, transform: `rotate(${rotate}deg)` }}>
                       {cardPreviews[n]
                         ? <img src={cardPreviews[n]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: hero[`card${n}_image_position`] || '50% 50%' }} />
                         : <div className={styles.cardPreviewEmpty}>No image</div>

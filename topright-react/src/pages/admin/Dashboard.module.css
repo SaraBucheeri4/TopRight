@@ -1267,7 +1267,8 @@
   display: flex;
   background: #262626;
   border: 1px solid #333;
-  overflow: hidden;
+  overflow: visible;
+  padding: 14px;
 }
 
 .cardPreviewThumb {

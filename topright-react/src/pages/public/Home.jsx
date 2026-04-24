@@ -11,6 +11,7 @@ import { fetchPublishedServices } from '../../services/servicesService'
 import { fetchPublishedTestimonials } from '../../services/testimonialsService'
 import { fetchHeroContent, getHeroCardImageUrl } from '../../services/heroService'
 import { fetchPublishedWhyItems } from '../../services/whyService'
+import { fetchCalendarEvents } from '../../services/calendarService'
 
 const CACHE_KEY = 'home_data_cache'
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
@@ -60,6 +61,99 @@ const svgIcons = {
 }
 
 const scrollTo = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December']
+const DAY_LABELS = ['S','M','T','W','T','F','S']
+
+function CoachingCalendar() {
+  const now = new Date()
+  const [year, setYear] = useState(now.getFullYear())
+  const [month, setMonth] = useState(now.getMonth() + 1)
+  const [events, setEvents] = useState([])
+  const [selected, setSelected] = useState(null)
+
+  useEffect(() => {
+    fetchCalendarEvents(year, month).then(setEvents).catch(() => {})
+  }, [year, month])
+
+  function prev() {
+    if (month === 1) { setYear(y => y - 1); setMonth(12) }
+    else setMonth(m => m - 1)
+  }
+  function next() {
+    if (month === 12) { setYear(y => y + 1); setMonth(1) }
+    else setMonth(m => m + 1)
+  }
+
+  const firstDay = new Date(year, month - 1, 1).getDay()
+  const daysInMonth = new Date(year, month, 0).getDate()
+  const todayStr = now.toISOString().split('T')[0]
+
+  const byDate = {}
+  events.forEach(ev => {
+    if (!byDate[ev.event_date]) byDate[ev.event_date] = []
+    byDate[ev.event_date].push(ev)
+  })
+
+  const cells = []
+  for (let i = 0; i < firstDay; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+  const selDateStr = selected
+    ? `${year}-${String(month).padStart(2,'0')}-${String(selected).padStart(2,'0')}`
+    : null
+  const selEvents = selDateStr ? (byDate[selDateStr] ?? []) : []
+
+  return (
+    <div className={styles.pubCal}>
+      <div className={styles.pubCalNav}>
+        <button className={styles.pubCalNavBtn} onClick={prev}>‹</button>
+        <span className={styles.pubCalMonth}>{MONTH_NAMES[month - 1]} {year}</span>
+        <button className={styles.pubCalNavBtn} onClick={next}>›</button>
+      </div>
+      <div className={styles.pubCalGrid}>
+        {DAY_LABELS.map((d, i) => <div key={i} className={styles.pubCalDayLbl}>{d}</div>)}
+        {cells.map((day, i) => {
+          if (!day) return <div key={`e-${i}`} />
+          const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+          const dayEvs = byDate[dateStr] ?? []
+          const isToday = dateStr === todayStr
+          const isSel = selected === day
+          return (
+            <div
+              key={dateStr}
+              className={`${styles.pubCalCell} ${isToday ? styles.pubCalToday : ''} ${isSel ? styles.pubCalSel : ''}`}
+              onClick={() => setSelected(isSel ? null : day)}
+            >
+              <span className={styles.pubCalDayNum}>{day}</span>
+              {dayEvs.length > 0 && (
+                <span className={styles.pubCalDot} style={{ background: dayEvs[0].color ?? '#E7432B' }} />
+              )}
+            </div>
+          )
+        })}
+      </div>
+      {selEvents.length > 0 && (
+        <div className={styles.pubCalEvents}>
+          {selEvents.map(ev => (
+            <div key={ev.id} className={styles.pubCalEvent}>
+              <span className={styles.pubCalEventDot} style={{ background: ev.color ?? '#E7432B' }} />
+              <div>
+                <div className={styles.pubCalEventTitle}>{ev.title}</div>
+                {(ev.start_time || ev.description) && (
+                  <div className={styles.pubCalEventMeta}>
+                    {ev.start_time && <span>{ev.start_time.slice(0,5)}{ev.end_time ? ` – ${ev.end_time.slice(0,5)}` : ''}</span>}
+                    {ev.description && <span>{ev.description}</span>}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function posToAspectRatio(pos) {
   const [xStr, yStr] = (pos || '50% 50%').split(' ')
@@ -399,10 +493,7 @@ export default function Home() {
           <button className={styles.btnWht} onClick={() => scrollTo('contact')}>{isAr ? 'استفسر عن الجلسات' : 'Enquire about sessions'}</button>
         </div>
         <div className={styles.coaR}>
-          <div className={styles.coaRing} style={{ width: 280, height: 280 }} />
-          <div className={styles.coaRing} style={{ width: 180, height: 180 }} />
-          <div className={styles.coaBig}>20+</div>
-          <div className={styles.coaLbl2}>{isAr ? <>عامًا من التدريب<br />وورش العمل الإبداعية</> : <>Years of coaching<br />&amp; creative workshops</>}</div>
+          <CoachingCalendar />
         </div>
       </section>
 
