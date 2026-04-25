@@ -2767,7 +2767,7 @@ function ContactInfoEditor({ showToast }) {
           <textarea
             className={styles.fieldInput}
             rows={3}
-            placeholder="Tell us about your project and we will get back to you within 24 hours…"
+            placeholder="Tell us about your project and we will get back…"
             value={info.description_en ?? ''}
             onChange={e => set('description_en', e.target.value)}
           />

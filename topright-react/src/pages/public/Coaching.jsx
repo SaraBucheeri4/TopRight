@@ -73,7 +73,7 @@ export default function Coaching() {
         <div className="page-hero-inner">
           <span className="sec-lbl">{isAr ? 'التعليم الإبداعي' : 'Creative education'}</span>
           <h1>{isAr ? <>التدريب<br />وورش العمل</> : <>Coaching &amp;<br />Workshops</>}</h1>
-          <p>{isAr ? 'تمكين الكتّاب والمربين والمهنيين من خلال التدريب الإبداعي وورش السرد القصصي وجلسات تطوير العلامة التجارية — في البحرين وعبر الإنترنت.' : 'Empowering writers, educators and professionals through creative coaching, storytelling workshops and brand development sessions — in Bahrain and online.'}</p>
+          <p>{isAr ? 'تمكين الكتّاب والمربين والمهنيين من خلال التدريب الإبداعي وورش السرد القصصي وجلسات تطوير العلامة التجارية — في البحرين وعبر الإنترنت.' : 'Empowering writers, educators and professionals through creative coaching, storytelling workshops and brand development sessions.'}</p>
         </div>
       </section>
 
