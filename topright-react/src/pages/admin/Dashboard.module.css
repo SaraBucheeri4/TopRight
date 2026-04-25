@@ -1458,6 +1458,13 @@
 
   .modal { width: 100% !important; max-width: 100vw; max-height: 96vh; border-radius: 0; }
   .mfgRow { grid-template-columns: 1fr; }
+
+  /* Calendar: shrink cells for tablets */
+  .calCell { min-height: 80px; padding: 6px 4px; }
+  .calCellEmpty { min-height: 80px; }
+  .calDayNum { font-size: 11px; }
+  .calEventPill { font-size: 8px; padding: 2px 4px; }
+  .calMonthLabel { font-size: 15px; min-width: 140px; }
 }
 
 @media (max-width: 480px) {
@@ -1465,4 +1472,22 @@
   .headerPortalLabel { display: none; }
   .statsRow { grid-template-columns: 1fr; }
   .pageHd { flex-direction: column; align-items: flex-start; gap: 12px; }
+
+  /* Calendar: phone-optimised cells */
+  .calCell { min-height: 52px; padding: 4px 3px; overflow: visible; }
+  .calCellEmpty { min-height: 52px; }
+  .calDayNum { font-size: 10px; margin-bottom: 2px; }
+  /* Replace text pills with colour dots so the grid still shows event presence */
+  .calEventPill {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    padding: 0;
+    font-size: 0;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+  .calEvents { flex-direction: row; flex-wrap: wrap; gap: 2px; }
+  .calDayLabel { font-size: 7px; letter-spacing: 1px; padding: 6px 0; }
+  .calMonthLabel { font-size: 14px; min-width: 120px; }
+  .calGrid { gap: 1px; }
 }

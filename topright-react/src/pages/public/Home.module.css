@@ -877,13 +877,15 @@
   .coaching { grid-template-columns: 1fr; }
   .coaL { padding: 48px 24px; }
   .coaL h2 { font-size: 36px; }
-  .coaR { display: none; }
+  .coaR { display: flex; min-height: auto; padding: 28px 20px; }
 
   .testi { padding: 48px 20px; }
   .tg { grid-template-columns: 1fr; }
 
-  .eventsSection { padding: 48px 20px; }
+  .eventsSection { padding: 48px 20px; overflow: visible; }
   .eventsGrid { grid-template-columns: 1fr; }
+  .eventCardDark { padding: 36px 24px; }
+  .eventCardStats { padding: 36px 24px; }
 
   .contactSection { grid-template-columns: 1fr; }
   .contactL { padding: 48px 24px; }
@@ -921,13 +923,18 @@
 
   .coaL { padding: 36px 16px; }
   .coaL h2 { font-size: 28px; }
+  .coaR { padding: 24px 16px; }
 
   .testi { padding: 36px 16px; }
   .tc { padding: 24px 18px; }
 
-  .eventsSection { padding: 36px 16px; }
+  .eventsSection { padding: 36px 16px; overflow: visible; }
   .eventCardDark { padding: 28px 20px; }
+  .eventCardStats { padding: 28px 20px; }
   .eventCardH3 { font-size: 20px; }
+  .eventCircle { width: 90px; height: 90px; }
+  .eventCircleInner { width: 68px; height: 68px; }
+  .eventCircleNum { font-size: 26px; }
 
   .contactL { padding: 36px 16px; }
   .contactL h2 { font-size: 28px; }
