@@ -160,7 +160,7 @@ export default function Contact() {
               </a>
             </div>
 
-            {sent && <div className={styles.success}>{isAr ? 'شكرًا — سنردّ عليك خلال ٢٤ ساعة.' : 'Thank you — we will get back to you.'}</div>}
+            {sent && <div className={styles.success}>{isAr ? 'شكرًا — سنردّ عليك.' : 'Thank you — we will get back to you.'}</div>}
             {submitError && <div className={styles.error}>{submitError}</div>}
           </form>
         </div>
