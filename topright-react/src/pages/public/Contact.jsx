@@ -69,7 +69,7 @@ export default function Contact() {
           }</h1>
           <p>{contactInfo?.description_en || contactInfo?.description_ar
             ? (isAr ? contactInfo.description_ar : contactInfo.description_en)
-            : (isAr ? 'أخبرنا عن مشروعك وسنردّ عليك خلال ٢٤ ساعة. نعمل مع مؤسسات في البحرين ومنطقة الخليج.' : 'Tell us about your project and we will get back to you within 24 hours. We work with organisations across Bahrain and the GCC.')
+            : (isAr ? 'أخبرنا عن مشروعك وسنردّ عليك خلال ٢٤ ساعة. نعمل مع مؤسسات في البحرين ومنطقة الخليج.' : 'Tell us about your project and we will get back to you. We work with organisations across Bahrain and the GCC.')
           }</p>
         </div>
       </section>
@@ -160,7 +160,7 @@ export default function Contact() {
               </a>
             </div>
 
-            {sent && <div className={styles.success}>{isAr ? 'شكرًا — سنردّ عليك خلال ٢٤ ساعة.' : 'Thank you — we will get back to you within 24 hours.'}</div>}
+            {sent && <div className={styles.success}>{isAr ? 'شكرًا — سنردّ عليك خلال ٢٤ ساعة.' : 'Thank you — we will get back to you.'}</div>}
             {submitError && <div className={styles.error}>{submitError}</div>}
           </form>
         </div>

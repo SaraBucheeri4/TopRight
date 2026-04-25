@@ -559,7 +559,7 @@ export default function Home() {
         <div className={styles.contactL}>
           <span className="sec-lbl">{isAr ? (contactInfo?.label_ar || 'تواصل معنا') : (contactInfo?.label_en || 'Get in touch')}</span>
           <h2>{isAr ? <>لنعمل<br />معًا</> : <>Let's work<br />together</>}</h2>
-          <p>{isAr ? 'أخبرنا عن مشروعك وسنردّ عليك خلال ٢٤ ساعة.' : 'Tell us about your project and we will get back to you within 24 hours.'}</p>
+          <p>{isAr ? 'أخبرنا عن مشروعك وسنردّ عليك خلال ٢٤ ساعة.' : 'Tell us about your project and we will get back to you.'}</p>
           <div className={styles.contactItems}>
             {contactInfo?.email && (
               <div className={styles.contactItem}>
