@@ -489,7 +489,7 @@ export default function Home() {
         <div className={styles.coaL}>
           <span className={styles.coaLbl}>{isAr ? 'التعليم الإبداعي' : 'Creative education'}</span>
           <h2>{isAr ? <>التدريب<br />وورش العمل</> : <>Coaching &amp;<br />Workshops</>}</h2>
-          <p>{isAr ? 'تمكين الكتّاب والمربين والمهنيين من خلال التدريب الإبداعي وورش السرد القصصي وجلسات تطوير العلامة التجارية — في البحرين وعبر الإنترنت.' : 'Empowering writers, educators and professionals through creative coaching, storytelling workshops and brand development sessions.'}</p>
+          <p>{isAr ? 'تمكين الكتّاب والمربين والمهنيين من خلال التدريب الإبداعي وورش السرد القصصي وجلسات تطوير العلامة التجارية' : 'Empowering writers, educators and professionals through creative coaching, storytelling workshops and brand development sessions.'}</p>
           <button className={styles.btnWht} onClick={() => scrollTo('contact')}>{isAr ? 'استفسر عن الجلسات' : 'Enquire about sessions'}</button>
         </div>
         <div className={styles.coaR}>
