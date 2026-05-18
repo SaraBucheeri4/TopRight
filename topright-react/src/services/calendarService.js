@@ -17,6 +17,15 @@ export async function fetchCalendarEvents(year, month) {
   return data ?? []
 }
 
+export async function fetchTotalEventCount() {
+  const { count, error } = await supabase
+    .from('calendar_events')
+    .select('*', { count: 'exact', head: true })
+
+  if (error) throw error
+  return count ?? 0
+}
+
 export async function fetchUpcomingEvents(limit = 5) {
   const today = new Date().toISOString().split('T')[0]
   const { data, error } = await supabase

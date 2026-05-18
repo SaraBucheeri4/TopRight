@@ -11,7 +11,7 @@ import { fetchPublishedServices } from '../../services/servicesService'
 import { fetchPublishedTestimonials } from '../../services/testimonialsService'
 import { fetchHeroContent, getHeroCardImageUrl } from '../../services/heroService'
 import { fetchPublishedWhyItems } from '../../services/whyService'
-import { fetchCalendarEvents } from '../../services/calendarService'
+import { fetchCalendarEvents, fetchTotalEventCount } from '../../services/calendarService'
 
 const CACHE_KEY = 'home_data_cache'
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
@@ -181,12 +181,17 @@ export default function Home() {
     card4_color: '#00AEA2', card4_line1: 'SDG Booklets', card4_label: 'SDG',
     basta_title: 'البسطة', basta_label: 'AL BASTA · BAHRAIN TV', basta_color: '#E7432B',
   })
+  const [totalEvents, setTotalEvents] = useState(0)
   const [form, setForm] = useState({ name: '', org: '', email: '', type: '', message: '' })
   const [formErrors, setFormErrors] = useState({})
   const [sent, setSent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const { lang } = useLang()
   const isAr = lang === 'ar'
+
+  useEffect(() => {
+    fetchTotalEventCount().then(setTotalEvents).catch(() => {})
+  }, [])
 
   const t = (obj) => isAr ? obj.ar : obj.en
 
@@ -515,7 +520,7 @@ export default function Home() {
             <div className={styles.eventCardStats}>
               <div className={styles.eventCircle}>
                 <div className={styles.eventCircleInner} />
-                <span className={styles.eventCircleNum}>1</span>
+                <span className={styles.eventCircleNum}>{totalEvents}</span>
               </div>
               <div className={styles.eventStatLbl}>{isAr ? 'فعالية منعقدة' : 'Event held'}</div>
               <div className={styles.eventStatTxt}>{isAr ? <>البحرين · ٢٠٢٥<br />فعاليات قادمة قريباً</> : <>Bahrain · 2025<br />More events coming soon</>}</div>
